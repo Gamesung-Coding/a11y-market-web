@@ -13,8 +13,11 @@ function orderCheckoutPage() {
   const [error, setError] = useState(false);
 
   //임시 : cart에서 받아올 값
-  const orderItemIds = ['019A6A127F227FEC9029BDBB9F4AA720', '019A6A127F227B6E9E952708025A9B56'];
-  const addressId = 'uuid-019A698D82C07C66AC4A293C84ACFA52';
+  const orderItemIds = [
+    '019A6A12-7F22-7FEC-9029-BDBB9F4AA720',
+    '019A6A12-7F22-7FEC-9029-BDBB9F4AA721',
+  ];
+  const addressId = '019A698D-82C0-7C66-AC4A-293C84ACFA52';
 
   // 결제 전 정보 조회
   useEffect(() => {
