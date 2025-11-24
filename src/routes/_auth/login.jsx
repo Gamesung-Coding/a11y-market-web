@@ -1,18 +1,27 @@
 import { authApi } from '@/api/authApi';
+import { Alert, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { loginSuccess } from '@/store/authSlice';
-
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { AlertCircleIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 export const Route = createFileRoute('/_auth/login')({
+  validateSearch: (search) => {
+    return {
+      redirect: search.redirect || '/',
+      error: search.error || '',
+    };
+  },
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { redirect, error } = Route.useSearch();
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -27,18 +36,44 @@ function RouteComponent() {
       const resp = await authApi.login(email, password);
       const { user, accessToken, refreshToken } = resp.data;
       dispatch(loginSuccess({ user, accessToken, refreshToken }));
-      navigate({ to: '/' });
+      console.log('Login successful:', redirect);
+      navigate({ to: redirect });
     } catch (err) {
       console.error('Login failed:', err);
       setErrorMsg('이메일 또는 비밀번호가 올바르지 않습니다.');
     }
   };
 
+  const getErrorMessage = (errType) => {
+    switch (errType) {
+      case 'login_required':
+        return '로그인이 필요한 서비스입니다.';
+      case 'unauthorized':
+        return '권한이 없습니다. 다시 로그인해주세요.';
+      case 'session_expired':
+        return '세션이 만료되었습니다. 다시 로그인해주세요.';
+      default:
+        return null;
+    }
+  };
+
+  useEffect(() => {
+    if (error && error.length > 0) {
+      setErrorMsg(getErrorMessage(error));
+    }
+  }, [error]);
+
   return (
     <main className='font-kakao-big-sans mx-auto max-w-md px-4 py-10'>
       <h1 className='mb-6 text-2xl font-bold'>로그인</h1>
 
-      {errorMsg && <p className='mb-2 text-sm text-red-600'>{errorMsg}</p>}
+      <Alert
+        variant='destructive'
+        className={`mb-4 grid border-red-500 bg-red-500/70 text-white ${errorMsg ? 'grid-rows-[1fr]' : 'mb-0 grid-rows-[0fr] opacity-0'} transition-all`}
+      >
+        <AlertCircleIcon />
+        <AlertTitle>{errorMsg}</AlertTitle>
+      </Alert>
 
       <form
         onSubmit={handleSubmit}
