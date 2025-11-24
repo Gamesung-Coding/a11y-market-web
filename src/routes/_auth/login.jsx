@@ -96,7 +96,7 @@ function RouteComponent() {
           type='button'
           variant='outline'
           className='w-full'
-          onClick={() => navigate({ to: '/auth/join' })}
+          onClick={() => navigate({ to: '/join' })}
         >
           아직 계정이 없으신가요? 회원가입
         </Button>
