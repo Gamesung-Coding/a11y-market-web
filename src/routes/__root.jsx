@@ -16,14 +16,6 @@ function Root() {
   useAuthInit();
 
   const isLoading = useSelector((state) => state.auth.isLoading);
-  if (isLoading) {
-    return (
-      <div className='flex h-screen items-center justify-center'>
-        <p className='text-lg'>로딩 중...</p>
-        <Spinner />
-      </div>
-    );
-  }
 
   // a11y 상태 적용
   const {
@@ -145,6 +137,15 @@ function Root() {
       window.speechSynthesis.cancel();
     };
   }, [screenReader]);
+
+  if (isLoading) {
+    return (
+      <div className='flex h-screen items-center justify-center'>
+        <p className='text-lg'>로딩 중...</p>
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <>

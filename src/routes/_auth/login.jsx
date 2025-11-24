@@ -27,7 +27,7 @@ function RouteComponent() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorType, setErrorType] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,7 +40,7 @@ function RouteComponent() {
       navigate({ to: redirect });
     } catch (err) {
       console.error('Login failed:', err);
-      setErrorMsg('이메일 또는 비밀번호가 올바르지 않습니다.');
+      setErrorType('invalid_user');
     }
   };
 
@@ -52,6 +52,8 @@ function RouteComponent() {
         return '권한이 없습니다. 다시 로그인해주세요.';
       case 'session_expired':
         return '세션이 만료되었습니다. 다시 로그인해주세요.';
+      case 'invalid_user':
+        return '이메일 또는 비밀번호가 올바르지 않습니다.';
       default:
         return null;
     }
@@ -59,7 +61,8 @@ function RouteComponent() {
 
   useEffect(() => {
     if (error && error.length > 0) {
-      setErrorMsg(getErrorMessage(error));
+      setErrorType(error);
+      //setErrorMsg(getErrorMessage(error));
     }
   }, [error]);
 
@@ -69,10 +72,12 @@ function RouteComponent() {
 
       <Alert
         variant='destructive'
-        className={`mb-4 grid border-red-500 bg-red-500/70 text-white ${errorMsg ? 'grid-rows-[1fr]' : 'mb-0 grid-rows-[0fr] opacity-0'} transition-all`}
+        className={`grid border-red-500 bg-red-500/70 text-white ${errorType ? 'mb-4 grid-rows-[1fr]' : 'mb-0 grid-rows-[0fr] p-0 opacity-0'} transition-all`}
       >
-        <AlertCircleIcon />
-        <AlertTitle>{errorMsg}</AlertTitle>
+        <AlertCircleIcon className={`${errorType ? '' : 'hidden'}`} />
+        <AlertTitle className={`${errorType ? '' : 'hidden'}`}>
+          {getErrorMessage(errorType)}
+        </AlertTitle>
       </Alert>
 
       <form
