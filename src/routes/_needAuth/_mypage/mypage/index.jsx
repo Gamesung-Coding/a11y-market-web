@@ -13,6 +13,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from '@/components/ui/item';
 
 export const Route = createFileRoute('/_needAuth/_mypage/mypage/')({
   component: RouteComponent,
@@ -131,7 +139,7 @@ function RouteComponent() {
                 <div className='flex gap-4'>
                   <Button
                     variant='default'
-                    className='h-10 w-40 text-lg font-bold'
+                    className='h-10 w-40 text-lg font-bold transition-all hover:-translate-y-0.5 hover:shadow-md'
                     onClick={() => {
                       navigate({ to: '/products' });
                     }}
@@ -140,7 +148,7 @@ function RouteComponent() {
                   </Button>
                   <Button
                     variant='outline'
-                    className='h-10 w-40 text-lg font-bold'
+                    className='h-10 w-40 text-lg font-bold transition-all hover:-translate-y-0.5 hover:shadow-md'
                     onClick={() => {
                       navigate({ to: '/' });
                     }}
@@ -153,14 +161,64 @@ function RouteComponent() {
           </div>
         ) : (
           <div className='flex flex-col gap-4'>
-            {orderList?.map((order) => (
-              <div
-                key={order.orderId}
-                className='flex flex-col rounded-md border border-neutral-300 bg-white p-4 shadow-sm'
-              >
-                <span>주문내역1</span>
-              </div>
-            ))}
+            {orderList?.map((order) => {
+              console.log(order);
+              return (
+                <Item
+                  key={order.orderId}
+                  variant='outline'
+                  className='border-neutral-500'
+                >
+                  <ItemContent>
+                    <ItemTitle className='w-full justify-between text-xl font-bold'>
+                      <span>{`주문 날짜: ${new Date(order.createdAt)?.toLocaleDateString('ko-KR')}`}</span>
+                      <span>{`총 주문 금액: ${order.totalPrice?.toLocaleString()}원`}</span>
+                    </ItemTitle>
+                    <ItemDescription className='mb-4 text-lg'>
+                      {`주문 ID: ${order.orderId.split('-')[4]} | 수령인: ${order.receiverName} | 배송지: ${order.receiverAddr1}`}
+                    </ItemDescription>
+                    <div className='flex flex-col gap-2'>
+                      {order.orderItems?.map((item) => (
+                        <Item
+                          key={item.orderItemId}
+                          variant='outline'
+                          className='shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg'
+                        >
+                          <ItemMedia>
+                            <img
+                              src={item.productImageUrl}
+                              alt={item.productName}
+                              className='aspect-3/2 h-24 rounded-md object-cover'
+                            />
+                          </ItemMedia>
+                          <ItemContent>
+                            <ItemTitle>
+                              <h4 className='text-primary text-xl font-bold'>{item.productName}</h4>
+                            </ItemTitle>
+                            <div className='flex flex-1 flex-col justify-center'>
+                              <p className='text-md'>{`가격: ${item.productPrice?.toLocaleString()}원 | 수량: ${item.productQuantity}`}</p>
+                              <p className='text-md'>{`총액: ${item.productTotalPrice?.toLocaleString()}원`}</p>
+                              <p className='text-md'>{`상태: ${item.orderItemStatus}`}</p>
+                            </div>
+                          </ItemContent>
+                          <ItemActions>
+                            <Button
+                              variant='outline'
+                              className='h-10 w-32 text-lg font-bold hover:cursor-pointer hover:bg-neutral-200'
+                              onClick={() => {
+                                navigate({ to: `/products/${item.productId}` });
+                              }}
+                            >
+                              주문 상세
+                            </Button>
+                          </ItemActions>
+                        </Item>
+                      ))}
+                    </div>
+                  </ItemContent>
+                </Item>
+              );
+            })}
           </div>
         )}
       </section>
