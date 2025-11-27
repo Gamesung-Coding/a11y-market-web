@@ -9,7 +9,6 @@ const orderSlice = createSlice({
   initialState,
   reducers: {
     setOrderItems: (state, action) => {
-      console.log('Setting order items:', action.payload);
       state.orderItems = action.payload;
     },
     clearOrderItems: (state) => {
