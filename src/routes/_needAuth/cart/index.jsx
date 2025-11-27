@@ -30,10 +30,6 @@ import { useDispatch } from 'react-redux';
 
 export const Route = createFileRoute('/_needAuth/cart/')({
   component: CartPage,
-  validateSearch: (search) => ({
-    ...search,
-    error: search.error ?? undefined,
-  }),
 });
 
 function CartPage() {
@@ -42,8 +38,6 @@ function CartPage() {
   const [totalPrice, setTotalPrice] = useState(0);
   const [submitType, setSubmitType] = useState('none');
   const [err, setErr] = useState(null);
-
-  const { error } = Route.useSearch();
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -58,21 +52,28 @@ function CartPage() {
     };
 
     // 주문이 가능한지 확인
-    const checkData = await getCheckoutInfo(options.selectedItems, options.orderAllItems);
-    if (checkData.status === 'OUT_OF_STOCK') {
-      setErr('재고가 부족한 상품이 있습니다.');
-      setSubmitType('none');
-      return;
-    } else if (checkData.totalAmount !== totalPrice) {
-      setErr('선택된 상품의 가격이 일치하지 않습니다. 새로고침 후 다시 시도해주세요.');
+    try {
+      const checkData = await getCheckoutInfo(options.selectedItems, options.orderAllItems);
+
+      if (checkData.status === 'OUT_OF_STOCK') {
+        setErr('재고가 부족한 상품이 있습니다.');
+        setSubmitType('none');
+        return;
+      } else if (checkData.totalAmount !== totalPrice) {
+        setErr('선택된 상품의 가격이 일치하지 않습니다. 새로고침 후 다시 시도해주세요.');
+        setSubmitType('none');
+        return;
+      }
+
+      dispatch(setOrderItems(Array.from(selectedItems)));
+      navigate({
+        to: '/order/checkout',
+      });
+    } catch (e) {
+      setErr(e.message);
       setSubmitType('none');
       return;
     }
-
-    dispatch(setOrderItems(Array.from(selectedItems)));
-    navigate({
-      to: '/order/checkout',
-    });
   };
 
   useEffect(() => {
@@ -82,10 +83,6 @@ function CartPage() {
       setTotalPrice(data.total || 0);
     };
     fetchCartData();
-
-    if (error) {
-      setErr(error);
-    }
   }, []);
 
   useEffect(() => {

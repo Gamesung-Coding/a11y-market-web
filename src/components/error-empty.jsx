@@ -6,8 +6,8 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from './ui/empty';
-import { Button } from './ui/button';
+} from '@/components/ui/empty';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from '@tanstack/react-router';
 
 export const ErrorEmpty = ({ prevPath, message }) => {

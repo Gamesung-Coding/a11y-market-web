@@ -1,15 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useSearch } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
 
 export const Route = createFileRoute('/_needAuth/order/complete')({
   component: OrderCompletePage,
+  validateSearch: (search) => ({
+    orderId: search.orderId,
+  }),
 });
 
 function OrderCompletePage() {
-  const search = useSearch({ strict: false }); // 테스트용 : orderId 없어도 에러 발생 x
-  const orderId = search.orderId;
+  const { orderId } = Route.useSearch();
 
   return (
     <section
@@ -29,8 +30,9 @@ function OrderCompletePage() {
           role='status'
           aria-live='polite'
         >
-          주문이 완료되었습니다
+          주문이 완료되었습니다.
         </h1>
+        <p className='mb-6 text-gray-700'>(결제가 미구현 상태입니다.)</p>
 
         {/* 주문번호 */}
         <p className='mb-6 text-gray-600'>주문 번호를 아래에서 확인하실 수 있습니다.</p>

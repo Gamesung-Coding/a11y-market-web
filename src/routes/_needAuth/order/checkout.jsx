@@ -1,5 +1,5 @@
 import { createOrder, getCheckoutInfo } from '@/api/orderAPI';
-import { AddressSelector } from '@/components/address-selector';
+import { AddressSelector } from '@/components/address/address-selector';
 import { ErrorEmpty } from '@/components/error-empty';
 import { LoadingEmpty } from '@/components/loading-empty';
 import {
@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import {
   Table,
@@ -19,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -30,40 +32,19 @@ export const Route = createFileRoute('/_needAuth/order/checkout')({
 function orderCheckoutPage() {
   const [checkout, setCheckout] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
 
   const { orderItems } = useSelector((state) => state.order);
 
   const navigate = useNavigate();
 
-  //임시 : cart에서 받아올 값
-  const orderItemIds = [
-    '019A6A12-7F22-7FEC-9029-BDBB9F4AA720',
-    '019A6A12-7F22-7FEC-9029-BDBB9F4AA721',
-  ];
-  const addressId = '019A698D-82C0-7C66-AC4A-293C84ACFA52';
-
   // 결제 전 정보 조회
   useEffect(() => {
-    console.log('orderItems:', orderItems);
-
     const fetchCheckout = async () => {
       try {
         setLoading(true);
         const data = await getCheckoutInfo(orderItems.map((item) => item.cartItemId));
-
-        if (data.status === 'OUT_OF_STOCK') {
-          navigate({
-            to: '/cart',
-            search: (search) => ({
-              ...search,
-              error: '재고가 부족한 상품이 있습니다.',
-            }),
-          });
-          return;
-        }
-
         setCheckout(data);
 
         const defaultAddress = data.addresses.find(
@@ -71,27 +52,38 @@ function orderCheckoutPage() {
         );
 
         setSelectedAddress(defaultAddress);
-      } catch (error) {
-        setError(true);
+      } catch (err) {
+        setError(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchCheckout();
-    console.log(orderItems);
-    console.log(checkout);
   }, []);
 
   const handleOrder = async () => {
     try {
       setLoading(true);
 
-      const order = await createOrder(addressId, orderItemIds);
+      const data = await createOrder(
+        selectedAddress.addressId,
+        orderItems.map((item) => item.cartItemId),
+      );
 
-      window.location.href = `/order/complete?orderId=${order.orderId}`;
-    } catch (error) {
-      alert('주문 생성 실패');
+      if (data?.status === 'ERROR') {
+        setError(new Error(data.message || '주문 생성에 실패했습니다.'));
+        return;
+      }
+
+      navigate({
+        to: '/order/complete',
+        search: {
+          orderId: data.orderId,
+        },
+      });
+    } catch (err) {
+      setError(err);
     } finally {
       setLoading(false);
     }
@@ -113,7 +105,10 @@ function orderCheckoutPage() {
       <main className='font-kakao-big flex items-center justify-center py-24'>
         <ErrorEmpty
           prevPath='/cart'
-          message='결제 정보를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+          message={
+            error?.message ||
+            '결제 정보를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+          }
         />
       </main>
     );
@@ -124,7 +119,14 @@ function orderCheckoutPage() {
           <h1 className='text-center text-2xl font-bold'>주문결제</h1>
           <Breadcrumb className='flex justify-center'>
             <BreadcrumbList>
-              <BreadcrumbItem className='text-muted-foreground'>01 장바구니</BreadcrumbItem>
+              <BreadcrumbItem className='text-muted-foreground'>
+                <Link
+                  to='/cart'
+                  className='hover:underline'
+                >
+                  01 장바구니
+                </Link>
+              </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem className='text-foreground'>02 주문결제</BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -178,35 +180,75 @@ function orderCheckoutPage() {
         </section>
 
         {/* 금액 정보 */}
-        <section
-          className='space-y-2 rounded-lg border p-4'
-          aria-label='결제 금액 정보'
-        >
-          <p>총 상품 금액: {checkout?.totalAmount}원</p>
-          <p>배송비: {checkout?.shippingFee}원</p>
-          <p className='text-lg font-bold'>총 결제 금액: {checkout?.finalAmount}원</p>
-        </section>
+        <div className='grid gap-4 md:grid-cols-2'>
+          <section>
+            <Card className='h-full w-full gap-2'>
+              <CardHeader>
+                <CardTitle className='font-bold'>결제 수단</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RadioGroup
+                  defaultValue='tosspay'
+                  className='flex flex-col gap-2'
+                >
+                  <Card className='py-0 transition-colors has-data-[state=checked]:border-l-4 has-data-[state=checked]:border-blue-500'>
+                    <CardContent className='flex items-center gap-4 py-4'>
+                      <RadioGroupItem
+                        value='tosspay'
+                        id='tosspay'
+                      />
+                      <Label htmlFor='tosspay'>{'토스페이 (Toss Pay)'}</Label>
+                    </CardContent>
+                  </Card>
+                  <Card className='py-0 transition-colors has-data-[state=checked]:border-l-4 has-data-[state=checked]:border-blue-500'>
+                    <CardContent className='flex items-center gap-4 py-4'>
+                      <RadioGroupItem
+                        value='kakaoPay'
+                        id='kakaoPay'
+                      />
+                      <Label htmlFor='kakaoPay'>{'카카오페이 (Kakao Pay)'}</Label>
+                    </CardContent>
+                  </Card>
+                </RadioGroup>
+              </CardContent>
+            </Card>
+          </section>
 
-        {/* 주문 버튼 */}
-        <div className='flex h-fit w-full flex-col gap-2'>
-          <Button
-            variant='default'
-            className='w-full py-6 text-lg'
-            onClick={handleOrder}
-            disabled={loading}
-            aria-label='주문 실행 버튼'
-          >
-            {loading ? '주문 처리중...' : '주문하기'}
-          </Button>
-          <Button
-            variant='outline'
-            className='w-full py-6 text-lg'
-            onClick={() => navigate({ to: '/cart' })}
-            disabled={loading}
-            aria-label='장바구니로 돌아가기 버튼'
-          >
-            장바구니로 돌아가기
-          </Button>
+          <section className='flex flex-col gap-4'>
+            <Card className='w-full'>
+              <CardHeader>
+                <CardTitle>결제 금액 정보</CardTitle>
+                <CardDescription>결제하실 금액을 확인해 주세요.</CardDescription>
+              </CardHeader>
+              <CardContent className='flex flex-col gap-2'>
+                <span>{`총 상품 금액: ${checkout?.totalAmount}원`}</span>
+                <span>{`배송비: ${checkout?.shippingFee}원`}</span>
+                <span className='text-lg font-bold'>{`총 결제 금액: ${checkout?.finalAmount}원`}</span>
+              </CardContent>
+            </Card>
+
+            {/* 주문 버튼 */}
+            <div className='flex h-fit w-full flex-col gap-2'>
+              <Button
+                variant='default'
+                className='w-full py-6 text-lg'
+                onClick={handleOrder}
+                disabled={loading}
+                aria-label='결제하기 버튼'
+              >
+                {loading ? '결제 처리중...' : '결제하기'}
+              </Button>
+              <Button
+                variant='outline'
+                className='w-full py-6 text-lg'
+                onClick={() => navigate({ to: '/cart' })}
+                disabled={loading}
+                aria-label='장바구니로 돌아가기 버튼'
+              >
+                장바구니로 돌아가기
+              </Button>
+            </div>
+          </section>
         </div>
       </main>
     );
