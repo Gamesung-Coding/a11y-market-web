@@ -1,5 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
-import React, { useState, Fragment } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -8,7 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+import { createFileRoute } from '@tanstack/react-router';
+import { Fragment, useState } from 'react';
 
 export const Route = createFileRoute('/_needAuth/_admin/admin/sellers')({
   component: RouteComponent,

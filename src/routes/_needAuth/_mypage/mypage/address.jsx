@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
+import AddressList from '@/components/address/AddressList';
 import DefaultAddress from '@/components/address/DefaultAddress';
 import NewAddressForm from '@/components/address/NewAddressForm';
-import AddressList from '@/components/address/AddressList';
 import { Button } from '@/components/ui/button';
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 
 export const Route = createFileRoute('/_needAuth/_mypage/mypage/address')({
   component: RouteComponent,

@@ -2,7 +2,7 @@ import axiosInstance from '@/api/axiosInstance';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 // import { Icon } from '@iconify/react';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 // import { motion } from 'framer-motion';
 // import {

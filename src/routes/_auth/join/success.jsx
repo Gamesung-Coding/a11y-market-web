@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import A11yOverlay from '@/components/A11y/A11yOverlay';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const Route = createFileRoute('/_auth/join/success')({
   component: JoinSuccessPage,

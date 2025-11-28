@@ -1,7 +1,7 @@
 // components/order/OrderList.jsx
 
-import OrderCard from './OrderCard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import OrderCard from './OrderCard';
 
 export default function OrderList({ orders }) {
   if (!orders || orders.length === 0) {

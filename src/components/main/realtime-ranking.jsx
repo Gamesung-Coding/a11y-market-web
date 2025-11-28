@@ -1,10 +1,10 @@
-import { Icon } from '@iconify/react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Carousel, CarouselContent } from '@/components/ui/carousel';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Icon } from '@iconify/react';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
 
 export function RealtimeRanking({ data }) {
   const [api, setApi] = useState();

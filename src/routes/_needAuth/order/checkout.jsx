@@ -1,4 +1,4 @@
-import { createOrder, getCheckoutInfo } from '@/api/orderAPI';
+import { createOrder, getCheckoutInfo } from '@/api/order';
 import { AddressSelector } from '@/components/address/address-selector';
 import { ErrorEmpty } from '@/components/error-empty';
 import { LoadingEmpty } from '@/components/loading-empty';

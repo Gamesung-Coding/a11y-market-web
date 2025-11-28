@@ -1,21 +1,15 @@
-import { useState, useEffect } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
+import { userApi } from '@/api/user';
 import { Button } from '@/components/ui/button';
-import { userApi } from '@/api/userApi';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { createFileRoute } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
 
 export const Route = createFileRoute('/_needAuth/_mypage/mypage/editProfile')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  
   const [initialData, setInitialData] = useState({
     userName: '',
     userEmail: '',
@@ -51,11 +45,11 @@ function RouteComponent() {
   const handleSave = async () => {
     try {
       const resp = await userApi.updateProfile(form);
-      const data={
+      const data = {
         userName: resp.data.userName || '',
-          userEmail: resp.data.userEmail || '',
-          userPhone: resp.data.userPhone || '',
-          userNickname: resp.data.userNickname || '',
+        userEmail: resp.data.userEmail || '',
+        userPhone: resp.data.userPhone || '',
+        userNickname: resp.data.userNickname || '',
       };
       setInitialData(data);
       setForm(data);
@@ -71,7 +65,7 @@ function RouteComponent() {
   };
 
   return (
-    <div className='mx-auto w-full max-w-3xl px-4 py-10 font-kakao-big'>
+    <div className='font-kakao-big mx-auto w-full max-w-3xl px-4 py-10'>
       <h1 className='mb-8 text-2xl font-bold'>회원정보 수정</h1>
 
       <div className='overflow-hidden rounded-md border'>
@@ -89,9 +83,7 @@ function RouteComponent() {
             </TableRow>
 
             <TableRow>
-              <TableCell className='w-40 bg-gray-50 font-medium'>
-                이메일
-              </TableCell>
+              <TableCell className='w-40 bg-gray-50 font-medium'>이메일</TableCell>
               <TableCell>
                 <Input
                   name='userEmail'
@@ -102,9 +94,7 @@ function RouteComponent() {
             </TableRow>
 
             <TableRow>
-              <TableCell className='w-40 bg-gray-50 font-medium'>
-                전화번호
-              </TableCell>
+              <TableCell className='w-40 bg-gray-50 font-medium'>전화번호</TableCell>
               <TableCell>
                 <Input
                   name='userPhone'
@@ -115,9 +105,7 @@ function RouteComponent() {
             </TableRow>
 
             <TableRow>
-              <TableCell className='w-40 bg-gray-50 font-medium'>
-                닉네임
-              </TableCell>
+              <TableCell className='w-40 bg-gray-50 font-medium'>닉네임</TableCell>
               <TableCell>
                 <Input
                   name='userNickname'
@@ -131,7 +119,11 @@ function RouteComponent() {
       </div>
 
       <div className='mt-8 flex justify-end gap-3'>
-        <Button variant='outline' className='px-6' onClick={handleCancel}>
+        <Button
+          variant='outline'
+          className='px-6'
+          onClick={handleCancel}
+        >
           취소하기
         </Button>
         <Button

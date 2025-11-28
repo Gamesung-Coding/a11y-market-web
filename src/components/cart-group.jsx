@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { Input } from '@/components/ui/input';
 import axiosInstance from '@/api/axiosInstance';
-import { deleteCartItems } from '@/api/cartAPI';
+import { deleteCartItems } from '@/api/cart';
 
 export const CartGroup = ({ groupData, selectedItems, setSelectedItems }) => {
   const [data, setData] = useState(groupData.items);

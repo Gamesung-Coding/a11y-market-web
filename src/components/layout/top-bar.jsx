@@ -1,13 +1,11 @@
 // import { logout } from '@/store/slices/authSlice';
+import { authApi } from '@/api/auth';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { logout } from '@/store/authSlice';
 import { Icon } from '@iconify/react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { SheetTrigger } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { authApi } from '@/api/authApi';
-import { logout } from '@/store/authSlice';
 
 export default function TopBar() {
   const { user, isAuthenticated } = useSelector((state) => state.auth);

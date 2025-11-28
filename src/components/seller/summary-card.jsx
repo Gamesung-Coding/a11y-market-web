@@ -1,5 +1,4 @@
 // src/components/seller/summary-card.jsx
-import React from 'react';
 import { Card } from '@/components/ui/card';
 
 export function SummaryCard({ label, value, badgeClass = '' }) {

@@ -1,6 +1,5 @@
-import { Button } from '../ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '../ui/button';
 
 export default function OrderPagination({ currentPage, totalPages, onPageChange }) {
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);

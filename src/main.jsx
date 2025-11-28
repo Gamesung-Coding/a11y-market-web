@@ -1,5 +1,5 @@
-import { createRoot } from 'react-dom/client';
 import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 
 // global css
 import './global.css';
@@ -9,8 +9,8 @@ import { Provider } from 'react-redux';
 import { store } from './store/store.js';
 
 // Router setup
-import { router } from './router.js';
 import { RouterProvider } from '@tanstack/react-router';
+import { router } from './router.js';
 
 const rootElement = document.getElementById('root');
 if (!rootElement.innerHTML) {

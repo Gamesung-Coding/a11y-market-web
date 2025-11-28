@@ -1,10 +1,10 @@
 // src/routes/_needAuth/seller/products/$productId/edit.jsx
-import React, { useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
+import { Field, FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Field, FieldGroup } from '@/components/ui/field';
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 
 function SellerProductEditPage() {
   const { productId } = Route.useParams();
@@ -90,7 +90,7 @@ function SellerProductEditPage() {
       <header className='mb-6'>
         <h1 className='font-kakao-big text-xl font-semibold'>상품 수정</h1>
         <p className='mt-1 text-xs text-gray-500'>
-          상품 정보를 수정하고 상태를 변경할 수 있습니다. 
+          상품 정보를 수정하고 상태를 변경할 수 있습니다.
         </p>
       </header>
 

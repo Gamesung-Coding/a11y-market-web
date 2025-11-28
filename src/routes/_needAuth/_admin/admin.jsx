@@ -1,10 +1,9 @@
-import React from 'react';
-import { createFileRoute, Outlet, Link, useRouterState } from '@tanstack/react-router';
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuList,
 } from '@/components/ui/navigation-menu';
+import { createFileRoute, Link, Outlet, useRouterState } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_needAuth/_admin/admin')({
   component: RouteComponent,

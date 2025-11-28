@@ -1,6 +1,6 @@
 // src/components/A11y/A11yOverlay.jsx
 
-import { updateUserA11ySettings } from '@/api/a11yAPI';
+import { updateUserA11ySettings } from '@/api/a11y';
 import { useState } from 'react';
 import { A11Y_PROFILES } from '@/lib/a11y/profiles';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';

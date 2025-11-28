@@ -1,4 +1,4 @@
-import { Icon } from '@iconify/react';
+import { Button } from '@/components/ui/button';
 import {
   Empty,
   EmptyContent,
@@ -7,7 +7,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { Button } from '@/components/ui/button';
+import { Icon } from '@iconify/react';
 import { useNavigate } from '@tanstack/react-router';
 
 export const ErrorEmpty = ({ prevPath, message }) => {

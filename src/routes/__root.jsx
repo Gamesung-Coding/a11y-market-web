@@ -1,13 +1,13 @@
-import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
-import { useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import TopBar from '@/components/layout/top-bar';
-import Footer from '@/components/layout/footer';
 import A11yButton from '@/components/A11y/A11yButton';
-import { useAuthInit } from '@/hooks/useAuthInit';
+import Footer from '@/components/layout/footer';
+import TopBar from '@/components/layout/top-bar';
 import { Spinner } from '@/components/ui/spinner';
 import useA11yStorage from '@/hooks/useA11yStorage';
+import { useAuthInit } from '@/hooks/useAuthInit';
+import { createRootRoute, Outlet } from '@tanstack/react-router';
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 export const Route = createRootRoute({
   component: Root,

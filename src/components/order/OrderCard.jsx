@@ -1,10 +1,10 @@
 // components/order/OrderCard.jsx
 
-import OrderStatusBadge from './OrderStatusBadge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
+import OrderStatusBadge from './OrderStatusBadge';
 
 export default function OrderCard({ order }) {
   const [open, setOpen] = useState(false);

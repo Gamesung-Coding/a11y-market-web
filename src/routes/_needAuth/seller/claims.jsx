@@ -1,21 +1,47 @@
 // src/routes/_needAuth/seller/claims.jsx
-import React, { useMemo, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
+import { useMemo, useState } from 'react';
 
+import { ClaimStatusBadge } from '@/components/seller/claim-status-badge';
+import { ClaimTypeBadge } from '@/components/seller/claim-type-badge';
+import { SummaryCard } from '@/components/seller/summary-card';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Field, FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Field, FieldGroup } from '@/components/ui/field';
-import { Checkbox } from '@/components/ui/checkbox';
-import {  Card,  CardHeader,  CardTitle,  CardDescription,  CardContent,  CardFooter,} from '@/components/ui/card';
-import {  Table,  TableBody,  TableCell, TableHead,  TableHeader, TableRow,} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import {  Select,  SelectContent,  SelectItem,  SelectTrigger,  SelectValue,} from '@/components/ui/select';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { SummaryCard } from '@/components/seller/summary-card';
-import {  Pagination,  PaginationContent,  PaginationItem,  PaginationLink,  PaginationPrevious,  PaginationNext,} from '@/components/ui/pagination';
-import { ClaimTypeBadge } from '@/components/seller/claim-type-badge';
-import { ClaimStatusBadge } from '@/components/seller/claim-status-badge';
 // 임시 데이터(백엔드 연동 전 UI 확인용)
 const mockRequests = [
   {

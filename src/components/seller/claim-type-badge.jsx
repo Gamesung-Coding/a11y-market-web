@@ -1,5 +1,4 @@
 // src/components/seller/claim-type-badge.jsx
-import React from 'react';
 import { Badge } from '@/components/ui/badge';
 
 export function ClaimTypeBadge({ type }) {
@@ -11,7 +10,7 @@ export function ClaimTypeBadge({ type }) {
 
   return (
     <Badge
-      variant="outline"
+      variant='outline'
       className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${
         map[type] ?? 'border-slate-200 bg-slate-50 text-slate-700'
       }`}

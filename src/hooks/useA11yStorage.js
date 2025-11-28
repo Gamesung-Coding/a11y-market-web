@@ -1,9 +1,9 @@
 // src/hooks/useA11yStorage.js
 
+import { loadA11y, saveA11y } from '@/lib/a11y/a11yStorage';
+import { setAllA11y } from '@/store/a11ySlice';
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { saveA11y, loadA11y } from '@/lib/a11y/a11yStorage';
-import { setAllA11y } from '@/store/a11ySlice';
 
 export default function useA11yStorage() {
   const dispatch = useDispatch();
@@ -21,11 +21,10 @@ export default function useA11yStorage() {
 
   // 상태 변경
   useEffect(() => {
-      if (isFirst.current) {
-        isFirst.current = false;
-        return;
-      }
-
+    if (isFirst.current) {
+      isFirst.current = false;
+      return;
+    }
 
     saveA11y(a11yState);
   }, [a11yState]);

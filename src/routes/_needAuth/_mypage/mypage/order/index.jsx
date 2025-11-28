@@ -1,13 +1,13 @@
 // mypage/order/index.jsx
 
-import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
-import { getMyOrders } from '@/api/orderApi';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent } from '@/components/ui/card';
-import OrderPagination from '@/components/order/OrderPagination';
+import { getMyOrders } from '@/api/order';
 import OrderCard from '@/components/order/OrderCard';
+import OrderPagination from '@/components/order/OrderPagination';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { createFileRoute } from '@tanstack/react-router';
 import { Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export const Route = createFileRoute('/_needAuth/_mypage/mypage/order/')({
   component: OrderHistoryPage,
@@ -45,7 +45,7 @@ export default function OrderHistoryPage() {
     fetchOrders();
   }, []);
 
-  console.log(orders.map(o => o.status));
+  console.log(orders.map((o) => o.status));
   console.log(Object.keys(orders[0] || {}));
 
   // 필터 (개발 중)
@@ -56,9 +56,11 @@ export default function OrderHistoryPage() {
     })
     .filter((order) => {
       if (!searchKeyword) return true;
-      return order.orderId?.includes(searchKeyword) || order.receiverName?.includes(searchKeyword) ||  order.orderItems?.some(item =>
-      item.productName?.includes(searchKeyword)
-  )
+      return (
+        order.orderId?.includes(searchKeyword) ||
+        order.receiverName?.includes(searchKeyword) ||
+        order.orderItems?.some((item) => item.productName?.includes(searchKeyword))
+      );
     });
 
   // 정렬
@@ -208,7 +210,7 @@ export default function OrderHistoryPage() {
           })}
 
         {/* 페이지네이션 */}
-        {!loading && !error &&  (
+        {!loading && !error && (
           <OrderPagination
             currentPage={currentPage}
             totalPages={Math.ceil(sortedOrders.length / ITEMS_PER_PAGE)}

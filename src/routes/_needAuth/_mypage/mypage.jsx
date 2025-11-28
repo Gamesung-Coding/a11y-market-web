@@ -1,5 +1,4 @@
-import React from 'react';
-import { createFileRoute, Outlet, Link, useRouterState } from '@tanstack/react-router';
+import { createFileRoute, Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 
 export const Route = createFileRoute('/_needAuth/_mypage/mypage')({

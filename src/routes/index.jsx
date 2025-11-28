@@ -1,7 +1,7 @@
 import { CategoryView } from '@/components/main/category-view';
 import { MainCarousel } from '@/components/main/main-carousel';
 import { RealtimeRanking } from '@/components/main/realtime-ranking';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@iconify/react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';

@@ -1,8 +1,8 @@
 // src/routes/products/index.jsx
-import React, { useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@iconify/react';
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 
 // 임시 상품 데이터 (백엔드 연동 전 UI 확인용)
 const mockProducts = [

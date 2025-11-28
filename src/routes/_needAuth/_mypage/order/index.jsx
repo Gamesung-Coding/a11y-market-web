@@ -1,11 +1,10 @@
+import { getMyOrders } from '@/api/order';
+import OrderList from '@/components/order/OrderList';
+import OrderPagination from '@/components/order/OrderPagination';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { getMyOrders } from '@/api/orderApi';
-import OrderList from '@/components/order/OrderList';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import OrderPagination from '@/components/order/OrderPagination';
 
 export const Route = createFileRoute('/_needAuth/_mypage/order/')({
   component: OrderHistoryPage,

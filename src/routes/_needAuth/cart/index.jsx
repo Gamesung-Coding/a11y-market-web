@@ -1,6 +1,5 @@
 // src/routes/cart.jsx
-import { getCartItems } from '@/api/cartAPI';
-import { getCheckoutInfo } from '@/api/orderAPI';
+import { getCartItems, getCheckoutInfo } from '@/api/cart';
 import { CartGroup } from '@/components/cart-group';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import {

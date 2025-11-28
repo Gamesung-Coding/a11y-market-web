@@ -1,5 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
+import { createFileRoute } from '@tanstack/react-router';
 import { CheckCircle2 } from 'lucide-react';
 
 export const Route = createFileRoute('/_needAuth/order/complete')({
