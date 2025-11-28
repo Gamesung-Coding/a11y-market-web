@@ -1,46 +1,42 @@
 import axiosInstance from '@/api/axiosInstance';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-// import { Icon } from '@iconify/react';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Icon } from '@iconify/react';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-// import { motion } from 'framer-motion';
-// import {
-//   Empty,
-//   EmptyContent,
-//   EmptyDescription,
-//   EmptyHeader,
-//   EmptyMedia,
-//   EmptyTitle,
-// } from '@/components/ui/empty';
-// import {
-//   Item,
-//   ItemActions,
-//   ItemContent,
-//   ItemDescription,
-//   ItemMedia,
-//   ItemTitle,
-// } from '@/components/ui/item';
+import { motion } from 'framer-motion';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from '@/components/ui/item';
 
 export const Route = createFileRoute('/_needAuth/_mypage/mypage/')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  // const orderMenuItems = [
-  //   // { label: '전체', path: '/mypage/orders' },
-  //   // { label: '배송중', path: '/mypage/orders/shipping' },
-  //   // { label: '배송완료', path: '/mypage/orders/completed' },
-  //   // { label: '취소/환불', path: '/mypage/orders/canceled' },
-  //   { label: '전체', status: 'ALL' },
-  //   { label: '배송중', status: 'SHIPPING' },
-  //   { label: '배송완료', status: 'DELIVERED' },
-  //   { label: '취소/환불', status: 'CANCELED' },
-  // ];
+  const orderMenuItems = [
+    { label: '전체', path: '/mypage/orders' },
+    { label: '배송중', path: '/mypage/orders/shipping' },
+    { label: '배송완료', path: '/mypage/orders/completed' },
+    { label: '취소/환불', path: '/mypage/orders/canceled' },
+  ];
 
   const [userInfo, setUserInfo] = useState({});
-  // const [orderList, setOrderList] = useState([]);
-  // const [activeOrderMenu, setActiveOrderMenu] = useState(orderMenuItems[0].status);
+  const [orderList, setOrderList] = useState([]);
+  const [activeOrderMenu, setActiveOrderMenu] = useState(orderMenuItems[0].path);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,11 +45,11 @@ function RouteComponent() {
       setUserInfo(resp.data);
     })();
 
-    // (async () => {
-    //   const resp = await axiosInstance.get('/v1/users/me/orders');
-    //   setOrderList(resp.data);
-    //   // setOrderList([]);
-    // })();
+    (async () => {
+      const resp = await axiosInstance.get('/v1/users/me/orders');
+      setOrderList(resp.data);
+      // setOrderList([]);
+    })();
   }, []);
 
   return (
@@ -78,7 +74,7 @@ function RouteComponent() {
           </Button>
         </div>
       </section>
-      {/* <section className='flex w-full flex-col gap-4 bg-neutral-300 px-8 pt-8'>
+      <section className='flex w-full flex-col gap-4 bg-neutral-300 px-8 pt-8'>
         <h2 className='text-3xl font-bold text-neutral-800'>주문 내역</h2>
         <div className='hidden w-full flex-row items-center justify-center rounded-md border border-neutral-300 bg-white px-4 py-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 xl:flex 2xl:w-xl dark:border-neutral-600 dark:bg-neutral-700 dark:focus-within:border-blue-400 dark:focus-within:ring-blue-400'>
           <input
@@ -101,13 +97,13 @@ function RouteComponent() {
         </div>
         <nav className='flex w-full'>
           {orderMenuItems.map((item) => {
-            const isActive = activeOrderMenu === item.status;
+            const isActive = activeOrderMenu === item.path;
             return (
               <Button
-                key={item.status}
+                key={item.path}
                 variant='ghost'
                 className={`relative rounded-md px-8 py-5 text-lg font-medium transition-colors hover:bg-transparent ${isActive ? 'text-neutral-900' : 'text-neutral-600 hover:text-neutral-900'} `}
-                onClick={() => setActiveOrderMenu(item.status)}
+                onClick={() => setActiveOrderMenu(item.path)}
               >
                 {isActive && (
                   <motion.span
@@ -209,7 +205,7 @@ function RouteComponent() {
                               variant='outline'
                               className='h-10 w-32 text-lg font-bold hover:cursor-pointer hover:bg-neutral-200'
                               onClick={() => {
-                                navigate({ to: `/products/${item.productId}` });
+                                navigate({ to: `/mypage/order/${item.orderItemId}` });
                               }}
                             >
                               주문 상세
@@ -224,7 +220,7 @@ function RouteComponent() {
             })}
           </div>
         )}
-      </section> */}
+      </section>
     </div>
   );
 }

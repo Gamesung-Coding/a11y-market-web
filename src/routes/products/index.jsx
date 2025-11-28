@@ -4,6 +4,11 @@ import { Icon } from '@iconify/react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 
+// TanStack Router – /products 경로
+export const Route = createFileRoute('/products/')({
+  component: ProductListPage,
+});
+
 // 임시 상품 데이터 (백엔드 연동 전 UI 확인용)
 const mockProducts = [
   {
@@ -359,8 +364,3 @@ function ProductListPage() {
     </main>
   );
 }
-
-// TanStack Router – /products 경로
-export const Route = createFileRoute('/products/')({
-  component: ProductListPage,
-});

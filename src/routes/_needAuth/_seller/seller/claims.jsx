@@ -507,7 +507,7 @@ function SellerClaimsPage() {
                           type='text'
                           defaultValue={
                             selectedRequest?.amount
-                              ? `₩${selectedRequest.amount.toLocaleString('ko-KR')}`
+                              ? `₩${selectedRequest.amount.toLocaleString(`ko-KR`)}`
                               : '₩0'
                           }
                           className='mt-1 h-9 bg-white text-sm text-slate-800'
@@ -632,6 +632,6 @@ function SellerClaimsPage() {
   );
 }
 
-export const Route = createFileRoute('/_needAuth/seller/claims')({
+export const Route = createFileRoute('/_needAuth/_seller/seller/claims')({
   component: SellerClaimsPage,
 });

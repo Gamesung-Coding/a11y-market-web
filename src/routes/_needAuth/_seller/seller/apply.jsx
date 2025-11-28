@@ -140,6 +140,6 @@ function SellerApplyPage() {
   );
 }
 
-export const Route = createFileRoute('/_needAuth/seller/apply')({
+export const Route = createFileRoute('/_needAuth/_seller/seller/apply')({
   component: SellerApplyPage,
 });
