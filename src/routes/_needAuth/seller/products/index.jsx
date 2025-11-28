@@ -1,8 +1,7 @@
-import React from 'react';
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { createFileRoute, Link } from '@tanstack/react-router';
 
 /** /seller/products : 판매자의 "내 상품 목록" 페이지 */
 export const Route = createFileRoute('/_needAuth/seller/products/')({
@@ -82,12 +81,18 @@ function SellerProductRow({ product }) {
 
       <div className='col-span-2 flex justify-end gap-2'>
         <Button
+          asChild
           variant='outline'
           size='sm'
-          disabled
         >
-          수정
+          <Link
+            to='/seller/products/$productId/edit'
+            params={{ productId: product.id }}
+          >
+            수정
+          </Link>
         </Button>
+
         <Button
           variant='outline'
           size='sm'
