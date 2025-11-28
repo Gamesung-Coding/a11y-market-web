@@ -2,9 +2,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { useSelector } from 'react-redux';
 
 /** /seller/products : 판매자의 "내 상품 목록" 페이지 */
-export const Route = createFileRoute('/_needAuth/seller/products/')({
+export const Route = createFileRoute('/_needAuth/_seller/seller/products/')({
   component: SellerProductListPage,
 });
 
@@ -40,6 +41,8 @@ const MOCK_PRODUCTS = [
 ];
 
 function SellerProductListPage() {
+  const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
+
   const products = MOCK_PRODUCTS;
 
   const totalCount = products.length;
@@ -110,6 +113,10 @@ function SellerProductListPage() {
         </div>
       </div>
     );
+  }
+
+  if (isLoading || !isAuthenticated) {
+    return <div>Loading...</div>;
   }
 
   return (

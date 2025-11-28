@@ -463,6 +463,6 @@ function SellerProductEditPage() {
 }
 
 // TanStack Router – /seller/products/:productId/edit 경로
-export const Route = createFileRoute('/_needAuth/seller/products/$productId/edit')({
+export const Route = createFileRoute('/_needAuth/_seller/seller/products/$productId/edit')({
   component: SellerProductEditPage,
 });

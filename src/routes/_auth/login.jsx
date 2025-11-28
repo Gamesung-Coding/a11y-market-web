@@ -7,7 +7,7 @@ import { loginSuccess } from '@/store/authSlice';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { AlertCircleIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 export const Route = createFileRoute('/_auth/login')({
   validateSearch: (search) => {
@@ -21,6 +21,7 @@ export const Route = createFileRoute('/_auth/login')({
 
 function RouteComponent() {
   const { redirect, error } = Route.useSearch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -65,6 +66,11 @@ function RouteComponent() {
       //setErrorMsg(getErrorMessage(error));
     }
   }, [error]);
+
+  if (isAuthenticated) {
+    navigate({ to: redirect || '/' });
+    return null;
+  }
 
   return (
     <main className='font-kakao-big-sans mx-auto max-w-md px-4 py-10'>
