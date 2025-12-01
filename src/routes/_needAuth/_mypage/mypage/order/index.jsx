@@ -48,7 +48,7 @@ export default function OrderHistoryPage() {
   console.log(orders.map((o) => o.status));
   console.log(Object.keys(orders[0] || {}));
 
-  // 필터 (개발 중)
+  // 필터
   const filteredOrders = orders
     .filter((order) => {
       if (statusFilter === 'ALL') return true;
@@ -103,7 +103,13 @@ export default function OrderHistoryPage() {
               key={item.key}
               className='flex items-center gap-14'
             >
-              <div className='flex flex-col gap-4'>
+              <div
+                className='flex cursor-pointer flex-col gap-4'
+                onClick={() => {
+                  setStatusFilter(item.key);
+                  setCurrentPage(1);
+                }}
+              >
                 <span className='text-md'>{item.label}</span>
                 <span className='text-xl font-bold text-blue-600'>
                   {orders.filter((o) => o.orderStatus === item.key).length}
@@ -192,8 +198,6 @@ export default function OrderHistoryPage() {
               >
                 <div className='flex justify-between'>
                   <p className='text-lg font-bold'>주문 날짜: {order.createdAt?.slice(0, 10)}</p>
-
-                  <p className='font-semibold'>총 주문 금액: {order.totalPrice ?? '금액 없음'}원</p>
                 </div>
 
                 <p className='text-sm text-gray-500'>
@@ -205,6 +209,12 @@ export default function OrderHistoryPage() {
                 </p>
 
                 <OrderCard order={order} />
+                <div className='mt-4 flex w-full justify-end'>
+                  <span className='font-semibold text-gray-800'>
+                    총 주문 금액:&nbsp;
+                    {(order.totalPrice ?? 0).toLocaleString()}원
+                  </span>
+                </div>
               </div>
             );
           })}

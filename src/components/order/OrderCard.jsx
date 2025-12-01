@@ -4,10 +4,36 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
-import OrderStatusBadge from './OrderStatusBadge';
+import CancelModal from './CancelModal';
+import { cancelOrder } from '@/api/orderApi';
+
+const statusLabel = (status) => {
+  switch (status) {
+    case 'ORDERED':
+      return '주문완료';
+    case 'PAID':
+      return '결제완료';
+    case 'SHIPPED':
+      return '배송중';
+    case 'CONFIRMED':
+      return '구매확정';
+    case 'CANCEL_PENDING':
+      return '취소요청 중';
+    case 'CANCELED':
+      return '취소완료';
+    case 'RETURN_PENDING':
+      return '반품요청 중';
+    case 'RETURNED':
+      return '반품완료';
+    default:
+      return status;
+  }
+};
 
 export default function OrderCard({ order }) {
   const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const formatPhone = (phone) => {
     if (!phone) return '정보 없음';
@@ -15,11 +41,7 @@ export default function OrderCard({ order }) {
   };
 
   return (
-    <Card>
-      <CardHeader className='flex justify-end'>
-        <OrderStatusBadge status={order?.orderStatus} />
-      </CardHeader>
-
+    <Card className='border-none bg-transparent shadow-none'>
       <CardContent className='space-y-2'>
         {order.orderItems?.map((item) => (
           <div
@@ -33,7 +55,7 @@ export default function OrderCard({ order }) {
                 params={{ productId: item.productId }}
               >
                 <img
-                  src={item.imageUrl || '/no-image.png'}
+                  src={item.productImageUrl || '/no-image.png'}
                   alt={item.productName}
                   className='h-24 w-24 cursor-pointer object-cover'
                 />
@@ -49,15 +71,21 @@ export default function OrderCard({ order }) {
                 <p className='text-gray-600'>
                   총액: {(item.productPrice * item.productQuantity).toLocaleString()}원
                 </p>
-                <p>
-                  {' '}
-                  {/* 상품별 상태 : 개발 중 */}
-                  상태: <OrderStatusBadge status={order?.orderStatus || 'PENDING'} />
-                </p>
+                <p>상태: {statusLabel(item.orderItemStatus)}</p>
               </div>
             </div>
 
-            <Button variant='outline'>상품 상세</Button>
+            {['ORDERED', 'PAID'].includes(item.orderItemStatus) && (
+              <Button
+                variant='default'
+                onClick={() => {
+                  setSelectedItem(item);
+                  setIsOpen(true);
+                }}
+              >
+                주문 취소
+              </Button>
+            )}
           </div>
         ))}
       </CardContent>
@@ -81,6 +109,27 @@ export default function OrderCard({ order }) {
             <p>결제수단: {order.paymentMethod || '카드'}</p>
             <p>주문일시: {order.createdAt}</p>
           </div>
+        )}
+
+        {selectedItem && (
+          <CancelModal
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            item={selectedItem}
+            onSubmit={async (reason) => {
+              try {
+                await cancelOrder(order.orderId, {
+                  orderItemId: selectedItem.orderItemId,
+                  reason: reason,
+                });
+                alert('취소 요청이 접수되었습니다.');
+                window.location.reload();
+                setIsOpen(false);
+              } catch {
+                alert('취소 요청 실패');
+              }
+            }}
+          />
         )}
       </CardFooter>
     </Card>

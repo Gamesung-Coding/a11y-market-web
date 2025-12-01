@@ -12,6 +12,13 @@ export const getMyOrderDetail = async (orderId) => {
   return res.data;
 };
 
+// 주문 취소 요청
+export const cancelOrder = async (orderId, data) => {
+  const res = await axiosInstance.post(`/v1/users/me/orders/${orderId}/cancel-request`, data);
+
+  return res.data;
+};
+
 //결제 전 주문 정보 조회
 export async function getCheckoutInfo(orderItemIds, orderAllItems = false) {
   const response = await axiosInstance.post('/v1/orders/pre-check', {
