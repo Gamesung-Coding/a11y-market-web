@@ -7,6 +7,29 @@ import { useState } from 'react';
 import CancelModal from './CancelModal';
 import { cancelOrder } from '@/api/orderApi';
 
+const statusLabel = (status) => {
+  switch (status) {
+    case 'ORDERED':
+      return '주문완료';
+    case 'PAID':
+      return '결제완료';
+    case 'SHIPPED':
+      return '배송중';
+    case 'CONFIRMED':
+      return '구매확정';
+    case 'CANCEL_PENDING':
+      return '취소요청 중';
+    case 'CANCELED':
+      return '취소완료';
+    case 'RETURN_PENDING':
+      return '반품요청 중';
+    case 'RETURNED':
+      return '반품완료';
+    default:
+      return status;
+  }
+};
+
 export default function OrderCard({ order }) {
   const [open, setOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -18,8 +41,7 @@ export default function OrderCard({ order }) {
   };
 
   return (
-    <Card className="border-none shadow-none bg-transparent">
-
+    <Card className='border-none bg-transparent shadow-none'>
       <CardContent className='space-y-2'>
         {order.orderItems?.map((item) => (
           <div
@@ -49,11 +71,11 @@ export default function OrderCard({ order }) {
                 <p className='text-gray-600'>
                   총액: {(item.productPrice * item.productQuantity).toLocaleString()}원
                 </p>
-                <p>상태: {item.orderItemStatus}</p>
+                <p>상태: {statusLabel(item.orderItemStatus)}</p>
               </div>
             </div>
 
-            {['결제완료', '주문완료'].includes(item.orderItemStatus) && (
+            {['ORDERED', 'PAID'].includes(item.orderItemStatus) && (
               <Button
                 variant='default'
                 onClick={() => {
