@@ -115,7 +115,7 @@ function MemberCancelPage() {
         </section>
 
         {/* 탈퇴 사유 체크박스 */}
-        <section className='space-y-3'>
+        {/* <section className='space-y-3'>
           <div className='flex items-baseline gap-1'>
             <h2 className='font-kakao-big text-base text-slate-900'>
               A11Y MARKET에서 탈퇴하려는 이유가 무엇인가요? (복수선택 가능)
@@ -141,7 +141,7 @@ function MemberCancelPage() {
           </Card>
         </section>
 
-        {/* 상세 사유 + 비밀번호 확인 */}
+         상세 사유 + 비밀번호 확인 
         <section className='space-y-6'>
           <div className='space-y-2'>
             <div className='flex items-baseline justify-between gap-2'>
@@ -171,8 +171,9 @@ function MemberCancelPage() {
                 </span>
               </div>
             </div>
-          </div>
-
+          </div> */}
+        {/*비밀 번호 확인 */}
+        <section>
           <FieldGroup className='space-y-2'>
             <Field>
               <Label
