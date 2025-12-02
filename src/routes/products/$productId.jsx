@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@iconify/react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
+import SellerTrustInfo from '@/components/product/SellerTrustInfo';
 
 // 임시 상품 데이터 (백엔드 연동 전까지 UI 확인용)
 const mockProduct = {
@@ -11,6 +12,7 @@ const mockProduct = {
   price: 0,
   sellerName: '판매자명',
   sellerGrade: '우수',
+  a11yGuarantee: true,
   shippingInfo: ['배송정보', '무료배송'],
   summary: '상품정보 요약',
   options: [
@@ -91,29 +93,16 @@ function ProductDetailPage() {
 
         {/* 정보 영역 */}
         <div className='space-y-4 md:w-1/2'>
-          {/* 판매자 정보 */}
-          <div
-            className='flex items-center gap-2 text-xs'
-            aria-label='판매자 정보'
-          >
-            <Icon
-              icon='mdi:check-circle'
-              className='h-4 w-4 text-green-500'
-              aria-hidden='true'
+          <div className='flex items-center gap-2 text-sm'>
+            {/* 판매자 정보 */}
+            <SellerTrustInfo
+              // sellerId={mockProduct.sellerId}
+              sellerName={mockProduct.sellerName}
+              sellerGrade={mockProduct.sellerGrade}
+              a11yGuarantee={mockProduct.a11yGuarantee}
             />
-            {/* 스크린 리더용 설명 텍스트 */}
-            <span
-              className='sr-only'
-              aria-label={`${mockProduct.sellerName} ${mockProduct.sellerGrade} 등급 판매자`}
-            >
-              {`${mockProduct.sellerName} (${mockProduct.sellerGrade}) 판매자`}
-            </span>
-            {/* 시각 사용자용 텍스트 */}
-            <span aria-hidden='true'>
-              {`${mockProduct.sellerName} (${mockProduct.sellerGrade}) >`}
-            </span>
+            <span className='text-gray-600'>{mockProduct.sellerName} &gt; </span>
           </div>
-
           {/* 상품명 / 가격 */}
           <div
             className='space-y-1'
