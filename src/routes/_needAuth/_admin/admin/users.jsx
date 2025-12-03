@@ -10,7 +10,13 @@ import {
 import { Fragment, useState, useEffect } from 'react';
 import { adminApi } from '@/api/adminApi';
 import { Button } from '@/components/ui/button';
-
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '@/components/ui/select';
 export const Route = createFileRoute('/_needAuth/_admin/admin/users')({
   component: RouteComponent,
 });
@@ -18,7 +24,7 @@ export const Route = createFileRoute('/_needAuth/_admin/admin/users')({
 /** 선택 가능한 권한 옵션 */
 const ROLE_OPTIONS = [
   { value: 'USER', label: '일반 회원' },
-  { value: 'RSELLER', label: '판매자' },
+  { value: 'SELLER', label: '판매자' },
   { value: 'ADMIN', label: '관리자' },
 ];
 
@@ -169,22 +175,27 @@ function RouteComponent() {
                                 변경할 권한을 선택하세요.
                               </label>
 
-                              <select
-                                value={currentDraftRole}
-                                onChange={(e) =>
-                                  handleRoleSelectChange(user.userId, e.target.value)
+                              <Select
+                                defaultValue={currentDraftRole}
+                                onValueChange={(value) =>
+                                  handleRoleSelectChange(user.userId, value)
                                 }
-                                className='h-8 rounded border px-2 text-xs'
                               >
-                                {ROLE_OPTIONS.map((role) => (
-                                  <option
-                                    key={role.value}
-                                    value={role.value}
-                                  >
-                                    {role.label} ({role.value})
-                                  </option>
-                                ))}
-                              </select>
+                                <SelectTrigger className='h-8 w-[160px] text-xs'>
+                                  <SelectValue placeholder='권한 선택' />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                  {ROLE_OPTIONS.map((role) => (
+                                    <SelectItem
+                                      key={role.value}
+                                      value={role.value}
+                                    >
+                                      {role.label} ({role.value})
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
 
                               <Button
                                 type='button'
@@ -215,3 +226,5 @@ function RouteComponent() {
     </>
   );
 }
+
+export default RouteComponent;
