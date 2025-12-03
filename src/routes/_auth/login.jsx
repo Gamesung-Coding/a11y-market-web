@@ -65,6 +65,10 @@ function RouteComponent() {
         return '세션이 만료되었습니다. 다시 로그인해주세요.';
       case 'invalid_user':
         return '이메일 또는 비밀번호가 올바르지 않습니다.';
+      case 'invalid_access':
+        return '유효하지 않은 접근입니다. 다시 시도해주세요.';
+      case 'oauth_login_failed':
+        return 'OAuth 로그인에 실패했습니다. 다시 시도해주세요.';
       default:
         return null;
     }
