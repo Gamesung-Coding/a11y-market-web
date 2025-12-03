@@ -19,14 +19,13 @@ export const Route = createFileRoute('/_auth/join/')({
 function RouteComponent() {
   const navigate = useNavigate();
 
-  const [userId, setUserId] = useState('');
+  const [emailId, setEmailId] = useState('');
+  const [emailDomain, setEmailDomain] = useState('naver.com');
   const [password, setPassword] = useState('');
   const [passwordCheck, setPasswordCheck] = useState('');
   const [name, setName] = useState('');
   const [nickname, setNickname] = useState('');
   const [phone, setPhone] = useState('');
-  const [emailId, setEmailId] = useState('');
-  const [emailDomain, setEmailDomain] = useState('naver.com');
   const [birthYear, setBirthYear] = useState('');
   const [birthMonth, setBirthMonth] = useState('');
   const [birthDay, setBirthDay] = useState('');
