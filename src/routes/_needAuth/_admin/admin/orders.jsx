@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Select, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import OrderItemsDialog from '@/components/admin/OrderItemsDialog';
 
 export const Route = createFileRoute('/_needAuth/_admin/admin/orders')({
   component: RouteComponent,
@@ -76,19 +77,6 @@ function RouteComponent() {
     );
   };
 
-  const handleItemStatusChange = (orderId, orderItemId, newStatus) => {
-    setOrdersState((prev) =>
-      prev.map((order) =>
-        order.orderId === orderId
-          ? {
-              ...order,
-              itemStatuses: { ...order.itemStatuses, [orderItemId]: newStatus },
-            }
-          : order,
-      ),
-    );
-  };
-
   const handleOrderStatusChange = (orderId, newStatus) => {
     setOrdersState((prev) =>
       prev.map((order) =>
@@ -125,12 +113,6 @@ function RouteComponent() {
       ),
     );
   };
-
-  const hasChanges = (order) =>
-    order.orderStatusState !== order.savedOrderStatus ||
-    Object.keys(order.itemStatuses).some(
-      (key) => order.itemStatuses[key] !== order.savedItemStatuses[key],
-    );
 
   return (
     <div className='max-w-8xl mx-auto w-full px-4 pt-4'>
@@ -214,13 +196,14 @@ function RouteComponent() {
                         <dt className='font-semibold'>배송지 주소:</dt>
                         <dd>{`${order.receiverZipcode} ${order.receiverAddr1} ${order.receiverAddr2}`}</dd>
                       </div>
-                      <div className='flex gap-2'>
-                        <dt className='font-semibold'>총 결제 금액:</dt>
-                        <dd>{order.totalPrice.toLocaleString()}원</dd>
+                      <div className='flex items-center justify-between gap-2'>
+                        <div className='flex gap-2'>
+                          <dt className='font-semibold'>총 결제 금액:</dt>
+                          <dd>{order.totalPrice.toLocaleString()}원</dd>
+                        </div>
+                        {/* 주문 상품 목록 테이블 */}
+                        <OrderItemsDialog orderItems={order.orderItems} />
                       </div>
-
-                      {/* 주문 상품 목록 테이블 -> 새창*/}
-
                     </div>
                   </TableCell>
                 </TableRow>
