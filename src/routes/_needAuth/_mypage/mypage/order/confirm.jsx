@@ -1,4 +1,4 @@
-// src/routes/_needAuth/order/confirm.jsx
+// src/routes/_needAuth/_mypage/mypage/order/confirm.jsx
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 
@@ -19,9 +19,18 @@ const mockOrder = {
 };
 
 function PurchaseConfirmPage() {
+  //  /mypage/order/confirm?orderId=... 에서 넘어온 orderId 를 search 로 받음
+  const { orderId } = Route.useSearch();
+
   const [agreeAll, setAgreeAll] = useState(false);
   const [detailReason, setDetailReason] = useState('');
   const [password, setPassword] = useState('');
+
+  // 실제 연동 시에는 orderId 로 백엔드에서 주문 정보 조회 예정
+  const currentOrder = {
+    ...mockOrder,
+    orderId: orderId ?? mockOrder.orderId,
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -59,7 +68,7 @@ function PurchaseConfirmPage() {
               <Label className='mb-1 block text-[11px] font-medium text-slate-500'>주문번호</Label>
               <Input
                 readOnly
-                value={mockOrder.orderId}
+                value={currentOrder.orderId}
                 className='h-9 bg-slate-50 text-xs text-slate-800'
               />
             </Field>
@@ -67,7 +76,7 @@ function PurchaseConfirmPage() {
               <Label className='mb-1 block text-[11px] font-medium text-slate-500'>주문일</Label>
               <Input
                 readOnly
-                value={mockOrder.date}
+                value={currentOrder.date}
                 className='h-9 bg-slate-50 text-xs text-slate-800'
               />
             </Field>
@@ -75,7 +84,7 @@ function PurchaseConfirmPage() {
               <Label className='mb-1 block text-[11px] font-medium text-slate-500'>주문 상품</Label>
               <Input
                 readOnly
-                value={mockOrder.productName}
+                value={currentOrder.productName}
                 className='h-9 bg-slate-50 text-xs text-slate-800'
               />
             </Field>
@@ -83,7 +92,7 @@ function PurchaseConfirmPage() {
               <Label className='mb-1 block text-[11px] font-medium text-slate-500'>결제 금액</Label>
               <Input
                 readOnly
-                value={`₩${mockOrder.amount.toLocaleString(`ko-KR`)}`}
+                value={`₩${currentOrder.amount.toLocaleString('ko-KR')}`}
                 className='h-9 bg-slate-50 text-xs text-slate-800'
               />
             </Field>
@@ -91,7 +100,7 @@ function PurchaseConfirmPage() {
               <Label className='mb-1 block text-[11px] font-medium text-slate-500'>현재 상태</Label>
               <Input
                 readOnly
-                value={mockOrder.status}
+                value={currentOrder.status}
                 className='h-9 bg-slate-50 text-xs text-slate-800'
               />
             </Field>
@@ -119,7 +128,7 @@ function PurchaseConfirmPage() {
         </CardContent>
       </Card>
 
-      {/*  동의 확인 */}
+      {/* 동의 확인 */}
       <form
         onSubmit={handleSubmit}
         className='space-y-6'
@@ -161,6 +170,10 @@ function PurchaseConfirmPage() {
   );
 }
 
+//  search 에서 orderId 를 받음
 export const Route = createFileRoute('/_needAuth/_mypage/mypage/order/confirm')({
   component: PurchaseConfirmPage,
+  validateSearch: (search) => ({
+    orderId: typeof search.orderId === 'string' ? search.orderId : undefined,
+  }),
 });
