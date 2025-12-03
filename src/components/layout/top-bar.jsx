@@ -112,7 +112,7 @@ export default function TopBar() {
           </li>
           <li aria-label='회원가입'>
             <Link
-              to='/register'
+              to='/join'
               className={itemStyle}
               aria-label='회원가입 페이지로 이동'
             >
