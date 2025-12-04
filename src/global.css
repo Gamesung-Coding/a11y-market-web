@@ -229,10 +229,10 @@ html.a11y-invert {
 }
 
 /* 글자 크기 */
-html.a11y-font-size-1 {
+html.a11y-text-size-1 {
   font-size: 112.5%;
 }
-html.a11y-font-size-2 {
+html.a11y-text-size-2 {
   font-size: 125%;
 }
 
