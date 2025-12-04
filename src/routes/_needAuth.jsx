@@ -1,11 +1,12 @@
+import { LoadingEmpty } from '@/components/main/loading-empty';
 import { store } from '@/store/store';
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/_needAuth')({
+export const Route = createFileRoute('/_needauth')({
   beforeLoad: async ({ location }) => {
     const { user, isAuthenticated, isLoading } = store.getState().auth;
 
-    if (isLoading) return;
+    if (isLoading) return <LoadingEmpty />;
     if (!isAuthenticated || !user) {
       throw redirect({
         to: '/login',
