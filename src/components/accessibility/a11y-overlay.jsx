@@ -1,5 +1,3 @@
-// src/components/A11y/A11yOverlay.jsx
-
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -21,7 +19,7 @@ import {
   toggleHighlightLinks,
   toggleScreenReader,
   toggleSmartContrast,
-} from '@/store/a11ySlice';
+} from '@/store/a11y-slice';
 import {
   AArrowUp,
   AlignCenter,
@@ -40,7 +38,7 @@ import {
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import A11yOverlaySave from './A11yOverlaySave';
+import A11yOverlaySave from './a11y-overlay-save';
 
 const languages = [
   { code: 'ko', label: '한국어' },

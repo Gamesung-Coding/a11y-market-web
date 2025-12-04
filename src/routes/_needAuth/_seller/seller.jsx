@@ -1,5 +1,5 @@
 import { ROLES } from '@/constants/roles';
-import { createFileRoute, Outlet, redirect, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router';
 import { useSelector } from 'react-redux';
 
 export const Route = createFileRoute('/_needAuth/_seller/seller')({

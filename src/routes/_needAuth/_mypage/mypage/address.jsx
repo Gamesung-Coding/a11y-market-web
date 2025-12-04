@@ -1,6 +1,6 @@
-import AddressList from '@/components/address/AddressList';
-import DefaultAddress from '@/components/address/DefaultAddress';
-import NewAddressForm from '@/components/address/NewAddressForm';
+import AddressList from '@/components/address/address-list';
+import DefaultAddress from '@/components/address/default-address';
+import NewAddressForm from '@/components/address/new-address-form';
 import { Button } from '@/components/ui/button';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';

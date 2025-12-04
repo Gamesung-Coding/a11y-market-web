@@ -1,4 +1,4 @@
-import axiosInstance from './axiosInstance';
+import axiosInstance from '@/api/axios-instance';
 
 // 내 주문 목록 조회
 export const getMyOrders = async () => {

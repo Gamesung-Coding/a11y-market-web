@@ -1,4 +1,4 @@
-import { ErrorEmpty } from '@/components/error-empty';
+import { ErrorEmpty } from '@/components/main/error-empty';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_error/invalid-path')({

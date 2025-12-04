@@ -1,4 +1,4 @@
-import { authApi } from '@/api/authApi';
+import { authApi } from '@/api/auth-api';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { loginSuccess } from '@/store/authSlice';
+import { loginSuccess } from '@/store/auth-slice';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { AlertCircleIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';

@@ -1,40 +1,27 @@
 // src/components/seller/order-summary-section.jsx
-import { Card } from "@/components/ui/card";
+import { Card } from '@/components/ui/card';
 
-export function OrderSummaryCard({
-  label,
-  value,
-  description,
-  badgeClass,
-}) {
+export function OrderSummaryCard({ label, value, description, badgeClass }) {
   return (
-    <Card
-      className="relative flex h-[120px] flex-col justify-between rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-sm"
-    >
+    <Card className='relative flex h-[120px] flex-col justify-between rounded-xl border border-slate-200 bg-white px-5 py-3 shadow-sm'>
       {/* 위쪽: 라벨 + 설명 */}
-      <div className="mt-1 space-y-1 pr-12">
-        <p className="font-kakao-little text-[11px] font-medium text-slate-500">
-          {label}
-        </p>
+      <div className='mt-1 space-y-1 pr-12'>
+        <p className='font-kakao-little text-[11px] font-medium text-slate-500'>{label}</p>
         {description && (
-          <p className="font-kakao-little text-[11px] text-slate-400">
-            {description}
-          </p>
+          <p className='font-kakao-little text-[11px] text-slate-400'>{description}</p>
         )}
       </div>
 
       {/* 아래쪽 숫자  */}
-      <div className="pb-1 pr-12">
-        <p className="font-kakao-big text-lg leading-none text-slate-900">
-          {value}
-        </p>
-        <div className="mt-2 h-[1px] w-12 bg-slate-100" />
+      <div className='pr-12 pb-1'>
+        <p className='font-kakao-big text-lg leading-none text-slate-900'>{value}</p>
+        <div className='mt-2 h-px w-12 bg-slate-100' />
       </div>
 
       {/*동그라미 배지 */}
       <div
-        className={`absolute right-5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border text-[11px] font-semibold ${
-          badgeClass ?? "border-slate-200 bg-slate-50 text-slate-600"
+        className={`absolute top-1/2 right-5 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border text-[11px] font-semibold ${
+          badgeClass ?? 'border-slate-200 bg-slate-50 text-slate-600'
         }`}
       >
         {value}

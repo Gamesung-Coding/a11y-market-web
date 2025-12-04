@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 
 /** /admin/products/pending : 관리자 상품 등록 신청 관리 페이지 */
 export const Route = createFileRoute('/_needAuth/_admin/admin/products')({

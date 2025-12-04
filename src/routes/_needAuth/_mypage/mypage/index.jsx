@@ -1,10 +1,6 @@
-import axiosInstance from '@/api/axiosInstance';
+import axiosInstance from '@/api/axios-instance';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Icon } from '@iconify/react';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   Empty,
   EmptyContent,
@@ -21,7 +17,11 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/components/ui/item';
-import { getOrderItemStatusLabel } from '@/lib/orderStatusMapping';
+import { getOrderItemStatusLabel } from '@/lib/order-status-mapping';
+import { Icon } from '@iconify/react';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 export const Route = createFileRoute('/_needAuth/_mypage/mypage/')({
   component: RouteComponent,

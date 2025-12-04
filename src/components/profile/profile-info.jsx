@@ -1,11 +1,8 @@
-// src/components/profile/ProfileInfo.jsx
-
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '../ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { Link } from '@tanstack/react-router';
+import { Button } from '../ui/button';
 
 function formatPhone(phone) {
   if (!phone) return '-';

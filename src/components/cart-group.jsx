@@ -1,5 +1,5 @@
-import axiosInstance from '@/api/axiosInstance';
-import { deleteCartItems } from '@/api/cartApi';
+import axiosInstance from '@/api/axios-instance';
+import { deleteCartItems } from '@/api/cart-api';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { Checkbox } from '@/components/ui/checkbox';

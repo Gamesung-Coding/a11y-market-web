@@ -1,29 +1,26 @@
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-
-import {
-  setAllA11y,
-  resetAll,
-  toggleScreenReader,
-  toggleSmartContrast,
-  toggleHighlightLinks,
-  toggleCursorHighlight,
-} from '@/store/a11ySlice';
-
-import { createA11yProfile, updateA11yProfile } from '@/api/a11yApi';
-
+import { createA11yProfile, updateA11yProfile } from '@/api/a11y-api';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  resetAll,
+  setAllA11y,
+  toggleCursorHighlight,
+  toggleHighlightLinks,
+  toggleScreenReader,
+  toggleSmartContrast,
+} from '@/store/a11y-slice';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 function StepSelector({ value, max, onChange }) {
   return (

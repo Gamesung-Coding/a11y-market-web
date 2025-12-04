@@ -1,4 +1,3 @@
-// src/components/seller/claim-type-badge.jsx
 import { Badge } from '@/components/ui/badge';
 
 export function ClaimTypeBadge({ type }) {

@@ -1,13 +1,11 @@
-// src/routes/_needAuth/_mypage/mypage/order/confirm.jsx
-import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 
 // TODO: 백엔드 연동 전까지 사용할 임시 주문 데이터
 const mockOrder = {
@@ -36,7 +34,7 @@ function PurchaseConfirmPage() {
     e.preventDefault();
 
     if (!agreeAll) {
-      // 필수 동의 체크 안 했을 때는 일단 아무 것도 안 함 
+      // 필수 동의 체크 안 했을 때는 일단 아무 것도 안 함
       return;
     }
 

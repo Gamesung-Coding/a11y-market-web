@@ -1,4 +1,4 @@
-import { logout, tokenRefresh } from '@/store/authSlice';
+import { logout, tokenRefresh } from '@/store/auth-slice';
 import { store } from '@/store/store';
 import axios from 'axios';
 

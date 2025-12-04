@@ -1,4 +1,4 @@
-import { userApi } from '@/api/userApi';
+import { userApi } from '@/api/user-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
