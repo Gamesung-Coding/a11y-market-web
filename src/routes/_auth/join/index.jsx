@@ -11,6 +11,7 @@ import {
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { authApi } from '@/api/auth-api';
 
 export const Route = createFileRoute('/_auth/join/')({
   component: RouteComponent,
@@ -21,50 +22,142 @@ function RouteComponent() {
 
   const [emailId, setEmailId] = useState('');
   const [emailDomain, setEmailDomain] = useState('naver.com');
+  const [customDomain, setCustomDomain] = useState('');
+
   const [password, setPassword] = useState('');
   const [passwordCheck, setPasswordCheck] = useState('');
   const [name, setName] = useState('');
   const [nickname, setNickname] = useState('');
   const [phone, setPhone] = useState('');
-  const [birthYear, setBirthYear] = useState('');
-  const [birthMonth, setBirthMonth] = useState('');
-  const [birthDay, setBirthDay] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
 
-  function handleEmailCheck() {
-    setErrorMsg('');
-    if (!emailId.trim()) return setErrorMsg('이메일을 입력하세요.');
+  const [errors, setErrors] = useState({});
 
-    //TODO: 실제 API 연동 필요
-    alert('사용 가능한 이메일입니다.');
+  const isValidDomain = (domain) => /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(domain);
+
+  const getDomain = () => (emailDomain === 'custom' ? customDomain.trim() : emailDomain);
+
+  const getFullEmail = () => {
+    const domain = getDomain();
+    if (!emailId.trim() || !domain) return '';
+    return `${emailId.trim()}@${domain}`;
+  };
+
+  //이메일 중복확인
+  async function handleEmailCheck() {
+    const domain = getDomain();
+    const newErrors = {};
+
+    setErrors((prev) => ({ ...prev, email: undefined }));
+
+    if (!emailId.trim()) {
+      newErrors.email = '이메일 아이디를 입력하세요.';
+    }
+
+    // 직접입력 검증
+    if (emailDomain === 'custom') {
+      if (!customDomain.trim()) {
+        newErrors.email = '도메인을 입력하세요. (예: gmail.com)';
+      } else if (!isValidDomain(customDomain.trim())) {
+        newErrors.email = '정확한 도메인명을 입력해주세요.';
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors((prev) => ({ ...prev, ...newErrors }));
+      return;
+    }
+
+    const fullEmail = getFullEmail();
+    if (!fullEmail) {
+      window.alert('이메일 형식이 올바르지 않습니다.');
+      return;
+    }
+
+    try {
+      const response = await authApi.checkEmail(fullEmail);
+
+      if (response.data === true) {
+        window.alert('이미 사용 중인 이메일입니다.');
+      } else {
+        window.alert('사용 가능한 이메일입니다.');
+      }
+    } catch (error) {
+      window.alert('이메일 중복 확인 중 오류가 발생했습니다.');
+    }
   }
 
-  function handleSubmit(e) {
+  //회원가입 제출
+  async function handleSubmit(e) {
     e.preventDefault();
-    setErrorMsg('');
+    const newErrors = {};
 
-    //검증
-    if (!emailId) return setErrorMsg('이메일을 입력하세요.');
-    if (!password) return setErrorMsg('비밀번호를 입력하세요.');
-    if (password.length < 8) return setErrorMsg('비밀번호는 최소 8자 이상이어야 합니다.');
-    if (password !== passwordCheck) return setErrorMsg('비밀번호가 일치하지 않습니다.');
-    if (!name.trim()) return setErrorMsg('이름을 입력하세요.');
-    if (!/^[0-9]{11}$/.test(phone)) return setErrorMsg('전화번호는 숫자 11자리여야 합니다.');
+    // 에러 메세지
+    if (!emailId.trim()) {
+      newErrors.email = '이메일 아이디를 입력하세요.';
+    }
+    if (emailDomain === 'custom') {
+      if (!customDomain.trim()) {
+        newErrors.email = '도메인을 입력하세요. (예: gmail.com)';
+      } else if (!isValidDomain(customDomain.trim())) {
+        newErrors.email = '정확한 도메인명을 입력해주세요. (예: example.com)';
+      }
+    }
 
-    alert('회원가입이 완료되었습니다.');
-    navigate({ to: '/login' });
+    if (!password) {
+      newErrors.password = '비밀번호를 입력하세요.';
+    } else if (password.length < 8) {
+      newErrors.password = '비밀번호는 최소 8자 이상이어야 합니다.';
+    }
+
+    if (!passwordCheck) {
+      newErrors.passwordCheck = '비밀번호 확인을 입력하세요.';
+    } else if (password !== passwordCheck) {
+      newErrors.passwordCheck = '비밀번호가 일치하지 않습니다.';
+    }
+
+    if (!name.trim()) {
+      newErrors.name = '이름을 입력하세요.';
+    }
+
+    if (!/^[0-9]{11}$/.test(phone)) {
+      newErrors.phone = "전화번호는 '-'를 제외한 숫자 11자리여야 합니다.";
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    const fullEmail = getFullEmail();
+    if (!fullEmail) {
+      window.alert('이메일 형식이 올바르지 않습니다.');
+      return;
+    }
+
+    try {
+      const payload = {
+        email: fullEmail,
+        password,
+        username: name,
+        nickname,
+        phone,
+      };
+
+      await authApi.join(payload);
+
+      window.alert('회원가입이 완료되었습니다.');
+      navigate({ to: '/login' });
+    } catch (error) {
+      window.alert('회원가입 중 오류가 발생했습니다.');
+    }
   }
 
   return (
-    <main className='font-kakao-big-sans mx-auto max-w-md px-4 py-10'>
+    <main className='font-kakao-big-sans mx-auto max-w-xl px-4 py-10'>
       <h1 className='mb-6 text-xl font-bold'>회원가입</h1>
       <p className='mb-6 text-sm text-gray-600'>* 표시된 항목은 필수 입력입니다.</p>
 
-      {errorMsg && <p className='mb-4 text-sm font-medium text-red-600'>{errorMsg}</p>}
-
       <form
         onSubmit={handleSubmit}
-        className='space-y-6'
+        className='space-y-10'
       >
         {/* 이메일 */}
         <div className='space-y-2'>
@@ -75,33 +168,67 @@ function RouteComponent() {
             <Input
               id='emailId'
               type='text'
-              placeholder='이메일 주소'
+              placeholder='이메일 아이디 입력'
               value={emailId}
               onChange={(e) => setEmailId(e.target.value)}
+              className='flex-1'
             />
             <span>@</span>
-            <Select
-              value={emailDomain}
-              onValueChange={setEmailDomain}
-            >
-              <SelectTrigger className='w-[180px]'>
-                <SelectValue placeholder='도메인 선택' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='naver.com'>naver.com</SelectItem>
-                <SelectItem value='gmail.com'>gmail.com</SelectItem>
-                <SelectItem value='daum.com'>daum.com</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* 도메인 선택 or 직접 입력 */}
+            {emailDomain === 'custom' ? (
+              <div className='flex items-center gap-2'>
+                <Input
+                  type='text'
+                  placeholder='도메인 입력'
+                  className='w-[180px]'
+                  value={customDomain}
+                  onChange={(e) => setCustomDomain(e.target.value)}
+                />
+                <Select
+                  onValueChange={(val) => {
+                    setEmailDomain(val);
+                    if (val !== 'custom') setCustomDomain('');
+                  }}
+                >
+                  <SelectTrigger className='w-[40px] px-2 text-xs'>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='naver.com'>naver.com</SelectItem>
+                    <SelectItem value='gmail.com'>gmail.com</SelectItem>
+                    <SelectItem value='daum.com'>daum.com</SelectItem>
+                    <SelectItem value='custom'>직접 입력</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <Select
+                value={emailDomain}
+                onValueChange={setEmailDomain}
+              >
+                <SelectTrigger className='w-[180px]'>
+                  <SelectValue placeholder='도메인 선택' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='naver.com'>naver.com</SelectItem>
+                  <SelectItem value='gmail.com'>gmail.com</SelectItem>
+                  <SelectItem value='daum.com'>daum.com</SelectItem>
+                  <SelectItem value='custom'>직접 입력</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+
             <Button
               type='button'
-              variant='outline'
+              variant='default'
               className='text-sm'
               onClick={handleEmailCheck}
             >
               중복확인
             </Button>
           </div>
+
+          {errors.email && <p className='text-sm text-red-600'>{errors.email}</p>}
         </div>
 
         {/* 비밀번호 */}
@@ -119,6 +246,8 @@ function RouteComponent() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+
+          {errors.password && <p className='text-sm text-red-600'>{errors.password}</p>}
         </div>
 
         {/* 비밀번호 확인*/}
@@ -136,6 +265,8 @@ function RouteComponent() {
             value={passwordCheck}
             onChange={(e) => setPasswordCheck(e.target.value)}
           />
+
+          {errors.passwordCheck && <p className='text-sm text-red-600'>{errors.passwordCheck}</p>}
         </div>
 
         {/* 이름 */}
@@ -153,6 +284,8 @@ function RouteComponent() {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
+
+          {errors.name && <p className='text-sm text-red-600'>{errors.name}</p>}
         </div>
 
         {/* 닉네임 */}
@@ -187,73 +320,12 @@ function RouteComponent() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
           />
-        </div>
 
-        {/* 생년월일 */}
-        <div className='space-y-2'>
-          <Label className='text-sm font-semibold'>생년월일</Label>
-          <div className='flex gap-2'>
-            <Select
-              value={birthYear}
-              onValueChange={setBirthYear}
-            >
-              <SelectTrigger className='flex-1'>
-                <SelectValue placeholder='년도' />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 60 }, (_, i) => 2024 - i).map((year) => (
-                  <SelectItem
-                    key={year}
-                    value={String(year)}
-                  >
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={birthMonth}
-              onValueChange={setBirthMonth}
-            >
-              <SelectTrigger className='flex-1'>
-                <SelectValue placeholder='월' />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                  <SelectItem
-                    key={m}
-                    value={String(m)}
-                  >
-                    {m}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={birthDay}
-              onValueChange={setBirthDay}
-            >
-              <SelectTrigger className='flex-1'>
-                <SelectValue placeholder='일' />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                  <SelectItem
-                    key={d}
-                    value={String(d)}
-                  >
-                    {d}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {errors.phone && <p className='text-sm text-red-600'>{errors.phone}</p>}
         </div>
 
         {/* 버튼 영역 */}
-        <div className='mt-8 space-y-3'>
+        <div className='mt-10 space-y-3'>
           <Button
             type='submit'
             variant='default'
@@ -265,8 +337,11 @@ function RouteComponent() {
           <Button
             type='button'
             variant='outline'
-            className='w-full'
-            onClick={() => navigate({ to: '..' })}
+            className='mt-3 w-full'
+            onClick={() => {
+              const ok = window.confirm('정말 가입을 취소하시겠습니까?');
+              if (ok) navigate({ to: '..' });
+            }}
           >
             가입 취소
           </Button>
