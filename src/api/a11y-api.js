@@ -1,6 +1,6 @@
 // src/api/a11yAPI.js
 
-import axiosInstance from './axiosInstance';
+import axiosInstance from './axios-instance';
 
 //접근성 프로필 목록 조회
 export async function getA11yProfiles() {

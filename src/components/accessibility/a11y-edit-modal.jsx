@@ -10,7 +10,7 @@ import {
   toggleCursorHighlight,
 } from '@/store/a11ySlice';
 
-import { createA11yProfile, updateA11yProfile } from '@/api/a11yApi';
+import { createA11yProfile, updateA11yProfile } from '@/api/a11y-api';
 
 import {
   Dialog,

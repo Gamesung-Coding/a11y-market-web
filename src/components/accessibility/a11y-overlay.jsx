@@ -40,7 +40,7 @@ import {
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import A11yOverlaySave from './A11yOverlaySave';
+import A11yOverlaySave from './a11y-overlay-save';
 
 const languages = [
   { code: 'ko', label: '한국어' },

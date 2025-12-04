@@ -1,7 +1,7 @@
-import { createOrder, getCheckoutInfo } from '@/api/orderApi';
+import { createOrder, getCheckoutInfo } from '@/api/order-api';
 import { AddressSelector } from '@/components/address/address-selector';
-import { ErrorEmpty } from '@/components/error-empty';
-import { LoadingEmpty } from '@/components/loading-empty';
+import { ErrorEmpty } from '@/components/main/error-empty';
+import { LoadingEmpty } from '@/components/main/loading-empty';
 import {
   Breadcrumb,
   BreadcrumbItem,

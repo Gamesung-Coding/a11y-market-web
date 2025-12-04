@@ -1,4 +1,4 @@
-import { authApi } from '@/api/authApi';
+import { authApi } from '@/api/auth-api';
 import { Spinner } from '@/components/ui/spinner';
 import { loginSuccess } from '@/store/authSlice';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';

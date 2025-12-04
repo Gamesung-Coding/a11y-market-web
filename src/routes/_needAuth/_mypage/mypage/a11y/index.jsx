@@ -5,12 +5,12 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 
-import { getA11yProfiles, deleteA11yProfile } from '@/api/a11yApi';
+import { getA11yProfiles, deleteA11yProfile } from '@/api/a11y-api';
 import { setAllA11y } from '@/store/a11ySlice';
 
 import { Card, CardContent } from '@/components/ui/card';
-import A11yProfileList from '@/components/accessibility/A11yProfileList';
-import A11yEditModal from '@/components/accessibility/A11yEditModal';
+import A11yProfileList from '@/components/accessibility/a11y-profile-list';
+import A11yEditModal from '@/components/accessibility/a11y-edit-modal';
 
 export const Route = createFileRoute('/_needAuth/_mypage/mypage/a11y/')({
   component: A11ySettingsPage,

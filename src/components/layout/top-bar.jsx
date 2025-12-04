@@ -1,5 +1,5 @@
 // import { logout } from '@/store/slices/authSlice';
-import { authApi } from '@/api/authApi';
+import { authApi } from '@/api/auth-api';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { logout } from '@/store/authSlice';

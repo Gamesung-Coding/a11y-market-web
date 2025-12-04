@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
-import CancelModal from './CancelModal';
-import { cancelOrder } from '@/api/orderApi';
+import CancelModal from './cancel-modal';
+import { cancelOrder } from '@/api/order-api';
 
 const statusLabel = (status) => {
   switch (status) {

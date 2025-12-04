@@ -8,7 +8,7 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { Fragment, useState, useEffect } from 'react';
-import { adminApi } from '@/api/adminApi';
+import { adminApi } from '@/api/admin-api';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -181,7 +181,7 @@ function RouteComponent() {
                                   handleRoleSelectChange(user.userId, value)
                                 }
                               >
-                                <SelectTrigger className='h-8 w-[160px] text-xs'>
+                                <SelectTrigger className='h-8 w-40 text-xs'>
                                   <SelectValue placeholder='권한 선택' />
                                 </SelectTrigger>
 

@@ -8,7 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-import { createA11yProfile } from '@/api/a11yApi';
+import { createA11yProfile } from '@/api/a11y-api';
 import { useState } from 'react';
 
 export default function A11yOverlaySave({ open, onClose, reloadProfiles, a11yState }) {

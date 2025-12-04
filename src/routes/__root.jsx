@@ -1,4 +1,4 @@
-import A11yButton from '@/components/accessibility/A11yButton';
+import A11yButton from '@/components/accessibility/a11y-button';
 import Footer from '@/components/layout/footer';
 import TopBar from '@/components/layout/top-bar';
 import { Spinner } from '@/components/ui/spinner';

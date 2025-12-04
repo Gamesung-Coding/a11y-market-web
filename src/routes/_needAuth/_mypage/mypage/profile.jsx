@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { userApi } from '@/api/userApi';
-import ProfileInfo from '@/components/profile/ProfileInfo';
+import { userApi } from '@/api/user-api';
+import ProfileInfo from '@/components/profile/profile-info';
 import { Card, CardContent } from '@/components/ui/card';
 
 export const Route = createFileRoute('/_needAuth/_mypage/mypage/profile')({

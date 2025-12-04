@@ -1,6 +1,6 @@
-import { getMyOrders } from '@/api/orderApi';
-import OrderList from '@/components/order/OrderList';
-import OrderPagination from '@/components/order/OrderPagination';
+import { getMyOrders } from '@/api/order-api';
+import OrderList from '@/components/order/order-list';
+import OrderPagination from '@/components/order/order-pagenation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createFileRoute } from '@tanstack/react-router';

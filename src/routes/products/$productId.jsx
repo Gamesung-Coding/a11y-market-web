@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@iconify/react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import SellerTrustInfo from '@/components/product/SellerTrustInfo';
+import SellerTrustInfo from '@/components/product/seller-trust-info';
 
 // 임시 상품 데이터 (백엔드 연동 전까지 UI 확인용)
 const mockProduct = {
