@@ -1,5 +1,5 @@
 // src/routes/cart.jsx
-import { getCartItems } from '@/api/cart-api';
+import { cartApi } from '@/api/cart-api';
 import { getCheckoutInfo } from '@/api/order-api';
 import { CartGroup } from '@/components/cart-group';
 import { Alert, AlertTitle } from '@/components/ui/alert';
@@ -78,7 +78,7 @@ function CartPage() {
 
   useEffect(() => {
     const fetchCartData = async () => {
-      const data = await getCartItems();
+      const data = await cartApi.getCartItems();
       // const data = {
       //   items: [],
       // };

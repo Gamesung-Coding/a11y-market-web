@@ -11,13 +11,13 @@ export function RealtimeRanking({ data }) {
   const navigate = useNavigate();
 
   const apiButtonStyles =
-    'absolute top-1/2 size-12 -translate-y-1/2 rounded-full bg-neutral-50 text-neutral-700 shadow-lg hover:bg-sky-100 hover:shadow-xl hover:shadow-sky-100';
+    'absolute top-1/2 size-12 -translate-y-1/2 rounded-full bg-neutral-50 text-neutral-700 shadow-lg';
   return (
     <>
       <h2 className='mb-4 flex h-16 w-full items-center bg-neutral-300 px-16 text-2xl font-bold dark:bg-neutral-500'>
         실시간 인기 상품
       </h2>
-      <div className='relative flex w-[80%] flex-col items-center justify-center px-8 pb-8'>
+      <div className='relative mx-auto flex w-[80%] flex-col items-center justify-center px-0 pb-8 md:px-8'>
         <Carousel
           opts={{
             align: 'center',
