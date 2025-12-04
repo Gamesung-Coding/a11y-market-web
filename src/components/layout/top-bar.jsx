@@ -2,7 +2,7 @@
 import { authApi } from '@/api/auth-api';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { logout } from '@/store/authSlice';
+import { logout } from '@/store/auth-slice';
 import { Icon } from '@iconify/react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useDispatch, useSelector } from 'react-redux';

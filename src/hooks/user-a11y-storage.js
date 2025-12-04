@@ -1,7 +1,5 @@
-// src/hooks/useA11yStorage.js
-
-import { loadA11y, saveA11y } from '@/lib/a11y/a11yStorage';
-import { setAllA11y } from '@/store/a11ySlice';
+import { loadA11y, saveA11y } from '@/lib/a11y/a11y-storage';
+import { setAllA11y } from '@/store/a11y-slice';
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 

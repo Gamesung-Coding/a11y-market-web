@@ -1,6 +1,6 @@
 import { authApi } from '@/api/auth-api';
 import { Spinner } from '@/components/ui/spinner';
-import { loginSuccess } from '@/store/authSlice';
+import { loginSuccess } from '@/store/auth-slice';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';

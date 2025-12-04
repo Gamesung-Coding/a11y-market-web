@@ -1,4 +1,3 @@
-// src/components/seller/claim-status-badge.jsx
 import { Badge } from '@/components/ui/badge';
 
 export function ClaimStatusBadge({ status }) {

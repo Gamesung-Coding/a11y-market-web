@@ -1,8 +1,8 @@
 // import { injectStore } from '@/api/axiosInstance';
+import a11yReducer from '@/store/a11y-slice';
+import authReducer from '@/store/auth-slice';
+import orderReducer from '@/store/order-slice';
 import { configureStore } from '@reduxjs/toolkit';
-import a11yReducer from './a11ySlice';
-import authReducer from './authSlice';
-import orderReducer from './orderSlice';
 
 export const store = configureStore({
   reducer: {

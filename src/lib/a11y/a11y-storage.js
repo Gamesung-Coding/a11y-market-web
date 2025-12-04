@@ -1,5 +1,3 @@
-// src/lib/a11yStorage.js
-
 const STORAGE_KEY = 'a11y-settings';
 
 // 접근성 설정 저장

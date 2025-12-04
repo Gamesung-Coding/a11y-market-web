@@ -1,6 +1,6 @@
 // components/order/OrderFilterBar.jsx
 
-import { Card, CardContent } from '../ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function OrderFilterBar({
   statusFilter,

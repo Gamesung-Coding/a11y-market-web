@@ -1,5 +1,3 @@
-// mypage/order/index.jsx
-
 import { getMyOrders } from '@/api/order-api';
 import OrderCard from '@/components/order/order-card';
 import OrderPagination from '@/components/order/order-pagenation';

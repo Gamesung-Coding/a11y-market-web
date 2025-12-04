@@ -1,3 +1,5 @@
+import { AddressModifier } from '@/components/address/address-modifier';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardAction,
@@ -6,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -20,7 +21,6 @@ import {
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@/components/ui/table';
 import { useState } from 'react';
-import { AddressModifier } from '@/components/address/address-modifier';
 
 export const AddressSelector = ({ addresses, defaultAddressId, onSelectAddress }) => {
   const [selectedAddressId, setSelectedAddressId] = useState(defaultAddressId);

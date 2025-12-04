@@ -1,5 +1,3 @@
-// src/components/A11y/A11yOverlay.jsx
-
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -21,7 +19,7 @@ import {
   toggleHighlightLinks,
   toggleScreenReader,
   toggleSmartContrast,
-} from '@/store/a11ySlice';
+} from '@/store/a11y-slice';
 import {
   AArrowUp,
   AlignCenter,

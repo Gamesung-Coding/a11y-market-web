@@ -1,4 +1,4 @@
-import axiosInstance from './axios-instance';
+import axiosInstance from '@/api/axios-instance';
 
 export const userApi = {
   getProfile: () => axiosInstance.get('/v1/users/me'),

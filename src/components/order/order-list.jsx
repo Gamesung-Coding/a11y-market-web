@@ -1,5 +1,3 @@
-// components/order/OrderList.jsx
-
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import OrderCard from './order-card';
 

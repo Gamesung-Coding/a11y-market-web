@@ -1,4 +1,4 @@
-import axiosInstance from './axios-instance';
+import axiosInstance from '@/api/axios-instance';
 
 export const getCartItems = async () => {
   const resp = await axiosInstance.get('/v1/cart/me');
