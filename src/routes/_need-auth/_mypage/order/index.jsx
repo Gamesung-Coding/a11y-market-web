@@ -1,4 +1,4 @@
-import { getMyOrders } from '@/api/order-api';
+import { orderApi } from '@/api/order-api';
 import OrderList from '@/components/order/order-list';
 import OrderPagination from '@/components/order/order-pagenation';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,7 +28,7 @@ export default function OrderHistoryPage() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const data = await getMyOrders();
+        const { data } = await orderApi.getMyOrders();
         setOrders(data);
       } catch (err) {
         setError('주문 목록을 불러오지 못했습니다.');

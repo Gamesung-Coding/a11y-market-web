@@ -1,5 +1,6 @@
 import { userApi } from '@/api/user-api';
 import { AccountInfo } from '@/components/mypage/AccounInfo';
+import { OrderHistory } from '@/components/mypage/OrderHistory';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,7 +33,7 @@ function RouteComponent() {
   // 마이페이지 메뉴 항목 정의
   const menuItems = [
     { label: '회원 정보', value: 'info', redirect: false },
-    { label: '내 프로필', value: 'profile', redirect: false },
+    // { label: '내 프로필', value: 'profile', redirect: false },
     { label: '주문 내역', value: 'order', redirect: false },
     { label: '접근성 프로필', value: 'a11y', redirect: false },
     { label: '배송지 관리', value: 'address', redirect: false },
@@ -98,7 +99,7 @@ function RouteComponent() {
 
   return (
     <main
-      className='flex-1 bg-neutral-50'
+      className='flex-1 bg-neutral-50 dark:bg-neutral-900'
       aria-label='마이페이지 내용 영역'
     >
       <div className='mx-auto mt-8 w-full max-w-6xl'>
@@ -135,17 +136,17 @@ function RouteComponent() {
         <Tabs
           defaultValue={activeTab}
           onValueChange={(value) => setActiveTab(value)}
-          className='w-full'
+          className='mb-8 w-full'
         >
           <div className='md:flex md:gap-6'>
             <div className='mb-6 w-full space-y-2 md:w-64'>
-              <TabsList className='w-full flex-wrap justify-start gap-2 bg-neutral-200 md:h-auto md:flex-col md:items-stretch md:gap-1 md:rounded-3xl'>
+              <TabsList className='w-full flex-wrap justify-start gap-2 bg-neutral-200 md:h-auto md:flex-col md:items-stretch md:gap-1 md:rounded-3xl dark:bg-neutral-800'>
                 {menuItems.map((item) => (
                   <TabsTrigger
                     value={item.value}
                     key={item.value}
                     className={cn(
-                      'relative z-10 transition-none data-[state=active]:bg-transparent data-[state=active]:shadow-none',
+                      'relative z-10 transition-none data-[state=active]:bg-transparent data-[state=active]:shadow-none dark:data-[state=active]:border-none dark:data-[state=active]:bg-transparent dark:data-[state=active]:shadow-none',
                       'hover:text-foreground/80 md:min-h-12',
                     )}
                   >
@@ -153,7 +154,7 @@ function RouteComponent() {
                     {activeTab === item.value && (
                       <motion.div
                         layoutId='active-tab-indicator'
-                        className='absolute inset-0 z-10 rounded-full bg-white shadow-md md:h-12 dark:bg-neutral-800'
+                        className='absolute inset-0 z-10 rounded-3xl bg-white shadow-md md:h-12 dark:bg-neutral-600'
                         initial={false}
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                       />
@@ -195,6 +196,10 @@ function RouteComponent() {
             <div className='flex-1'>
               <TabsContent value='info'>
                 <AccountInfo />
+              </TabsContent>
+
+              <TabsContent value='order'>
+                <OrderHistory />
               </TabsContent>
             </div>
           </div>

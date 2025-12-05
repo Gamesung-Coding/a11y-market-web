@@ -1,11 +1,11 @@
 import { userApi } from '@/api/user-api';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Spinner } from '../ui/spinner';
 
 export const AccountInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
