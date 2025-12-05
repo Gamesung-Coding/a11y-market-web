@@ -1,5 +1,5 @@
 import axiosInstance from '@/api/axios-instance';
-import { deleteCartItems } from '@/api/cart-api';
+import { cartApi } from '@/api/cart-api';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -54,11 +54,11 @@ export const CartGroup = ({ groupData, selectedItems, setSelectedItems }) => {
     });
   };
 
-  const handleDelete = (index) => {
+  const handleDelete = async (index) => {
     const newData = [...data];
     const removedItems = newData.splice(index, 1);
     setData(newData);
-    deleteCartItems(removedItems);
+    await cartApi.deleteCartItems(removedItems);
   };
 
   useEffect(() => {

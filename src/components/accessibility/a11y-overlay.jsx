@@ -38,7 +38,7 @@ import {
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import A11yOverlaySave from './a11y-overlay-save';
+import A11yOverlaySave from '@/components/accessibility/a11y-overlay-save.jsx';
 
 const languages = [
   { code: 'ko', label: '한국어' },
@@ -200,7 +200,7 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
                       setSelectedSubMode(modeId);
 
                       dispatch(resetAll());
-                      
+
                       const selectedMode = A11Y_PROFILES[selectedProfile].items.find(
                         (item) => item.id === modeId,
                       );

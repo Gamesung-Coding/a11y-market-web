@@ -55,7 +55,7 @@
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: oklch(0.9 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -89,7 +89,7 @@
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  --accent: oklch(0.369 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
@@ -176,4 +176,106 @@
 @theme font {
   --font-kakao-big: 'KakaoBig', sans-serif;
   --font-kakao-small: 'KakaoSmall', sans-serif;
+}
+
+/* 고대비 */
+html.a11y-contrast-high {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0 0 0);
+
+  /* primary를 시인성이 높은 진한 파란색을 사용 */
+  --primary: oklch(0.4 0.25 263.5);
+  --primary-foreground: oklch(1 0 0);
+
+  --muted: oklch(0.95 0 0);
+  --muted-foreground: oklch(0.2 0 0);
+
+  --border: oklch(0 0 0);
+  --input: oklch(0 0 0);
+  --ring: oklch(0 0 0);
+
+  * {
+    @apply border-black;
+  }
+}
+
+/* 저대비 - 눈이 편하게 회색조 사용 */
+html.a11y-contrast-low {
+  --background: oklch(0.96 0 0);
+  --foreground: oklch(0.45 0 0);
+  --card: oklch(0.96 0 0);
+  --card-foreground: oklch(0.45 0 0);
+  --popover: oklch(0.96 0 0);
+  --popover-foreground: oklch(0.45 0 0);
+
+  --primary: oklch(0.6 0 0);
+  --primary-foreground: oklch(0.96 0 0);
+
+  --muted: oklch(0.92 0 0);
+  --muted-foreground: oklch(0.6 0 0);
+
+  --border: oklch(0.85 0 0);
+  --input: oklch(0.85 0 0);
+}
+
+/* 색상 반전: CSS Filter 사용 */
+html.a11y-invert {
+  filter: invert(1) hue-rotate(180deg);
+  background-color: oklch(1 0 0);
+}
+
+/* 글자 크기 */
+html.a11y-text-size-1 {
+  font-size: 112.5%;
+}
+html.a11y-text-size-2 {
+  font-size: 125%;
+}
+
+/* 글자 간격 */
+html.a11y-spacing-1 * {
+  letter-spacing: 0.05em !important;
+}
+html.a11y-spacing-2 * {
+  letter-spacing: 0.1em !important;
+}
+
+/* 줄 간격 */
+html.a11y-leading-1 * {
+  line-height: 1.8 !important;
+}
+html.a11y-leading-2 * {
+  line-height: 2.2 !important;
+}
+
+/* 글자 정렬 */
+html.a11y-align-center * {
+  text-align: center !important;
+}
+html.a11y-align-right * {
+  text-align: right !important;
+}
+
+/* 링크 강조 */
+html.a11y-link-highlight a {
+  text-decoration: underline !important;
+  text-decoration-style: solid !important;
+  text-decoration-thickness: 2px !important;
+
+  /* 형광 노랑 배경에 검은 글씨 */
+  background-color: oklch(0.95 0.18 100) !important;
+  color: oklch(0 0 0) !important;
+  font-weight: bold !important;
+}
+
+/* 커서 강조 */
+html.a11y-cursor-highlight,
+html.a11y-cursor-highlight * {
+  cursor:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewport="0 0 48 48" style="fill:black;stroke:white;stroke-width:2px;"><circle cx="24" cy="24" r="10" opacity="0.7" fill="%23ffff00" /><path d="M10,10 L30,30 M30,10 L10,30" stroke="%23ff0000" stroke-width="3" /></svg>'),
+    auto !important;
 }
