@@ -78,13 +78,10 @@ function CartPage() {
 
   useEffect(() => {
     const fetchCartData = async () => {
-      const data = await cartApi.getCartItems();
-      // const data = {
-      //   items: [],
-      // };
+      const resp = await cartApi.getCartItems();
 
-      setCartGroups(data);
-      setTotalPrice(data.total || 0);
+      setCartGroups(resp.data);
+      setTotalPrice(resp.data?.total || 0);
     };
     fetchCartData();
   }, []);
