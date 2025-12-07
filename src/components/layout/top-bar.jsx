@@ -1,7 +1,6 @@
 // import { logout } from '@/store/slices/authSlice';
 import { authApi } from '@/api/auth-api';
 import { cartApi } from '@/api/cart-api';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Item, ItemContent } from '@/components/ui/item';
@@ -17,6 +16,7 @@ import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { LogIn, LogOut, Menu, Search, ShoppingCart, User, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { CartBadge } from '../cart/cart-badge';
 import { Separator } from '../ui/separator';
 
 export default function TopBar() {
@@ -123,7 +123,7 @@ export default function TopBar() {
   useEffect(() => {
     // 장바구니 아이템 수 가져오기
     const fetchCartItems = async () => {
-      const resp = await cartApi.getCartItemNumber();
+      const resp = await cartApi.getCartItemCount();
       setCartItemCount(resp.data?.count);
     };
 
@@ -268,11 +268,7 @@ export default function TopBar() {
                 className='relative'
               >
                 <ShoppingCart className='size-5' />
-                {cartItemCount > 0 && (
-                  <Badge className='absolute -top-1 -right-1 flex size-5 items-center justify-center p-0 text-xs'>
-                    {cartItemCount}
-                  </Badge>
-                )}
+                {isAuthenticated && <CartBadge />}
                 <span className='sr-only'>장바구니</span>
               </Button>
             </ItemContent>
