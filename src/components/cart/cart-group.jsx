@@ -1,5 +1,5 @@
-import axiosInstance from '@/api/axios-instance';
 import { cartApi } from '@/api/cart-api';
+import { ImageWithFallback } from '@/components/image-with-fallback';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -12,13 +12,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { fetchCartCount } from '@/store/cart-slice';
 import { MinusIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { toast } from 'sonner';
-import { ImageWithFallback } from './image-with-fallback';
 
-export const CartGroup = ({ groupData, selectedItems, setSelectedItems }) => {
+export const CartGroup = ({ groupData, onGroupDelete, selectedItems, setSelectedItems }) => {
   const [data, setData] = useState(groupData.items);
+
+  const dispatch = useDispatch();
 
   const handleSelectItem = (item, isSelected) => {
     setSelectedItems((prevSelectedItems) => {
@@ -47,21 +50,42 @@ export const CartGroup = ({ groupData, selectedItems, setSelectedItems }) => {
   };
 
   const handleChangeQuantity = async (index, cartItemId, amount) => {
+    const oldData = data[index];
     const newData = [...data];
     newData[index].quantity += amount;
     setData(newData);
 
-    axiosInstance.patch(`/v1/cart/items/${cartItemId}`, {
-      quantity: newData[index].quantity,
-    });
+    try {
+      const resp = await cartApi.updateCartItemQuantity(cartItemId, newData[index].quantity);
+
+      if (resp.status !== 200) {
+        throw new Error('Failed to update cart item quantity');
+      }
+    } catch (err) {
+      console.error('Failed to update cart item quantity:', err);
+      toast.error('장바구니 아이템 수량 업데이트에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      const revertedData = [...data];
+      revertedData[index].quantity = oldData.quantity;
+      setData(revertedData);
+    }
   };
 
   const handleDelete = async (index) => {
     const newData = [...data];
     const removedItems = newData.splice(index, 1);
-    setData(newData);
     try {
-      await cartApi.deleteCartItems(removedItems.map((item) => item.cartItemId));
+      const resp = await cartApi.deleteCartItems(removedItems.map((item) => item.cartItemId));
+
+      if (resp.status !== 204) {
+        throw new Error('Failed to delete cart items');
+      }
+      setData(newData);
+      dispatch(fetchCartCount());
+
+      if (newData.length === 0) {
+        // 현재 컴포넌트를 렌더링하는 상위 컴포넌트에서 이 그룹을 제거하도록 알림
+        onGroupDelete(groupData.sellerId);
+      }
     } catch (error) {
       console.error('Failed to delete cart items:', error);
       toast.error('장바구니 아이템 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');

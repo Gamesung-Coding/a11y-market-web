@@ -1,12 +1,10 @@
 import { cartApi } from '@/api/cart-api';
 import { ImageWithFallback } from '@/components/image-with-fallback';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import { Link } from '@tanstack/react-router';
-import { ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { AddCartButton } from '../cart/add-cart-button';
 
 export const ProductCard = ({ product }) => {
   const [loading, setLoading] = useState(false);
@@ -63,17 +61,7 @@ export const ProductCard = ({ product }) => {
             </span>
           </div>
 
-          <Button
-            className='w-full gap-2'
-            aria-label={`${product.productName} 장바구니에 담기`}
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart
-              className='size-4'
-              aria-hidden='true'
-            />
-            {loading ? <Spinner /> : '장바구니'}
-          </Button>
+          <AddCartButton product={product} />
         </div>
       </Link>
     </article>

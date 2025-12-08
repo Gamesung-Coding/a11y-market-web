@@ -1,6 +1,6 @@
 // src/routes/cart.jsx
 import { cartApi } from '@/api/cart-api';
-import { CartGroup } from '@/components/cart-group';
+import { CartGroup } from '@/components/cart/cart-group';
 import { LoadingEmpty } from '@/components/main/loading-empty';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import {
@@ -44,41 +44,6 @@ function CartPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // --- 체크박스 & 수량 변경 로직 ---
-  const handleOrder = async (type) => {
-    setSubmitType(type);
-
-    const options = {
-      selectedItems: Array.from(selectedItems).map((item) => item.cartItemId),
-      orderAllItems: type === 'all',
-    };
-
-    // 주문이 가능한지 확인
-    try {
-      const resp = await orderApi.getCheckoutInfo(options.selectedItems, options.orderAllItems);
-      const checkData = resp.data;
-
-      if (checkData.status === 'OUT_OF_STOCK') {
-        setErr('재고가 부족한 상품이 있습니다.');
-        setSubmitType('none');
-        return;
-      } else if (checkData.totalAmount !== totalPrice) {
-        setErr('선택된 상품의 가격이 일치하지 않습니다. 새로고침 후 다시 시도해주세요.');
-        setSubmitType('none');
-        return;
-      }
-
-      dispatch(setOrderItems(Array.from(selectedItems)));
-      navigate({
-        to: '/order/checkout',
-      });
-    } catch (e) {
-      setErr(e.message);
-      setSubmitType('none');
-      return;
-    }
-  };
-
   useEffect(() => {
     const fetchCartData = async () => {
       setFetching(true);
@@ -118,6 +83,45 @@ function CartPage() {
     };
     calculateTotalPrice();
   }, [cartGroups, selectedItems]);
+
+  const handleOrder = async (type) => {
+    setSubmitType(type);
+
+    const options = {
+      selectedItems: Array.from(selectedItems).map((item) => item.cartItemId),
+      orderAllItems: type === 'all',
+    };
+
+    // 주문이 가능한지 확인
+    try {
+      const resp = await orderApi.getCheckoutInfo(options.selectedItems, options.orderAllItems);
+      const checkData = resp.data;
+
+      if (checkData.status === 'OUT_OF_STOCK') {
+        setErr('재고가 부족한 상품이 있습니다.');
+        setSubmitType('none');
+        return;
+      } else if (checkData.totalAmount !== totalPrice) {
+        setErr('선택된 상품의 가격이 일치하지 않습니다. 새로고침 후 다시 시도해주세요.');
+        setSubmitType('none');
+        return;
+      }
+
+      dispatch(setOrderItems(Array.from(selectedItems)));
+      navigate({
+        to: '/order/checkout',
+      });
+    } catch (e) {
+      setErr(e.message);
+      setSubmitType('none');
+      return;
+    }
+  };
+
+  const handleOnDeleteGroup = (sellerId) => {
+    const updatedGroups = cartGroups.items.filter((group) => group.sellerId !== sellerId);
+    setCartGroups((prev) => ({ ...prev, items: updatedGroups }));
+  };
 
   if (fetching) {
     return (
@@ -180,6 +184,7 @@ function CartPage() {
               <CartGroup
                 key={groupData.sellerId}
                 groupData={groupData}
+                onGroupDelete={handleOnDeleteGroup}
                 selectedItems={selectedItems}
                 setSelectedItems={setSelectedItems}
               />
