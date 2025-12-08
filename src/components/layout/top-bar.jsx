@@ -1,7 +1,5 @@
 // import { logout } from '@/store/slices/authSlice';
 import { authApi } from '@/api/auth-api';
-import { cartApi } from '@/api/cart-api';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Item, ItemContent } from '@/components/ui/item';
@@ -13,18 +11,26 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { logout } from '@/store/auth-slice';
+import { fetchCartCount } from '@/store/cart-slice';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { LogIn, LogOut, Menu, Search, ShoppingCart, User, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { CartBadge } from '../cart/cart-badge';
 import { Separator } from '../ui/separator';
 
 export default function TopBar() {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { categories } = useSelector((state) => state.category);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const router = useRouterState();
+
+  useEffect(() => {
+    // pathname이 변경될 때마다 실행
+    setIsMobileMenuOpen(false);
+  }, [router.location.pathname]);
 
   const handleLogout = async () => {
     try {
@@ -37,100 +43,48 @@ export default function TopBar() {
     }
   };
 
-  useEffect(() => {
-    // pathname이 변경될 때마다 실행
-    setIsMobileMenuOpen(false);
-  }, [router.location.pathname]);
+  const isAdminPage = router.location.pathname.startsWith('/admin');
 
-  const menuItems = () => (
-    <>
-      <NavigationMenuItem>
-        <NavigationMenuLink asChild>
-          <Link
-            to='/products'
-            className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
-          >
-            전체 카테고리
-          </Link>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <NavigationMenuLink asChild>
-          <Link
-            to='/'
-            className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
-          >
-            {'디지털/가전'}
-          </Link>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <NavigationMenuLink asChild>
-          <Link
-            to='/'
-            className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
-          >
-            {'패션/의류'}
-          </Link>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <NavigationMenuLink asChild>
-          <Link
-            to='/'
-            className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
-          >
-            건강
-          </Link>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <NavigationMenuLink asChild>
-          <Link
-            to='/'
-            className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
-          >
-            스포츠
-          </Link>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <NavigationMenuLink asChild>
-          <Link
-            to='/'
-            className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
-          >
-            식품
-          </Link>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <NavigationMenuLink asChild>
-          <Link
-            to='/'
-            className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
-          >
-            도서
-          </Link>
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-    </>
-  );
+  const navItemStyle =
+    'px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 focus:bg-transparent focus:underline dark:hover:bg-neutral-800';
+
+  const menuItems = () => {
+    return (
+      <>
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <Link
+              to='/products'
+              className={navItemStyle}
+            >
+              전체 카테고리
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        {categories.map((category) => (
+          <NavigationMenuItem key={category.categoryId}>
+            <NavigationMenuLink asChild>
+              <Link
+                to='/products'
+                search={{ categoryId: category.categoryId }}
+                className={navItemStyle}
+              >
+                {category.categoryName}
+              </Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+        ))}
+      </>
+    );
+  };
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [cartItemCount, setCartItemCount] = useState(0);
 
   useEffect(() => {
     // 장바구니 아이템 수 가져오기
-    const fetchCartItems = async () => {
-      const resp = await cartApi.getCartItemNumber();
-      setCartItemCount(resp.data?.count);
-    };
 
     if (isAuthenticated) {
-      fetchCartItems();
-    } else {
-      setCartItemCount(0);
+      dispatch(fetchCartCount());
     }
   }, [isAuthenticated]);
 
@@ -139,69 +93,71 @@ export default function TopBar() {
       <Item className='container mx-auto px-4 py-0'>
         <ItemContent className='h-16 flex-row items-center justify-between'>
           <div className='flex items-center gap-4'>
-            <Sheet
-              open={isMobileMenuOpen}
-              onOpenChange={setIsMobileMenuOpen}
-              className='lg:hidden'
-            >
-              <SheetTrigger asChild>
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  className='lg:hidden'
-                  aria-label='메뉴 열기'
-                  aria-expanded={isMobileMenuOpen ? 'true' : 'false'}
-                >
-                  <Menu className='size-6' />
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side='left'
-                className='w-64'
+            {!isAdminPage && (
+              <Sheet
+                open={isMobileMenuOpen}
+                onOpenChange={setIsMobileMenuOpen}
+                className='lg:hidden'
               >
-                <SheetHeader>
-                  <SheetTitle>메뉴</SheetTitle>
-                </SheetHeader>
-                <div className='mt-4 w-full'>
-                  <NavigationMenu className='w-full max-w-full p-0'>
-                    <NavigationMenuList className='flex h-full flex-col space-y-2'>
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to={isAuthenticated ? '/logout' : '/login'}
-                            className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
-                          >
-                            {isAuthenticated ? '로그아웃' : '로그인'}
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to={isAuthenticated ? '/mypage' : '/join'}
-                            className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
-                          >
-                            {isAuthenticated ? '마이페이지' : '회원가입'}
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to='/cart'
-                            className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
-                          >
-                            장바구니
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                      <Separator className='my-2 bg-neutral-400' />
-                      {menuItems()}
-                    </NavigationMenuList>
-                  </NavigationMenu>
-                </div>
-              </SheetContent>
-            </Sheet>
+                <SheetTrigger asChild>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='lg:hidden'
+                    aria-label='메뉴 열기'
+                    aria-expanded={isMobileMenuOpen ? 'true' : 'false'}
+                  >
+                    <Menu className='size-6' />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  side='left'
+                  className='w-64'
+                >
+                  <SheetHeader>
+                    <SheetTitle>메뉴</SheetTitle>
+                  </SheetHeader>
+                  <div className='mt-4 w-full'>
+                    <NavigationMenu className='w-full max-w-full p-0'>
+                      <NavigationMenuList className='flex h-full flex-col space-y-2'>
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to={isAuthenticated ? '/logout' : '/login'}
+                              className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
+                            >
+                              {isAuthenticated ? '로그아웃' : '로그인'}
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to={isAuthenticated ? '/mypage' : '/join'}
+                              className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
+                            >
+                              {isAuthenticated ? '마이페이지' : '회원가입'}
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to='/cart'
+                              className='px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 dark:hover:bg-neutral-800'
+                            >
+                              장바구니
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
+                        <Separator className='my-2 bg-neutral-400' />
+                        {menuItems()}
+                      </NavigationMenuList>
+                    </NavigationMenu>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
             <Link
               to='/'
               className='flex items-center gap-2'
@@ -268,22 +224,20 @@ export default function TopBar() {
                 className='relative'
               >
                 <ShoppingCart className='size-5' />
-                {cartItemCount > 0 && (
-                  <Badge className='absolute -top-1 -right-1 flex size-5 items-center justify-center p-0 text-xs'>
-                    {cartItemCount}
-                  </Badge>
-                )}
+                {isAuthenticated && <CartBadge />}
                 <span className='sr-only'>장바구니</span>
               </Button>
             </ItemContent>
           </Item>
         </ItemContent>
       </Item>
-      <NavigationMenu className='hidden max-w-full border-t bg-neutral-50 lg:block dark:bg-neutral-800'>
-        <NavigationMenuList className='container mx-auto justify-start px-4 py-2'>
-          {menuItems()}
-        </NavigationMenuList>
-      </NavigationMenu>
+      {!isAdminPage && (
+        <NavigationMenu className='hidden max-w-full border-t bg-neutral-50 lg:block dark:bg-neutral-800'>
+          <NavigationMenuList className='container mx-auto justify-start px-4 py-2'>
+            {menuItems()}
+          </NavigationMenuList>
+        </NavigationMenu>
+      )}
     </header>
   );
 }

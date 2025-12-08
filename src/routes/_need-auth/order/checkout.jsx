@@ -44,11 +44,11 @@ function orderCheckoutPage() {
     const fetchCheckout = async () => {
       try {
         setLoading(true);
-        const data = await orderApi.getCheckoutInfo(orderItems.map((item) => item.cartItemId));
-        setCheckout(data);
+        const resp = await orderApi.getCheckoutInfo(orderItems.map((item) => item.cartItemId));
+        setCheckout(resp.data);
 
-        const defaultAddress = data.addresses.find(
-          (addr) => addr.addressId === data.defaultAddressId,
+        const defaultAddress = resp.data.addresses.find(
+          (addr) => addr.addressId === resp.data.defaultAddressId,
         );
 
         setSelectedAddress(defaultAddress);
@@ -168,7 +168,7 @@ function orderCheckoutPage() {
                   {orderItems.map((item) => (
                     <TableRow key={item.productId}>
                       <TableCell className='max-w-40 truncate px-8'>
-                        {'${item.productName}'}
+                        {`${item.productName}`}
                       </TableCell>
                       <TableCell className='text-center'>{item.quantity}</TableCell>
                       <TableCell className='text-center'>{`${item.productPrice?.toLocaleString('ko-KR')}원`}</TableCell>
@@ -226,7 +226,7 @@ function orderCheckoutPage() {
                 <span>{`총 상품 금액: ${checkout?.totalAmount}원`}</span>
                 <span>{`배송비: ${checkout?.shippingFee}원`}</span>
                 <span className='text-lg font-bold'>
-                  {'총 결제 금액: ${checkout?.finalAmount}원'}
+                  {`총 결제 금액: ${checkout?.finalAmount}원`}
                 </span>
               </CardContent>
             </Card>
