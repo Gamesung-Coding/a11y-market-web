@@ -115,4 +115,19 @@ export const sellerApi = {
       return Promise.reject(err);
     }
   },
+
+  deleteMyProduct: async (productId) => {
+    try {
+      const resp = await axiosInstance.delete(`v1/seller/products/${productId}`);
+
+      if (resp.status !== 204) {
+        throw new Error('Failed to delete product');
+      }
+
+      return resp;
+    } catch (err) {
+      console.error('Error deleting product:', err);
+      return Promise.reject(err);
+    }
+  },
 };
