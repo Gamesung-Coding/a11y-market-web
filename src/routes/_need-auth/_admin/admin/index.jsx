@@ -1,6 +1,9 @@
+import { adminApi } from '@/api/admin-api';
+import { LoadingEmpty } from '@/components/main/loading-empty';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
 
 export const Route = createFileRoute('/_need-auth/_admin/admin/')({
   component: RouteComponent,
@@ -9,24 +12,30 @@ export const Route = createFileRoute('/_need-auth/_admin/admin/')({
 function RouteComponent() {
   const navigate = useNavigate();
 
-  // 임시 더미 데이터
-  const pendingSellers = [
-    { id: 1, name: '판매자 A' },
-    { id: 2, name: '판매자 B' },
-    { id: 3, name: '판매자 C' },
-  ];
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState({
+    pendingSellersCount: 0,
+    pendingProductsCount: 0,
+  });
 
-  const pendingProducts = [
-    { id: 1, name: '상품 A', seller: '판매자 A' },
-    { id: 2, name: '상품 B', seller: '판매자 B' },
-    { id: 3, name: '상품 C', seller: '판매자 C' },
-    { id: 4, name: '상품 D', seller: '판매자 A' },
-  ];
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      const data = await adminApi.getDashboardStats();
 
-  const pendingAccessibility = [
-    { id: 1, seller: '판매자 B' },
-    { id: 2, seller: '판매자 C' },
-  ];
+      setDashboardData((prev) => ({
+        ...prev,
+        pendingSellersCount: data.pendingSellerCount || 0,
+        pendingProductsCount: data.pendingProductCount || 0,
+      }));
+
+      setIsLoading(false);
+    })();
+  }, []);
+
+  if (isLoading) {
+    return <LoadingEmpty />;
+  }
 
   return (
     <>
@@ -37,7 +46,7 @@ function RouteComponent() {
           <CardContent>
             <div className='font-kakao-big mb-2 text-lg font-medium'>승인 대기 판매자</div>
             <div className='font-kakao-big text-gray-600'>
-              {`현재 미승인 상품 수는 ${pendingProducts.length}개 입니다.`}
+              {`현재 미승인 판매자 수는 ${dashboardData.pendingSellersCount}명 입니다.`}
             </div>
           </CardContent>
           <CardFooter>
@@ -55,7 +64,7 @@ function RouteComponent() {
           <CardContent>
             <div className='font-kakao-big mb-2 text-lg font-medium'>미승인 상품</div>
             <div className='font-kakao-big text-gray-600'>
-              {`현재 미승인 상품 수는 ${pendingProducts.length}개 입니다.`}
+              {`현재 미승인 상품 수는 ${dashboardData.pendingProductsCount}개 입니다.`}
             </div>
           </CardContent>
           <CardFooter>
@@ -65,24 +74,6 @@ function RouteComponent() {
               onClick={() => navigate({ to: '/admin/products' })}
             >
               상품 승인 관리
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card className='bg-white shadow-md'>
-          <CardContent>
-            <div className='font-kakao-big mb-2 text-lg font-medium'>접근성 인증 대기 판매자</div>
-            <div className='font-kakao-big text-gray-600'>
-              {`현재 접근성 인증 대기 판매자는 ${pendingAccessibility.length}명 입니다.`}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button
-              variant='default'
-              className='w-full'
-              onClick={() => navigate({ to: '/admin/accessibility' })}
-            >
-              접근성 인증 관리
             </Button>
           </CardFooter>
         </Card>

@@ -1,4 +1,5 @@
 import axiosInstance from '@/api/axios-instance';
+import { toast } from 'sonner';
 
 export const adminApi = {
   getUsers: async () => {
@@ -47,6 +48,23 @@ export const adminApi = {
     } catch (err) {
       console.error('Error updating product status:', err);
       return Promise.reject(err);
+    }
+  },
+  getUsers: async () => await axiosInstance.get('/v1/admin/users'),
+
+  getDashboardStats: async () => {
+    try {
+      const resp = await axiosInstance.get('/v1/admin/dashboard/stats');
+
+      if (resp.status !== 200) {
+        throw new Error('Failed to fetch dashboard stats');
+      }
+
+      return resp.data;
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      toast.error('대시보드 통계 정보를 불러오는 데 실패했습니다.');
+      return {};
     }
   },
 };

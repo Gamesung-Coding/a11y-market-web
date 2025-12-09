@@ -61,6 +61,10 @@ function SellerProductListPage() {
   const handleProductDelete = async (productId) => {
     try {
       await sellerApi.deleteMyProduct(productId);
+      setProducts((prevProducts) =>
+        prevProducts.filter((product) => product.productId !== productId),
+      );
+      toast.success('상품이 성공적으로 삭제되었습니다.');
     } catch (err) {
       toast.error('상품 삭제 중에 오류가 발생했습니다.');
     }

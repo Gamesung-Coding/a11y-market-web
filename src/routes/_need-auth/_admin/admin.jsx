@@ -1,10 +1,6 @@
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuList,
-} from '@/components/ui/navigation-menu';
 import { ROLES } from '@/constants/roles';
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
+import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 
 export const Route = createFileRoute('/_need-auth/_admin/admin')({
@@ -13,14 +9,14 @@ export const Route = createFileRoute('/_need-auth/_admin/admin')({
 });
 
 function RouteComponent() {
+  // hooks
   const router = useRouterState();
   const navigate = useNavigate();
 
   const { user } = useSelector((state) => state.auth);
 
+  // variables and constants
   const currentPath = router.location.pathname;
-
-  // 내비게이션 메뉴
   const menuItems = [
     { label: '대시보드', path: '/admin' },
     { label: '회원 관리', path: '/admin/users' },
@@ -30,6 +26,7 @@ function RouteComponent() {
     { label: '접근성 인증 관리', path: '/admin/accessibility' },
   ];
 
+  // functions
   // 내비게이션 경로 표시 상단바
   const navPathLabel = () => {
     const item = menuItems.find((m) => m.path === currentPath);
@@ -38,6 +35,7 @@ function RouteComponent() {
     return `${base} > ${item.label}`;
   };
 
+  // render
   if (user?.userRole !== ROLES.ADMIN) {
     navigate({
       to: '/unauthorized',
@@ -45,44 +43,52 @@ function RouteComponent() {
   }
 
   return (
-    <div className='flex min-h-screen w-full bg-gray-50'>
+    <div className='flex min-h-screen w-full flex-col md:flex-row'>
       <aside
-        className='flex w-48 flex-col border-r bg-white'
+        className='flex w-full flex-col border-r md:w-48'
         aria-label='관리자 메뉴 보조 영역'
       >
         <h2 className='border-b p-6 text-lg font-bold'>관리자 메뉴</h2>
 
         {/* Navigation Buttons */}
-        <div className='mt-4 flex flex-col items-center'>
-          <NavigationMenu
+        <div className='flex items-center'>
+          <nav
             orientation='vertical'
             className='w-full'
             aria-label='관리자 페이지 내비게이션'
           >
-            <NavigationMenuList
-              className='flex w-full flex-col space-y-2 px-0'
+            <ul
+              className='flex w-full flex-row flex-wrap space-y-2 px-0 md:flex-col'
               aria-label='관리자 페이지 메뉴 목록'
             >
               {menuItems.map((item) => {
                 const active = currentPath === item.path;
                 return (
-                  <NavigationMenuItem
+                  <li
                     key={item.path}
-                    className='w-full'
+                    className='w-fit flex-1 text-center whitespace-nowrap md:w-full'
                     aria-label={`${item.label} 페이지로 이동`}
                   >
                     <Link
                       to={item.path}
                       aria-label={`${item.label} 페이지로 이동`}
-                      className={`block w-full rounded py-4 text-center text-base font-medium transition ${active ? `bg-gray-300 font-semibold` : `hover:bg-gray-200`}`}
+                      className='relative z-10 block w-full rounded py-4 text-center text-base font-medium'
                     >
-                      {item.label}
+                      <span className='relative z-20 px-4'>{item.label}</span>
+                      {active && (
+                        <motion.div
+                          layoutId='active-menu-indicator'
+                          className='absolute inset-0 z-10 rounded bg-gray-200 shadow-md'
+                          initial={false}
+                          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        />
+                      )}
                     </Link>
-                  </NavigationMenuItem>
+                  </li>
                 );
               })}
-            </NavigationMenuList>
-          </NavigationMenu>
+            </ul>
+          </nav>
         </div>
       </aside>
 
