@@ -50,7 +50,7 @@ export const adminApi = {
       return Promise.reject(err);
     }
   },
-  getUsers: async () => await axiosInstance.get('/v1/admin/users'),
+  
 
   getDashboardStats: async () => {
     try {
@@ -67,4 +67,10 @@ export const adminApi = {
       return {};
     }
   },
+
+  // 회원 권한 변경
+  updateUserRole: ({ userId, role }) =>
+    axiosInstance.patch(`/v1/admin/users/${userId}/permission`, null, {
+      params: { role },
+    }),
 };
