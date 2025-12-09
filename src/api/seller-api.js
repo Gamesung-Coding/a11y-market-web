@@ -1,22 +1,71 @@
 import axiosInstance from './axios-instance';
 
 export const sellerApi = {
-  getDashboardStats: async () => await axiosInstance.get('/v1/seller/dashboard/stats'),
+  getDashboardStats: async () => {
+    try {
+      const resp = await axiosInstance.get('/v1/seller/dashboard/stats');
 
-  getDailyRevenue: async (year, month) =>
-    await axiosInstance.get('/v1/seller/dashboard/daily-revenue', {
-      params: { year, month },
-    }),
+      if (resp.status !== 200) {
+        throw new Error('Failed to fetch dashboard stats');
+      }
 
-  getTopProducts: async (topN) =>
-    await axiosInstance.get('/v1/seller/dashboard/top-products', {
-      params: { topN: topN || 5 },
-    }),
+      return resp;
+    } catch (err) {
+      console.error('Error fetching dashboard stats:', err);
+      return Promise.reject(err);
+    }
+  },
 
-  getRecentOrders: async (page, size) =>
-    await axiosInstance.get('/v1/seller/dashboard/recent-orders', {
-      params: { page: page || 0, size: size || 5 },
-    }),
+  getDailyRevenue: async (year, month) => {
+    try {
+      const resp = await axiosInstance.get('/v1/seller/dashboard/daily-revenue', {
+        params: { year, month },
+      });
+
+      if (resp.status !== 200) {
+        throw new Error('Failed to fetch daily revenue');
+      }
+
+      return resp;
+    } catch (err) {
+      console.error('Error fetching daily revenue:', err);
+      return Promise.reject(err);
+    }
+  },
+
+  getTopProducts: async (topN) => {
+    try {
+      const resp = await axiosInstance.get('/v1/seller/dashboard/top-products', {
+        params: { topN: topN || 5 },
+      });
+
+      if (resp.status !== 200) {
+        throw new Error('Failed to fetch top products');
+      }
+
+      return resp;
+    } catch (err) {
+      console.error('Error fetching top products:', err);
+      return Promise.reject(err);
+    }
+  },
+
+  getRecentOrders: async (page, size) => {
+    try {
+      const resp = await axiosInstance.get('/v1/seller/dashboard/recent-orders', {
+        params: { page: page || 0, size: size || 5 },
+      });
+
+      if (resp.status !== 200) {
+        throw new Error('Failed to fetch recent orders');
+      }
+
+      return resp;
+    } catch (err) {
+      console.error('Error fetching recent orders:', err);
+      return Promise.reject(err);
+    }
+  },
 
   registerProduct: async (data, images) => {
     const formData = new FormData();
@@ -32,10 +81,38 @@ export const sellerApi = {
       });
     }
 
-    return await axiosInstance.post('/v1/seller/products', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    try {
+      const resp = await axiosInstance.post('/v1/seller/products', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (resp.status !== 201) {
+        throw new Error('Failed to register product');
+      }
+
+      return resp;
+    } catch (err) {
+      console.error('Error registering product:', err);
+      return Promise.reject(err);
+    }
+  },
+
+  getMyProducts: async (page, size) => {
+    try {
+      const resp = await axiosInstance.get('/v1/seller/products', {
+        params: { page: page || 0, size: size || 10 },
+      });
+
+      if (resp.status !== 200) {
+        throw new Error('Failed to fetch my products');
+      }
+
+      return resp;
+    } catch (err) {
+      console.error('Error fetching my products:', err);
+      return Promise.reject(err);
+    }
   },
 };
