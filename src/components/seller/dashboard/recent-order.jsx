@@ -25,10 +25,10 @@ export const DashboardRecentOrder = () => {
     (async () => {
       try {
         const resp = await sellerApi.getRecentOrders(0, 3);
-        console.log('Recent Orders Response:', resp.data);
 
         const formattedData = resp.data.map((item) => ({
           id: item.orderId,
+          itemId: item.orderItemId,
           product: item.productName,
           price: item.productPrice * item.productQuantity,
           status: item.orderStatus,
@@ -51,7 +51,7 @@ export const DashboardRecentOrder = () => {
       <CardContent>
         {data.map((order) => (
           <div
-            key={order.id}
+            key={order.itemId}
             className='flex items-center justify-between border-b py-3 last:border-none'
           >
             <div>

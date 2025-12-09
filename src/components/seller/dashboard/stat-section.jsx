@@ -46,10 +46,7 @@ export const DashboardStatSection = () => {
           <ItemDescription className='text-gray-600'>{user?.userEmail}</ItemDescription>
         </ItemContent>
         <ItemActions>
-          <Link
-            asChild
-            to='/seller/products'
-          >
+          <Link to='/seller/products'>
             <Button
               variant='outline'
               size='lg'
