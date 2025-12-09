@@ -48,10 +48,12 @@ function SellerProductListPage() {
   const activeCount = products.filter((product) => product.productStatus === 'APPROVED').length;
   const pendingCount = products.filter((product) => product.productStatus === 'PENDING').length;
   const deletedCount = products.filter((product) => product.productStatus === 'DELETED').length;
+  const pausedCount = products.filter((product) => product.productStatus === 'PAUSED').length;
   const soldOutCount = products.filter((product) => product.productStock === 0).length;
   const badgeColorMap = {
     APPROVED: 'bg-blue-500',
     PENDING: 'bg-orange-500',
+    PAUSED: 'bg-violet-500',
     DELETED: 'bg-red-500',
   };
 
@@ -72,6 +74,7 @@ function SellerProductListPage() {
     const statusLabelMap = {
       APPROVED: '판매 중',
       PENDING: '승인 대기',
+      PAUSED: '판매 중지',
       DELETED: '삭제됨',
     };
 
@@ -125,7 +128,7 @@ function SellerProductListPage() {
         >
           <Badge
             variant='secondary'
-            className={`${isSoldOut ? 'bg-yellow-500' : badgeColorMap[status]} px-2 py-1 text-xs text-white`}
+            className={`${isSoldOut ? 'bg-neutral-500' : badgeColorMap[status]} px-2 py-1 text-xs text-white`}
           >
             {statusLabel}
           </Badge>
@@ -220,7 +223,7 @@ function SellerProductListPage() {
         </Button>
       </section>
 
-      <section className='mb-6 grid gap-4 sm:grid-cols-5'>
+      <section className='mb-6 grid gap-4 sm:grid-cols-3'>
         <Card
           tabIndex={0}
           aria-label={`등록된 상품 수: ${totalCount}개`}
@@ -236,7 +239,7 @@ function SellerProductListPage() {
         </Card>
 
         <Card
-          className='bg-blue-100'
+          className='bg-blue-100 dark:bg-blue-900'
           tabIndex={0}
           aria-label={`판매 중인 상품 수: ${activeCount}개`}
         >
@@ -249,7 +252,7 @@ function SellerProductListPage() {
         </Card>
 
         <Card
-          className='bg-yellow-100'
+          className='bg-neutral-200 dark:bg-neutral-700'
           tabIndex={0}
           aria-label={`품절된 상품 수: ${soldOutCount}개`}
         >
@@ -262,7 +265,20 @@ function SellerProductListPage() {
         </Card>
 
         <Card
-          className='bg-orange-100'
+          className='bg-violet-100 dark:bg-violet-900'
+          tabIndex={0}
+          aria-label={`판매 중단된 상품 수: ${pausedCount}개`}
+        >
+          <CardHeader className='pb-2'>
+            <CardTitle className='text-muted-foreground text-xs font-medium'>판매 중단</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold'>{pausedCount}개</div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className='bg-orange-100 dark:bg-orange-900'
           tabIndex={0}
           aria-label={`승인 대기 중인 상품 수: ${pendingCount}개`}
         >
@@ -275,7 +291,7 @@ function SellerProductListPage() {
         </Card>
 
         <Card
-          className='bg-red-100'
+          className='bg-red-100 dark:bg-red-900'
           tabIndex={0}
           aria-label={`삭제된 상품 수: ${deletedCount}개`}
         >
