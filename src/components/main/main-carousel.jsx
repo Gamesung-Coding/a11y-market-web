@@ -8,8 +8,9 @@ import { ChevronLeftIcon, ChevronRightIcon, Pause, Play } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { ImageWithFallback } from '../image-with-fallback';
 import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel';
+import { LoadingEmpty } from './loading-empty';
 
-export const MainCarousel = ({ data }) => {
+export const MainCarousel = () => {
   const autoPlay = useRef(Autoplay({ delay: 4000, stopOnInteraction: true }));
   const fade = useRef(Fade());
 
@@ -62,8 +63,8 @@ export const MainCarousel = ({ data }) => {
     api?.scrollTo(index);
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  if (isLoading || !bannerData || bannerData.length === 0) {
+    return <LoadingEmpty />;
   }
 
   return (

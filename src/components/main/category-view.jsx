@@ -31,6 +31,10 @@ export function CategoryView({ products }) {
     setProductList(filteredProducts);
   };
 
+  if (!itemList || itemList.length === 0) {
+    return null;
+  }
+
   return (
     <section
       className='flex h-fit w-full flex-col items-center justify-center'

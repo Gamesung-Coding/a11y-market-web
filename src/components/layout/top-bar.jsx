@@ -21,16 +21,26 @@ import { Separator } from '../ui/separator';
 
 export default function TopBar() {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
-  const { categories } = useSelector((state) => state.category);
+  const { categories, isLoading } = useSelector((state) => state.category);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const router = useRouterState();
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   useEffect(() => {
     // pathname이 변경될 때마다 실행
     setIsMobileMenuOpen(false);
   }, [router.location.pathname]);
+
+  useEffect(() => {
+    // 장바구니 아이템 수 가져오기
+
+    if (isAuthenticated) {
+      dispatch(fetchCartCount());
+    }
+  }, [isAuthenticated]);
 
   const handleLogout = async () => {
     try {
@@ -47,6 +57,10 @@ export default function TopBar() {
 
   const navItemStyle =
     'px-4 py-2 text-base font-bold hover:bg-white hover:underline hover:underline-offset-4 focus:bg-transparent focus:underline dark:hover:bg-neutral-800';
+
+  if (isLoading || !categories) {
+    return null;
+  }
 
   const menuItems = () => {
     return (
@@ -77,16 +91,6 @@ export default function TopBar() {
       </>
     );
   };
-
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    // 장바구니 아이템 수 가져오기
-
-    if (isAuthenticated) {
-      dispatch(fetchCartCount());
-    }
-  }, [isAuthenticated]);
 
   return (
     <header className='font-kakao-big sticky top-0 z-50 border-b bg-white shadow-sm dark:bg-neutral-900'>
