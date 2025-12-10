@@ -36,7 +36,8 @@ function RouteComponent() {
   const menuItems = [
     { label: '대시보드', path: '/admin' },
     { label: '회원 관리', path: '/admin/users' },
-    { label: '판매자 승인 관리', path: '/admin/sellers' },
+    { label: '판매자 관리', path: '/admin/sellers' },
+    { label: '판매자 승인 관리', path: '/admin/sellers/approval' },
     { label: '상품 승인 관리', path: '/admin/products' },
     { label: '주문 관리', path: '/admin/orders' },
     { label: '접근성 인증 관리', path: '/admin/accessibility' },

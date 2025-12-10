@@ -73,17 +73,6 @@ export const adminApi = {
       params: { role },
     }),
 
-  // 회원 목록 조회
-  getUsers: async () => {
-    try {
-      const resp = await axiosInstance.get('/v1/admin/users');
-      return resp;
-    } catch (err) {
-      console.error('Failed to fetch users info:', err);
-      return Promise.reject(err);
-    }
-  },
-
   // 회원 권한 변경
   updateUserRole: async ({ userId, role }) => {
     try {
@@ -101,6 +90,13 @@ export const adminApi = {
       return Promise.reject(err);
     }
   },
+  getSellerList: async () => await axiosInstance.get('/v1/admin/sellers'),
+
+  getSellerDetail: async (sellerId) => await axiosInstance.get(`/v1/admin/sellers/${sellerId}`),
+
+  updateSellerInfo: async (sellerId, updateData) =>
+    await axiosInstance.patch(`/v1/admin/sellers/${sellerId}`, updateData),
+
   getPendingSellers: async () => await axiosInstance.get('/v1/admin/sellers/pending'),
 
   updateSellerStatus: async (sellerId, status) =>

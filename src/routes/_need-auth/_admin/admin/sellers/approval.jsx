@@ -26,12 +26,13 @@ import { CircleCheck, CircleX, Search, UserRoundSearch } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-export const Route = createFileRoute('/_need-auth/_admin/admin/sellers')({
+export const Route = createFileRoute('/_need-auth/_admin/admin/sellers/approval')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
   // 임시 더미 데이터
+  const [sellerData, setSellerData] = useState([]);
   const [sellers, setSellers] = useState([]);
   const [processedSellers, setProcessedSellers] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -46,6 +47,7 @@ function RouteComponent() {
           throw new Error('판매자 목록을 불러오지 못했습니다.');
         }
 
+        setSellerData(data);
         setSellers(data);
       } catch (err) {
         console.error('판매자 목록 조회 실패:', err);
@@ -113,6 +115,19 @@ function RouteComponent() {
             type='search'
             placeholder='판매자명, 이메일로 검색'
             className='pl-10'
+            onChange={(e) => {
+              const query = e.target.value.toLowerCase();
+
+              console.log('Search query:', query);
+
+              setSellers(
+                sellerData.filter(
+                  (seller) =>
+                    seller.sellerName.toLowerCase().includes(query) ||
+                    seller.businessNumber.toLowerCase().includes(query),
+                ),
+              );
+            }}
           />
         </div>
       </section>
