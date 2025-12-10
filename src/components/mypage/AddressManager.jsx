@@ -1,50 +1,78 @@
 import AddressList from '@/components/address/address-list';
 import DefaultAddress from '@/components/address/default-address';
 import NewAddressForm from '@/components/address/new-address-form';
-import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { addressApi } from '@/api/address-api';
 
 export const AddressManager = () => {
   const [activeTab, setActiveTab] = useState('default');
   const [editingAddress, setEditingAddress] = useState(null);
 
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      addressName: '우리집',
-      receiverName: '홍길동',
-      zipcord: '12345',
-      address1: '서울시 강남구 테헤란로 123',
-      address2: '101동 1001호',
-      phone: '010-1234-5678',
-      isDefault: true,
-    },
-    {
-      id: 2,
-      addressName: '회사',
-      receiverName: '홍길동',
-      zipcord: '67890',
-      address1: '서울시 서초구 서초대로 456',
-      address2: '5층',
-      phone: '010-9876-5432',
-      isDefault: false,
-    },
-  ]);
+  const [addresses, setAddresses] = useState([]);
 
   const handleEdit = (addr) => setEditingAddress(addr);
-  const handleDelete = (id) => setAddresses((prev) => prev.filter((a) => a.id !== id));
 
-  const handleSave = (form) => {
-    if (form.id) {
-      setAddresses((prev) => prev.map((a) => (a.id === form.id ? { ...a, ...form } : a)));
-    } else {
-      const nextId = Math.max(0, ...addresses.map((a) => a.id)) + 1;
-      setAddresses((prev) => [...prev, { ...form, id: nextId }]);
+  const handleDelete = async (addressId) => {
+    try {
+      await addressApi.deleteAddress(addressId);
+      setAddresses((prev) => prev.filter((a) => a.addressId !== addressId));
+      alert('배송지가 삭제되었습니다,');
+    } catch (err) {
+      alert('배송지 삭제를 실패했습니다.');
     }
-    setEditingAddress(null);
   };
+
+  const handleSave = async (form) => {
+    try {
+      let response;
+      if (form.addressId) {
+        response = await addressApi.updateAddress(form.addressId, form);
+      } else {
+        response = await addressApi.createAddress(form);
+      }
+      const updated = response.data;
+      setAddresses((prev) => {
+        const exists = prev.find((a) => a.addressId === updated.addressId);
+        if (exists) {
+          return prev.map((a) => (a.addressId === updated.addressId ? updated : a));
+        }
+        return [...prev, updated];
+      });
+      setEditingAddress(null);
+      alert('배송지를 저장했습니다.');
+    } catch (err) {
+      alert('배송지 저장을 실패했습니다.');
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const listResp = await addressApi.getAddressList();
+
+        let list = listResp.data.map((addr) => ({
+          ...addr,
+        }));
+        let defaultAddr = null;
+        try {
+          const defaultResp = await addressApi.getDefaultAddress();
+          defaultAddr = defaultResp.data;
+        } catch (err) {
+          defaultAddr = null;
+        }
+
+        if (defaultAddr && !list.find((a) => a.isDefault)) {
+          list.push(defaultAddr);
+        }
+        setAddresses(list);
+      } catch (err) {
+        console.error(err);
+        setAddresses([]);
+      }
+    })();
+  }, []);
 
   const defaultAddr = addresses.find((a) => a.isDefault) || null;
 
@@ -73,7 +101,7 @@ export const AddressManager = () => {
 
           {/* 기본배송지 */}
           <TabsContent value='default'>
-            {editingAddress?.id === defaultAddr?.id ? (
+            {editingAddress?.addressId === defaultAddr?.addressId ? (
               <NewAddressForm
                 initialForm={editingAddress}
                 onSave={handleSave}

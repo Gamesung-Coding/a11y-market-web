@@ -26,7 +26,7 @@ export default function AddressList({ addresses = [], onEdit, onDelete }) {
 
           <TableBody>
             {addresses.map((addr) => (
-              <TableRow key={addr.id}>
+              <TableRow key={addr.addressId}>
                 <TableCell className='px-4 py-4 text-center'>
                   <div className='flex flex-2 flex-col'>
                     {addr.isDefault && <span className='text-blue-500'>[기본배송지]</span>}
@@ -35,10 +35,10 @@ export default function AddressList({ addresses = [], onEdit, onDelete }) {
                 </TableCell>
                 <TableCell className='px-4 py-4 text-center'>{addr.receiverName}</TableCell>
                 <TableCell className='px-4 py-4 text-left'>
-                  [{addr.zipcord}]<br /> {addr.address1}
-                  <br /> ({addr.address2})
+                  [{addr.receiverZipcode}]<br /> {addr.receiverAddr1}
+                  <br /> ({addr.receiverAddr2})
                 </TableCell>
-                <TableCell className='px-4 py-4 text-center'>{addr.phone}</TableCell>
+                <TableCell className='px-4 py-4 text-center'>{addr.receiverPhone}</TableCell>
                 <TableCell className='px-4 py-4 text-center'>
                   <div className='flex gap-1'>
                     <Button
@@ -49,7 +49,7 @@ export default function AddressList({ addresses = [], onEdit, onDelete }) {
                       수정
                     </Button>
                     <Button
-                      onClick={() => onDelete && onDelete(addr.id)}
+                      onClick={() => onDelete && onDelete(addr.addressId)}
                       variant='outline'
                       className='font-bold'
                     >

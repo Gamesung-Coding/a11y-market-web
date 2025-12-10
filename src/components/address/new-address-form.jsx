@@ -7,13 +7,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
 const EMPTY_FORM = {
-  id: undefined,
+  addressId: undefined,
   addressName: '',
   receiverName: '',
-  zipcord: '',
-  address1: '',
-  address2: '',
-  phone: '',
+  receiverZipcode: '',
+  receiverAddr1: '',
+  receiverAddr2: '',
+  receiverPhone: '',
   isDefault: false,
 };
 
@@ -38,8 +38,8 @@ export default function NewAddressForm({ initialForm = null, onSave, onCancel })
 
   const handleSubmit = (e) => {
     e?.preventDefault?.();
-    if (!form.addressName || !form.receiverName || !form.zipcord || !form.address1) {
-      alert('배송지명, 수령인, 우편번호(또는 우편코드), 주소(주소1)는 필수입니다.');
+    if (!form.addressName || !form.receiverName || !form.receiverZipcode || !form.receiverAddr1) {
+      alert('입력하지 않은 항목이 있습니다.');
       return;
     }
     onSave && onSave(form);
@@ -62,7 +62,7 @@ export default function NewAddressForm({ initialForm = null, onSave, onCancel })
               <Field>
                 <div className='flex items-center gap-2'>
                   <FieldLabel
-                    htlmFor='addressName'
+                    htmlFor='addressName'
                     className='w-16'
                   >
                     배송지명
@@ -80,7 +80,7 @@ export default function NewAddressForm({ initialForm = null, onSave, onCancel })
                       name='isDefault'
                       checked={!!form.isDefault}
                       onCheckedChange={(checked) =>
-                        setForm((prev) => ({ ...prev, isDefault: checked }))
+                        setForm((prev) => ({ ...prev, isDefault: !!checked }))
                       }
                     />
                     기본배송지로 설정
@@ -110,15 +110,15 @@ export default function NewAddressForm({ initialForm = null, onSave, onCancel })
               <Field>
                 <div className='flex items-center gap-2'>
                   <FieldLabel
-                    htmlFor='phone'
+                    htmlFor='receiverPhone'
                     className='w-16'
                   >
                     연락처
                   </FieldLabel>
                   <Input
-                    id='phone'
-                    name='phone'
-                    value={form.phone}
+                    id='receiverPhone'
+                    name='receiverPhone'
+                    value={form.receiverPhone}
                     onChange={handleChange}
                     placeholder='01012345678'
                     className='w-64'
@@ -129,15 +129,15 @@ export default function NewAddressForm({ initialForm = null, onSave, onCancel })
               <Field>
                 <div className='flex items-center gap-2'>
                   <FieldLabel
-                    htmlFor='zipcord'
+                    htmlFor='receiverZipcode'
                     className='w-16'
                   >
                     우편번호
                   </FieldLabel>
                   <Input
-                    id='zipcord'
-                    name='zipcord'
-                    value={form.zipcord}
+                    id='receiverZipcode'
+                    name='receiverZipcode'
+                    value={form.receiverZipcode}
                     onChange={handleChange}
                     placeholder='예: 12345'
                     className='w-64'
@@ -148,15 +148,15 @@ export default function NewAddressForm({ initialForm = null, onSave, onCancel })
               <Field>
                 <div className='flex items-center gap-2'>
                   <FieldLabel
-                    htmlFor='address1'
+                    htmlFor='receiverAddr1'
                     className='w-16'
                   >
                     주소1
                   </FieldLabel>
                   <Input
-                    id='address1'
-                    name='address1'
-                    value={form.address1}
+                    id='receiverAddr1'
+                    name='receiverAddr1'
+                    value={form.receiverAddr1}
                     onChange={handleChange}
                     placeholder='도로명/지번'
                     className='w-100'
@@ -167,15 +167,15 @@ export default function NewAddressForm({ initialForm = null, onSave, onCancel })
               <Field>
                 <div className='flex items-center gap-2'>
                   <FieldLabel
-                    htmlFor='address2'
+                    htmlFor='receiverAddr2'
                     className='w-16'
                   >
                     주소2
                   </FieldLabel>
                   <Input
-                    id='address2'
-                    name='address2'
-                    value={form.address2}
+                    id='receiverAddr2'
+                    name='receiverAddr2'
+                    value={form.receiverAddr2}
                     onChange={handleChange}
                     placeholder='상세주소 예: 101동 1001호'
                     className='w-100'
@@ -192,14 +192,14 @@ export default function NewAddressForm({ initialForm = null, onSave, onCancel })
           onClick={handleSubmit}
           variant='default'
         >
-          {form.id ? '수정 저장' : '저장하기'}
+          {form.addressId ? '수정' : '저장'}
         </Button>
         <Button
           type='button'
           onClick={handleReset}
           variant='outline'
         >
-          초기화
+          취소
         </Button>
       </div>
     </>

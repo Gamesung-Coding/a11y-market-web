@@ -18,11 +18,11 @@ export default function DefaultAddress({ defaultAddress, onEdit }) {
               <strong>수령인:</strong> {defaultAddress.receiverName}
             </p>
             <p>
-              <strong>주소:</strong> [{defaultAddress.zipcord}] {defaultAddress.address1}{' '}
-              {defaultAddress.address2}
+              <strong>주소:</strong> [{defaultAddress.receiverZipcode}]{' '}
+              {defaultAddress.receiverAddr1} {defaultAddress.receiverAddr2}
             </p>
             <p>
-              <strong>연락처:</strong> {defaultAddress.phone}
+              <strong>연락처:</strong> {defaultAddress.receiverPhone}
             </p>
           </div>
 
