@@ -40,12 +40,18 @@ export default function OrderCard({ order }) {
                   src={item.productImageUrl}
                   alt={item.productName}
                   className='aspect-3/2 h-16 rounded-md object-cover'
+                  style={{ cursor: 'pointer' }}
+                  onClick={() =>
+                    navigate({
+                      to: `/products/${item.productId}`,
+                    })
+                  }
                 />
               </ItemMedia>
               <ItemContent>
                 <ItemTitle className='w-full justify-start gap-4 text-lg font-bold'>
                   <ClipboardList />
-                  {`ID: ${getLastOfUUID(item.orderItemId)}`}
+                   {item.productName}
                   <Badge className={badge.className}>{badge.label}</Badge>
                 </ItemTitle>
                 <ItemDescription>
