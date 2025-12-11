@@ -1,6 +1,7 @@
 // src/routes/products/$productId.jsx
 import { cartApi } from '@/api/cart-api';
 import { productApi } from '@/api/product-api';
+import { AddCartButton } from '@/components/cart/add-cart-button';
 import { ImageWithFallback } from '@/components/image-with-fallback';
 import { LoadingEmpty } from '@/components/main/loading-empty';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +12,7 @@ import { Item } from '@/components/ui/item';
 import { Spinner } from '@/components/ui/spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { MinusIcon, PlusIcon, RotateCcw, Shield, ShoppingCart, Store, Truck } from 'lucide-react';
+import { MinusIcon, PlusIcon, RotateCcw, Shield, Store, Truck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -171,20 +172,13 @@ function ProductDetailPage() {
 
               {/* 구매 버튼 */}
               <div className='flex gap-3'>
+                <AddCartButton
+                  product={productData}
+                  quantity={quantity}
+                  className='flex flex-1'
+                />
                 <Button
                   variant='outline'
-                  size='lg'
-                  onClick={handleAddToCart}
-                  className='flex-1 gap-2'
-                  aria-label='장바구니에 추가'
-                >
-                  <ShoppingCart
-                    className='size-5'
-                    aria-hidden='true'
-                  />
-                  장바구니
-                </Button>
-                <Button
                   size='lg'
                   onClick={handleBuyNow}
                   className='flex flex-1'
