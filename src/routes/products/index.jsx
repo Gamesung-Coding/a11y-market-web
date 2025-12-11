@@ -38,7 +38,7 @@ function RouteComponent() {
   const [products, setProducts] = useState([]);
   const [filters, setFilters] = useState({
     searchQuery: searchQuery,
-    categories: [...categoryId],
+    categories: [categoryId],
     isA11yGuaranteed: isA11yGuaranteed,
     sellerGrade: sellerGrade,
     priceRange: [0, 1000000],
@@ -47,6 +47,14 @@ function RouteComponent() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      searchQuery: searchQuery,
+      categories: categoryId ? [categoryId] : [],
+      isA11yGuaranteed: isA11yGuaranteed,
+      sellerGrade: sellerGrade,
+    }));
+
     (async () => {
       setIsLoading(true);
       try {
@@ -56,6 +64,7 @@ function RouteComponent() {
           certified: isA11yGuaranteed,
           grade: sellerGrade,
         });
+
         if (resp.status === 200) {
           setProducts(resp.data);
         }
@@ -69,7 +78,7 @@ function RouteComponent() {
   }, [searchQuery, categoryId, isA11yGuaranteed, sellerGrade]);
 
   const filteredProducts = products.filter((product) => {
-    if (filters.searchQuery) {
+    if (!!filters.searchQuery) {
       const query = filters.searchQuery.toLowerCase();
       if (
         !product.productName?.toLowerCase()?.includes(query) &&
@@ -78,7 +87,13 @@ function RouteComponent() {
         return false;
       }
     }
-    if (filters.categories.length > 0 && !filters.categories.includes(product.categoryId)) {
+    if (filters.categories.length == 0) {
+      return true;
+    }
+    if (
+      !filters.categories.includes(product.categoryId) &&
+      !filters.categories.includes(product.parentCategoryId)
+    ) {
       return false;
     }
     return true;
@@ -97,6 +112,10 @@ function RouteComponent() {
         return b.salesCount - a.salesCount;
     }
   });
+
+  if (isLoading) {
+    return <LoadingEmpty />;
+  }
 
   return (
     <main className='flex-1'>
@@ -139,13 +158,11 @@ function RouteComponent() {
             </div>
 
             {/* 상품 그리드 */}
-            {isLoading ? (
-              <LoadingEmpty />
-            ) : sortedProducts.length > 0 ? (
+            {sortedProducts.length > 0 ? (
               <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3'>
                 {sortedProducts.map((product) => (
                   <ProductCard
-                    key={product.id}
+                    key={product.productId}
                     product={product}
                   />
                 ))}
