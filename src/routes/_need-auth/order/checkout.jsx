@@ -29,13 +29,14 @@ export const Route = createFileRoute('/_need-auth/order/checkout')({
   component: orderCheckoutPage,
   validateSearch: (search) => ({
     type: search.type || 'CART',
+    cartItemIds: search.cartItemIds,
     productId: search.productId || null,
     quantity: search.quantity ? Number(search.quantity) : 1,
   }),
 });
 
 function orderCheckoutPage() {
-  const { type, productId, quantity } = Route.useSearch();
+  const { type, cartItemIds, productId, quantity } = Route.useSearch();
 
   const [checkout, setCheckout] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -51,7 +52,7 @@ function orderCheckoutPage() {
       try {
         setLoading(true);
         const resp = await orderApi.getCheckoutInfoV2(
-          type === 'CART' ? orderItems.map((item) => item.cartItemId) : null,
+          type === 'CART' ? (cartItemIds ? cartItemIds.split(',') : []) : null,
           type === 'DIRECT'
             ? {
                 productId: productId,
@@ -59,8 +60,6 @@ function orderCheckoutPage() {
               }
             : null,
         );
-
-        console.log('Checkout info:', resp.data);
 
         setCheckout(resp.data);
         setOrderItems(resp.data.items);
@@ -239,10 +238,10 @@ function orderCheckoutPage() {
                 <CardDescription>결제하실 금액을 확인해 주세요.</CardDescription>
               </CardHeader>
               <CardContent className='flex flex-col gap-2'>
-                <span>{`총 상품 금액: ${checkout?.totalAmount}원`}</span>
-                <span>{`배송비: ${checkout?.shippingFee}원`}</span>
+                <span>{`총 상품 금액: ${checkout?.totalAmount.toLocaleString('ko-KR')}원`}</span>
+                <span>{`배송비: ${checkout?.shippingFee.toLocaleString('ko-KR')}원`}</span>
                 <span className='text-lg font-bold'>
-                  {`총 결제 금액: ${checkout?.finalAmount}원`}
+                  {`총 결제 금액: ${checkout?.finalAmount.toLocaleString('ko-KR')}원`}
                 </span>
               </CardContent>
             </Card>
