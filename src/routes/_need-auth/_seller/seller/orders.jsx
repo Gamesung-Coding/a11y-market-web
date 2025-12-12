@@ -44,7 +44,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getOrderItemStatusLabel, getOrderItemStatusStyle } from '@/lib/order-status-mapping';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { ClipboardClock } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -60,6 +60,8 @@ function SellerOrdersPage() {
   // const [keyword, setKeyword] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [page, setPage] = useState(1);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -113,11 +115,32 @@ function SellerOrdersPage() {
   return (
     <div className='mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6'>
       {/* 헤더 */}
-      <header className='space-y-1'>
-        <h1 className='font-kakao-big text-2xl text-slate-900'>주문 접수 / 배송 처리</h1>
-        <p className='font-kakao-little text-sm text-slate-500'>
-          접수된 주문을 확인하고, 상품 준비 및 배송 정보를 관리할 수 있습니다.
-        </p>
+      <header className='flex flex-col justify-between gap-4 md:flex-row md:items-center'>
+        <div className='space-y-1'>
+          <h1 className='font-kakao-big text-2xl'>주문 접수 / 배송 처리</h1>
+          <p className='font-kakao-little text-sm'>
+            접수된 주문을 확인하고, 상품 준비 및 배송 정보를 관리할 수 있습니다.
+          </p>
+        </div>
+        <div className='flex w-48 flex-col items-center gap-2'>
+          {/* 이전으로 */}
+          <Button
+            variant='default'
+            className='font-kakao-little h-9 w-full px-4 text-base'
+            type='button'
+            onClick={() => navigate({ to: '/seller/dashboard' })}
+          >
+            대시보드로 돌아가기
+          </Button>
+          {/* 관리 방법 보기 */}
+          {/* <Button
+            variant='outline'
+            className='font-kakao-little h-9 w-full px-4 text-base'
+            type='button'
+          >
+            관리 방법 보기
+          </Button> */}
+        </div>
       </header>
 
       {/* 상단 요약 카드 */}
@@ -145,16 +168,16 @@ function SellerOrdersPage() {
       </section>
 
       {/* 주문 목록 + 검색 */}
-      <Card className='border-slate-200 bg-white shadow-sm'>
+      <Card className='shadow-sm'>
         {/* 검색 영역 */}
-        <CardHeader className='border-b border-slate-100 bg-slate-50 py-3'>
+        <CardHeader className='border-b py-3'>
           <div className='space-y-3'>
             <FieldGroup className='grid items-end gap-3 md:grid-cols-4'>
               {/* 주문 상태 필터 */}
               <Field>
                 <FieldLabel
                   htmlFor='filter-status'
-                  className='font-kakao-little text-xs font-medium text-slate-600'
+                  className='font-kakao-little text-xs font-medium'
                 >
                   주문 상태
                 </FieldLabel>
@@ -164,7 +187,7 @@ function SellerOrdersPage() {
                 >
                   <SelectTrigger
                     id='filter-status'
-                    className='mt-1 h-9 border-slate-200 bg-white text-sm text-slate-800 focus-visible:border-slate-400 focus-visible:ring-slate-400'
+                    className='focus-visible: mt-1 h-9 text-sm focus-visible:ring-slate-400'
                   >
                     <SelectValue placeholder='전체' />
                   </SelectTrigger>
@@ -178,7 +201,20 @@ function SellerOrdersPage() {
                     <SelectItem value='CONFIRMED'>
                       {getOrderItemStatusLabel('CONFIRMED')}
                     </SelectItem>
+                    <SelectItem value='CANCEL_PENDING'>
+                      {getOrderItemStatusLabel('CANCEL_PENDING')}
+                    </SelectItem>
                     <SelectItem value='CANCELED'>{getOrderItemStatusLabel('CANCELED')}</SelectItem>
+                    <SelectItem value='CANCEL_REJECTED'>
+                      {getOrderItemStatusLabel('CANCEL_REJECTED')}
+                    </SelectItem>
+                    <SelectItem value='RETURN_PENDING'>
+                      {getOrderItemStatusLabel('RETURN_PENDING')}
+                    </SelectItem>
+                    <SelectItem value='RETURNED'>{getOrderItemStatusLabel('RETURNED')}</SelectItem>
+                    <SelectItem value='RETURN_REJECTED'>
+                      {getOrderItemStatusLabel('RETURN_REJECTED')}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
@@ -269,7 +305,7 @@ function SellerOrdersPage() {
               {/* <Field>
                 <Label
                   htmlFor='order-keyword'
-                  className='font-kakao-little text-xs font-medium text-slate-600'
+                  className='font-kakao-little text-xs font-medium'
                 >
                   주문 검색
                 </Label>
@@ -279,11 +315,11 @@ function SellerOrdersPage() {
                     placeholder='주문번호 / 주문자명 / 상품명'
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
-                    className='h-9 flex-1 bg-white text-sm text-slate-800'
+                    className='h-9 flex-1 text-sm'
                   />
                   <Button
                     type='button'
-                    className='font-kakao-little h-9 bg-slate-900 px-4 text-xs text-slate-50 hover:bg-slate-800'
+                    className='font-kakao-little h-9 px-4 text-xs text-slate-50 '
                   >
                     검색
                   </Button>
@@ -301,7 +337,7 @@ function SellerOrdersPage() {
                 <EmptyHeader>
                   <EmptyMedia
                     variant='icon'
-                    className='mb-0 flex size-24 rounded-full bg-neutral-200 dark:bg-neutral-800'
+                    className='mb-0 flex size-24 rounded-full'
                   >
                     <ClipboardClock className='size-12' />
                   </EmptyMedia>
@@ -314,8 +350,8 @@ function SellerOrdersPage() {
             ) : (
               <>
                 <Table className='text-xs md:text-sm'>
-                  <TableHeader className='border-b border-slate-100 bg-white'>
-                    <TableRow className='font-kakao-little text-[11px] font-medium text-slate-500 md:text-xs'>
+                  <TableHeader className='border-b-4'>
+                    <TableRow className='font-kakao-little font-medium md:text-xs'>
                       <TableHead className='px-4 py-2'>주문ID</TableHead>
                       <TableHead className='px-4 py-2 text-center'>주문일</TableHead>
                       <TableHead className='px-4 py-2 text-center'>주문자</TableHead>
@@ -330,17 +366,19 @@ function SellerOrdersPage() {
                     {orderData.map((o) => (
                       <TableRow
                         key={o.orderItemId}
-                        className={`border-t border-slate-100 text-slate-700 hover:bg-slate-50 ${
-                          o.orderId === selectedOrder?.orderId ? 'bg-slate-50' : ''
+                        className={`border-t ${
+                          o.orderItemId === selectedOrder?.orderItemId
+                            ? 'bg-amber-100 hover:bg-amber-200 dark:bg-amber-900 dark:hover:bg-amber-800'
+                            : ''
                         }`}
                       >
-                        <TableCell className='px-4 py-2 align-middle text-[11px] text-blue-600 md:text-xs'>
+                        <TableCell className='px-4 py-2 align-middle text-blue-600 md:text-xs dark:text-blue-300'>
                           {o.orderItemId}
                         </TableCell>
-                        <TableCell className='px-4 py-2 text-center align-middle text-[11px] md:text-xs'>
+                        <TableCell className='px-4 py-2 text-center align-middle md:text-xs'>
                           {new Date(o.orderedAt)?.toLocaleDateString('ko-KR')}
                         </TableCell>
-                        <TableCell className='px-4 py-2 text-center align-middle text-[11px] md:text-xs'>
+                        <TableCell className='px-4 py-2 text-center align-middle md:text-xs'>
                           {o.buyerName}
                         </TableCell>
                         <TableCell className='truncate px-4 py-2 align-middle md:max-w-[260px]'>
@@ -349,7 +387,7 @@ function SellerOrdersPage() {
                         <TableCell className='truncate px-4 py-2 text-center align-middle'>
                           {o.productQuantity}
                         </TableCell>
-                        <TableCell className='px-4 py-2 text-center align-middle text-[11px] md:text-xs'>
+                        <TableCell className='px-4 py-2 text-center align-middle md:text-xs'>
                           ₩{(o.productPrice * o.productQuantity)?.toLocaleString('ko-KR')}
                         </TableCell>
                         <TableCell className='px-4 py-2 text-center align-middle'>
@@ -361,7 +399,7 @@ function SellerOrdersPage() {
                           <Button
                             size='xs'
                             variant='outline'
-                            className='h-7 rounded-md border-slate-300 bg-slate-50 px-3 text-[11px] text-slate-700 hover:bg-slate-100'
+                            className='h-7 rounded-md px-3'
                             type='button'
                             onClick={() => setSelectedOrder(o)}
                           >
@@ -378,8 +416,8 @@ function SellerOrdersPage() {
         </CardContent>
 
         {/* 하단 Pagination – 아직 기능 없이 UI만 */}
-        <CardFooter className='border-t border-slate-100 px-4 py-3'>
-          <div className='flex w-full items-center justify-between text-base text-slate-500 md:text-xs'>
+        <CardFooter className='border-t px-4 py-3'>
+          <div className='flex w-full items-center justify-between text-base md:text-xs'>
             <span>{`총 ${totalOrderCount}건 중 ${(page - 1) * 20 + 1}-${Math.min(page * 20, totalOrderCount)}건 표시`}</span>
             <Pagination>
               <PaginationContent>
@@ -414,10 +452,8 @@ function SellerOrdersPage() {
         <section className='space-y-4'>
           {/* 섹션 헤더 */}
           <div className='flex flex-col gap-1 md:flex-row md:items-baseline md:justify-between'>
-            <h2 className='font-kakao-little text-sm font-semibold text-slate-900'>
-              주문 / 배송 처리 상세
-            </h2>
-            <p className='font-kakao-little text-xs text-slate-500'>
+            <h2 className='font-kakao-little text-sm font-semibold'>주문 / 배송 처리 상세</h2>
+            <p className='font-kakao-little text-xs'>
               선택한 주문의 기본 정보와 배송 상태, 송장 정보를 한 번에 관리합니다.
             </p>
           </div>
@@ -425,19 +461,17 @@ function SellerOrdersPage() {
           {/* 좌: 주문 정보 / 우: 배송 처리 */}
           <div className='grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]'>
             {/* 왼쪽: 주문 기본 정보 카드 */}
-            <Card className='border-slate-200 bg-white shadow-sm'>
+            <Card>
               <CardHeader className='pb-3'>
-                <CardTitle className='font-kakao-little text-sm text-slate-900'>
-                  주문 기본 정보
-                </CardTitle>
-                <CardDescription className='font-kakao-little text-xs text-slate-500'>
+                <CardTitle className='font-kakao-little text-sm'>주문 기본 정보</CardTitle>
+                <CardDescription className='font-kakao-little text-xs'>
                   결제 금액과 주문자, 주문 상품 정보를 확인할 수 있습니다.
                 </CardDescription>
               </CardHeader>
 
               <CardContent className='space-y-4'>
                 {/* 주문 정보 박스 */}
-                <div className='space-y-2 rounded-lg border border-slate-200 bg-slate-50/80 p-4'>
+                <div className='space-y-2 rounded-lg border p-4'>
                   <InfoRow
                     label='주문번호'
                     value={selectedOrder?.orderId || '-'}
@@ -469,12 +503,10 @@ function SellerOrdersPage() {
                 </div>
 
                 {/* 상태 요약 박스 */}
-                <div className='flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/60 px-4 py-3'>
+                <div className='/60 flex items-center justify-between rounded-lg border px-4 py-3'>
                   <div className='space-y-0.5'>
-                    <p className='font-kakao-little text-xs font-medium text-slate-700'>
-                      현재 주문 상태
-                    </p>
-                    <p className='font-kakao-little text-[11px] text-slate-500'>
+                    <p className='font-kakao-little text-xs font-medium'>현재 주문 상태</p>
+                    <p className='font-kakao-little'>
                       주문의 진행 상황을 확인하고 우측에서 배송 상태를 변경할 수 있습니다.
                     </p>
                   </div>
@@ -486,12 +518,10 @@ function SellerOrdersPage() {
             </Card>
 
             {/* 오른쪽: 배송 처리 카드 */}
-            <Card className='border-slate-200 bg-white shadow-sm'>
+            <Card className='shadow-sm'>
               <CardHeader className='pb-3'>
-                <CardTitle className='font-kakao-little text-sm text-slate-900'>
-                  배송 처리
-                </CardTitle>
-                <CardDescription className='font-kakao-little text-xs text-slate-500'>
+                <CardTitle className='font-kakao-little text-sm'>배송 처리</CardTitle>
+                <CardDescription className='font-kakao-little text-xs'>
                   배송 상태, 택배사, 송장번호를 입력하고 알림 발송 여부를 설정할 수 있습니다.
                 </CardDescription>
               </CardHeader>
@@ -506,7 +536,7 @@ function SellerOrdersPage() {
                     <Field>
                       <Label
                         htmlFor='shipping-status'
-                        className='font-kakao-little text-xs font-medium text-slate-600'
+                        className='font-kakao-little text-xs font-medium'
                       >
                         배송 상태
                       </Label>
@@ -522,7 +552,7 @@ function SellerOrdersPage() {
                       >
                         <SelectTrigger
                           id='shipping-status'
-                          className='mt-1 h-9 border-slate-200 bg-white text-sm text-slate-800 focus-visible:border-slate-400 focus-visible:ring-slate-400'
+                          className='focus-visible: mt-1 h-9 text-sm focus-visible:ring-slate-400'
                         >
                           <SelectValue placeholder='배송 상태 선택' />
                         </SelectTrigger>
@@ -534,23 +564,41 @@ function SellerOrdersPage() {
                             {getOrderItemStatusLabel('ORDERED')}
                           </SelectItem>
                           <SelectItem value='PAID'>{getOrderItemStatusLabel('PAID')}</SelectItem>
-                          <SelectItem value='ACCEPTED'>
-                            {getOrderItemStatusLabel('ACCEPTED')}
-                          </SelectItem>
                           <SelectItem value='REJECTED'>
                             {getOrderItemStatusLabel('REJECTED')}
                           </SelectItem>
+                          <SelectItem value='ACCEPTED'>
+                            {getOrderItemStatusLabel('ACCEPTED')}
+                          </SelectItem>
                           <SelectItem value='SHIPPED'>
                             {getOrderItemStatusLabel('SHIPPED')}
-                          </SelectItem>
-                          <SelectItem value='CANCELED'>
-                            {getOrderItemStatusLabel('CANCELED')}
                           </SelectItem>
                           <SelectItem
                             value='CONFIRMED'
                             disabled
                           >
-                            배송 완료
+                            {getOrderItemStatusLabel('CONFIRMED')}
+                          </SelectItem>
+                          <SelectItem
+                            value='CANCEL_PENDING'
+                            disabled
+                          >
+                            {getOrderItemStatusLabel('CANCEL_PENDING')}
+                          </SelectItem>
+                          <SelectItem value='CANCELED'>
+                            {getOrderItemStatusLabel('CANCELED')}
+                          </SelectItem>
+                          <SelectItem value='CANCEL_REJECTED'>
+                            {getOrderItemStatusLabel('CANCEL_REJECTED')}
+                          </SelectItem>
+                          <SelectItem value='RETURN_PENDING'>
+                            {getOrderItemStatusLabel('RETURN_PENDING')}
+                          </SelectItem>
+                          <SelectItem value='RETURNED'>
+                            {getOrderItemStatusLabel('RETURNED')}
+                          </SelectItem>
+                          <SelectItem value='RETURN_REJECTED'>
+                            {getOrderItemStatusLabel('RETURN_REJECTED')}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -561,14 +609,14 @@ function SellerOrdersPage() {
                   <div className='mt-3 flex flex-col gap-2'>
                     <Button
                       type='submit'
-                      className='font-kakao-little h-9 bg-slate-900 text-xs font-medium text-slate-50 hover:bg-slate-800'
+                      className='font-kakao-little h-9 text-xs font-medium'
                     >
                       배송 정보 저장
                     </Button>
                     <Button
                       type='button'
                       variant='outline'
-                      className='font-kakao-little mt-1 h-9 border-slate-300 bg-slate-50 text-xs text-slate-700 hover:bg-slate-100'
+                      className='font-kakao-little mt-1 h-9 text-xs'
                     >
                       취소
                     </Button>

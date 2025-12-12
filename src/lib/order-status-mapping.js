@@ -37,10 +37,14 @@ export const getOrderItemStatusLabel = (status) => {
       return '취소 요청됨';
     case 'CANCELED':
       return '취소됨';
+    case 'CANCEL_REJECTED':
+      return '취소 거절됨';
     case 'RETURN_PENDING':
       return '반품 요청됨';
     case 'RETURNED':
       return '반품됨';
+    case 'RETURN_REJECTED':
+      return '반품 거절됨';
     default:
       return '알 수 없음';
   }
@@ -75,6 +79,10 @@ export const getOrderItemStatusStyle = (status) => {
     case 'CANCELED':
     case 'RETURNED':
       style = 'bg-red-100 text-red-800';
+      break;
+    case 'CANCEL_REJECTED':
+    case 'RETURN_REJECTED':
+      style = 'bg-pink-100 text-pink-800';
       break;
     default:
       style = 'bg-gray-100 text-gray-800';
