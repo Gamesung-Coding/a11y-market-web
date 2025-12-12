@@ -16,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
@@ -29,8 +29,8 @@ export const Route = createFileRoute('/_need-auth/_seller/seller/products/')({
 function SellerProductListPage() {
   // hooks
   const { isLoading } = useSelector((state) => state.auth);
-
   const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -236,9 +236,22 @@ function SellerProductListPage() {
           </p>
         </div>
 
-        <Button asChild>
-          <Link to='/seller/products/new'>상품 등록하기</Link>
-        </Button>
+        <div className='flex flex-col gap-2'>
+          <Button
+            variant='outline'
+            className='hover:bg-blue-100 dark:hover:bg-blue-900'
+            onClick={() => navigate({ to: '/seller/dashboard' })}
+          >
+            대시보드로 이동
+          </Button>
+          <Button
+            variant='outline'
+            className='hover:bg-green-100 dark:hover:bg-green-900'
+            onClick={() => navigate({ to: '/seller/products/new' })}
+          >
+            상품 등록하기
+          </Button>
+        </div>
       </section>
 
       <section className='mb-6 grid gap-4 sm:grid-cols-3'>
