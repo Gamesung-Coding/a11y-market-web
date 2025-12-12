@@ -53,7 +53,7 @@ function RouteComponent() {
             <Button
               variant='default'
               className='w-full'
-              onClick={() => navigate({ to: '/admin/sellers' })}
+              onClick={() => navigate({ to: '/admin/sellers/approval' })}
             >
               판매자 관리
             </Button>
