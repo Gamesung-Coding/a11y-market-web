@@ -1,11 +1,4 @@
 export const getOrderStatusLabel = (status) => {
-  // PENDING,
-  // PAID,
-  // ACCEPTED,
-  // REJECTED,
-  // SHIPPED,
-  // DELIVERED,
-  // CANCELLED
   switch (status) {
     case 'PENDING':
       return '결제 대기';
@@ -27,15 +20,6 @@ export const getOrderStatusLabel = (status) => {
 };
 
 export const getOrderItemStatusLabel = (status) => {
-  // ORDERED,
-  // PAID,
-  // SHIPPED,
-  // CONFIRMED,
-  // CANCEL_PENDING,
-  // CANCELED,
-  // RETURN_PENDING,
-  // RETURNED
-
   switch (status) {
     case 'ORDERED':
       return '주문 완료';
@@ -56,4 +40,35 @@ export const getOrderItemStatusLabel = (status) => {
     default:
       return '알 수 없음';
   }
+};
+
+export const getOrderItemStatusStyle = (status) => {
+  let style = '';
+
+  switch (status) {
+    case 'ORDERED':
+      style = 'bg-purple-100 text-purple-800';
+      break;
+    case 'PAID':
+      style = 'bg-blue-100 text-blue-800';
+      break;
+    case 'SHIPPED':
+      style = 'bg-yellow-100 text-yellow-800';
+      break;
+    case 'CONFIRMED':
+      style = 'bg-green-100 text-green-800';
+      break;
+    case 'CANCEL_PENDING':
+    case 'RETURN_PENDING':
+      style = 'bg-orange-100 text-orange-800';
+      break;
+    case 'CANCELED':
+    case 'RETURNED':
+      style = 'bg-red-100 text-red-800';
+      break;
+    default:
+      style = 'bg-gray-100 text-gray-800';
+  }
+
+  return style;
 };

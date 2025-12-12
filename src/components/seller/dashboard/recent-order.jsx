@@ -2,21 +2,9 @@ import { sellerApi } from '@/api/seller-api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getOrderItemStatusLabel, getOrderItemStatusStyle } from '@/lib/order-status-mapping';
 import { Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-
-/** 요약 정보 목데이터 (나중에 API 연동) */
-const MOCK_DASHBOARD = {
-  totalSales: 3564000,
-  totalOrders: 142,
-  totalProductsSold: 512,
-  totalCancelled: 7,
-  recentOrders: [
-    { id: 'O-4532', product: '저염 갓김치 500g', price: 8900, status: '결제완료' },
-    { id: 'O-4533', product: '접이식 지팡이', price: 15900, status: '배송중' },
-    { id: 'O-4534', product: '무설탕 건강즙', price: 12900, status: '배송완료' },
-  ],
-};
 
 export const DashboardRecentOrder = () => {
   const [data, setData] = useState([]);
@@ -31,7 +19,7 @@ export const DashboardRecentOrder = () => {
           itemId: item.orderItemId,
           product: item.productName,
           price: item.productPrice * item.productQuantity,
-          status: item.orderStatus,
+          status: item.orderItemStatus,
         }));
 
         setData(formattedData);
@@ -62,10 +50,10 @@ export const DashboardRecentOrder = () => {
             <div className='text-right'>
               <p className='font-medium'>{format(order.price)}원</p>
               <Badge
-                variant='outline'
-                className='mt-1'
+                variant='secondary'
+                className={`mt-1 ${getOrderItemStatusStyle(order.status)}`}
               >
-                {order.status}
+                {getOrderItemStatusLabel(order.status)}
               </Badge>
             </div>
           </div>

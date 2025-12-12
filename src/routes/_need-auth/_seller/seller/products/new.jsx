@@ -37,15 +37,6 @@ export const Route = createFileRoute('/_need-auth/_seller/seller/products/new')(
   component: RouteComponent,
 });
 
-// const categories = [
-//   { id: 'fashion', name: '패션' },
-//   { id: 'electronics', name: '전자제품' },
-//   { id: 'home', name: '홈/리빙' },
-//   { id: 'beauty', name: '뷰티' },
-//   { id: 'food', name: '식품' },
-//   { id: 'books', name: '도서' },
-// ];
-
 function RouteComponent() {
   const [formData, setFormData] = useState({
     productName: '',
