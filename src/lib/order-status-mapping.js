@@ -22,9 +22,13 @@ export const getOrderStatusLabel = (status) => {
 export const getOrderItemStatusLabel = (status) => {
   switch (status) {
     case 'ORDERED':
-      return '주문 완료';
+      return '결제 대기';
     case 'PAID':
       return '결제 완료';
+    case 'ACCEPTED':
+      return '주문 접수됨';
+    case 'REJECTED':
+      return '주문 거절됨';
     case 'SHIPPED':
       return '배송 중';
     case 'CONFIRMED':
@@ -51,6 +55,12 @@ export const getOrderItemStatusStyle = (status) => {
       break;
     case 'PAID':
       style = 'bg-blue-100 text-blue-800';
+      break;
+    case 'ACCEPTED':
+      style = 'bg-teal-100 text-teal-800';
+      break;
+    case 'REJECTED':
+      style = 'bg-red-100 text-red-800';
       break;
     case 'SHIPPED':
       style = 'bg-yellow-100 text-yellow-800';

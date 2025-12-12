@@ -74,6 +74,14 @@ export const DashboardStatSection = () => {
               className='w-full justify-start'
               variant='outline'
             >
+              <Link to='/seller/orders'>주문 접수 관리</Link>
+            </Button>
+
+            <Button
+              asChild
+              className='w-full justify-start'
+              variant='outline'
+            >
               <Link to='/seller/claims'>취소/반품 관리</Link>
             </Button>
           </CardContent>
