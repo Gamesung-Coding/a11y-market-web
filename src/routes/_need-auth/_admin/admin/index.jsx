@@ -71,7 +71,7 @@ function RouteComponent() {
             <Button
               variant='default'
               className='w-full'
-              onClick={() => navigate({ to: '/admin/products' })}
+              onClick={() => navigate({ to: '/admin/products/approval' })}
             >
               상품 승인 관리
             </Button>
