@@ -176,4 +176,7 @@ export const sellerApi = {
     await axiosInstance.patch(`/v1/seller/orders/items/${orderItemId}/status`, {
       status,
     }),
+
+  updateProductStock: async (productId, newStock) =>
+    await axiosInstance.patch(`/v1/seller/products/${productId}/stock`, { productStock: newStock }),
 };

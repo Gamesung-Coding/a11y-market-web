@@ -1,5 +1,6 @@
 import { sellerApi } from '@/api/seller-api';
 import { LoadingEmpty } from '@/components/main/loading-empty';
+import { UpdateStock } from '@/components/seller/products/update-stock';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -92,7 +93,7 @@ function SellerProductListPage() {
         className='grid grid-cols-12 items-center px-4 py-3 text-sm'
       >
         <div
-          className='col-span-5 truncate'
+          className='col-span-4 truncate'
           tabIndex={0}
           aria-label={`상품명: ${product.productName}`}
         >
@@ -118,11 +119,24 @@ function SellerProductListPage() {
         </div>
 
         <div
-          className='col-span-1 text-center tabular-nums'
+          className='col-span-2 flex flex-col text-center tabular-nums'
           aria-label={`재고 수: ${product.productStock} 개`}
           tabIndex={0}
         >
           {`${product.productStock} 개`}
+          <UpdateStock
+            productId={product.productId}
+            currentStock={product.productStock}
+            variant='outline'
+            className='ml-2 px-2 py-1 text-xs'
+            onStockUpdate={(id, newStock) => {
+              setProducts((prevProducts) =>
+                prevProducts.map((p) =>
+                  p.productId === id ? { ...p, productStock: newStock } : p,
+                ),
+              );
+            }}
+          />
         </div>
 
         <div
@@ -310,9 +324,9 @@ function SellerProductListPage() {
 
       <section className='bg-card rounded-xl border'>
         <div className='text-muted-foreground grid grid-cols-12 border-b px-4 py-3 text-xs font-medium'>
-          <div className='col-span-5'>상품명</div>
+          <div className='col-span-4'>상품명</div>
           <div className='col-span-2 text-center'>판매가</div>
-          <div className='col-span-1 text-center'>재고</div>
+          <div className='col-span-2 text-center'>재고</div>
           <div className='col-span-2 text-center'>상태</div>
           <div className='col-span-2 text-center'>관리</div>
         </div>
