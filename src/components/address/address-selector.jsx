@@ -46,12 +46,15 @@ export const AddressSelector = ({ defaultAddressId, onSelectAddress }) => {
         const defaultAddr = data.find((addr) => addr.addressId === defaultAddressId) || data[0];
         setSelectedAddress(defaultAddr);
         onSelectAddress(defaultAddr);
+
+        if (!defaultAddr) {
+          setSelectDialogOpen(true);
+        }
       }
     } catch (err) {
       console.error('Failed to fetch addresses:', err);
     } finally {
       setIsLoading(false);
-      setSelectDialogOpen(true);
     }
   };
 
