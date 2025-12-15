@@ -42,16 +42,16 @@ export const AddressModifier = ({ mode, onChange, className = '', variant = 'out
     const input = value.replace(/[^0-9]/g, '');
     setFormData((prev) => ({ ...prev, receiverPhone: input }));
 
-    if (value.length > 3 && value.length <= 7) {
-      value = `${value.slice(0, 3)}-${value.slice(3)}`;
-    } else if (value.length === 10) {
-      value = `${value.slice(0, 3)}-${value.slice(3, 6)}-${value.slice(6)}`;
-    } else if (value.length > 7) {
-      value = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7)}`;
-    } else {
-      value = value;
+    let formattedValue = value;
+    if (input.length > 3 && input.length <= 7) {
+      formattedValue = `${input.slice(0, 3)}-${input.slice(3)}`;
+    } else if (input.length === 10) {
+      formattedValue = `${input.slice(0, 3)}-${input.slice(3, 6)}-${input.slice(6)}`;
+    } else if (input.length > 7) {
+      formattedValue = `${input.slice(0, 3)}-${input.slice(3, 7)}-${input.slice(7)}`;
     }
-    return value;
+
+    return formattedValue;
   };
 
   const handleOnComplete = (data) => {

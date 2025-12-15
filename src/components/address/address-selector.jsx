@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dialog';
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@/components/ui/table';
+import { formatPhoneNumber } from '@/lib/phone-number-formatter';
 import { useEffect, useState } from 'react';
 import { Spinner } from '../ui/spinner';
 
@@ -61,16 +62,6 @@ export const AddressSelector = ({ defaultAddressId, onSelectAddress }) => {
   const handleAddressSelect = (address) => {
     setSelectedAddress(address);
     onSelectAddress(address);
-  };
-
-  const formatPhoneNumber = (phoneNumber) => {
-    if (!phoneNumber) return '';
-    if (phoneNumber.length === 10) {
-      return phoneNumber.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-    } else if (phoneNumber.length === 11) {
-      return phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-    }
-    return phoneNumber;
   };
 
   if (isLoading) {
