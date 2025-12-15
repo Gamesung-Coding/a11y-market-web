@@ -16,12 +16,14 @@ env:
   # GitHub Container Registry
   IMAGE_NAME: ghcr.io/${{ secrets.GHCR_USER }}/${{ github.event.repository.name }}
   IMAGE_TAG: ghcr.io/${{ secrets.GHCR_USER }}/${{ github.event.repository.name }}:${{ github.ref_name }}
+  SERVICE_NAME: fe-production
+  DEPLOY_PATH: ${{ secrets.AWS_DOCKER_DIR }}/deployments/fe-production
 
 jobs:
   build-and-push:
     name: Build, Test and Push Image
     # Using self-hosted runner
-    runs-on: [self-hosted, fe, qa]
+    runs-on: [self-hosted, fe, prod]
 
     permissions:
       contents: read
@@ -73,7 +75,7 @@ jobs:
   deploy:
     name: Deploy to PR Server
     needs: build-and-push
-    runs-on: [self-hosted, fe, qa]
+    runs-on: [self-hosted, fe, prod]
 
     # Set output and secrets received through needs as global variables
     env:
@@ -81,8 +83,6 @@ jobs:
       TEAM_PASS: ${{ secrets.TEAM_PASS }}
       ENVIRONMENT_FILE: ${{ secrets.FE_ENV_PRODUCTION }}
       HOST_NAME: ${{ secrets.PRODUCTION_DOMAIN }}
-      SERVICE_NAME: fe-production
-      DEPLOY_PATH: ${{ secrets.AWS_DOCKER_DIR }}/deployments/fe-production
 
     steps:
       - name: Checkout code
@@ -105,8 +105,6 @@ jobs:
 
       - name: Deploy to server
         run: |
-          set -e
-
           mkdir -p ${{ secrets.AWS_DOCKER_DIR }}/deployments/fe-production
 
           # write compose file from runner
