@@ -2,6 +2,10 @@ name: FE | Staging - Cleanup
 on:
   workflow_dispatch:
 
+concurrency:
+  group: '${{ github.workflow }}-staging'
+  cancel-in-progress: true
+
 env:
   SERVICE_NAME: fe-staging
   DEPLOY_PATH: ${{ secrets.DOCKER_DIR }}/deployments/fe-staging
@@ -9,10 +13,10 @@ env:
 jobs:
   cleanup:
     name: Cleanup Staging Deployment
-    runs-on: self-hosted
+    runs-on: [self-hosted, fe, qa]
 
     steps:
-      - name: Cleanup server resources via SSH
+      - name: Cleanup server resources
         run: |
           export SERVICE_NAME=${{ env.SERVICE_NAME }}
           export DEPLOY_PATH=${{ env.DEPLOY_PATH }}

@@ -25,7 +25,7 @@ env:
 
 jobs:
   pre-comment:
-    runs-on: self-hosted
+    runs-on: [self-hosted, fe, qa]
 
     steps:
       - name: Add PR comment
@@ -44,7 +44,7 @@ jobs:
   build-and-push:
     name: Build, Test and Push Image
     # Using self-hosted runner
-    runs-on: self-hosted
+    runs-on: [self-hosted, fe, qa]
     needs: pre-comment
     outputs:
       # To use next job(deploy)
@@ -98,7 +98,7 @@ jobs:
   deploy:
     name: Deploy to PR Server
     needs: build-and-push
-    runs-on: self-hosted
+    runs-on: [self-hosted, fe, qa]
 
     # Set output and secrets received through needs as global variables
     env:
@@ -116,9 +116,9 @@ jobs:
           export SERVICE_NAME=fe-pr-${{ env.PR_NUMBER }}
 
           echo "IMAGE_TAG=${{ env.IMAGE_NAME }}:pr-${{ env.PR_NUMBER }}" >> $GITHUB_ENV
-          echo "SERVICE_NAME=fe-staging" >> $GITHUB_ENV
-          echo "HOST_NAME=fe-staging.${{ secrets.QA_DOMAIN }}" >> $GITHUB_ENV
-          echo "DEPLOY_PATH=${{ secrets.DOCKER_DIR }}/deployments/fe-staging" >> $GITHUB_ENV
+          echo "SERVICE_NAME=fe-pr-${{ env.PR_NUMBER }}" >> $GITHUB_ENV
+          echo "HOST_NAME=fe-pr-${{ env.PR_NUMBER }}.${{ secrets.QA_DOMAIN }}" >> $GITHUB_ENV
+          echo "DEPLOY_PATH=${{ secrets.DOCKER_DIR }}/deployments/fe-pr-${{ env.PR_NUMBER }}" >> $GITHUB_ENV
 
       - name: Create compose file from template
         run: |
@@ -134,6 +134,8 @@ jobs:
       - name: Deploy to server
         run: |
           set -e
+
+          mkdir -p ${{ env.DEPLOY_PATH }}
 
           # write compose file from runner
           echo "[LOG] build compose file ..."
@@ -168,7 +170,7 @@ jobs:
     needs:
       - build-and-push
       - deploy
-    runs-on: self-hosted
+    runs-on: [self-hosted, fe, qa]
     env:
       PR_NUMBER: ${{ needs.build-and-push.outputs.pr_number }}
       QA_DOMAIN: ${{ secrets.QA_DOMAIN }}

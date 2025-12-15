@@ -1,0 +1,163 @@
+name: FE | QA - Build and Deploy
+
+on:
+  push:
+    branches:
+      - 'release/**'
+
+concurrency:
+  group: '${{ github.workflow }}-qa'
+  cancel-in-progress: true
+
+env:
+  # GitHub Container Registry
+  IMAGE_NAME: ghcr.io/${{ secrets.GHCR_USER }}/${{ github.event.repository.name }}
+
+jobs:
+  build-and-push:
+    name: Build, Test and Push Image
+    # Using self-hosted runner
+    runs-on: [self-hosted, fe, qa]
+    outputs:
+      image_tag: ${{ steps.vars.outputs.image_tag }}
+      service_name: ${{ steps.vars.outputs.service_name }}
+      clean_version: ${{ steps.vars.outputs.clean_version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Create .env file
+        run: echo "${{ secrets.FE_ENV_QA }}" > .env
+
+      - name: Set dynamic variables
+        id: vars
+        run: |
+          # Get version from branch name (e.g., release/v1.0.0)
+          VERSION=$(echo "${{ github.ref_name }}" | sed 's/release\///g')
+
+          # Replace dot to tech (result e.g., v1-0-0)
+          export CLEAN_VERSION=$(echo "$VERSION" | tr '.' '-')
+
+          # Variables
+          export IMAGE_TAG="${{ env.IMAGE_NAME }}:qa-$CLEAN_VERSION"
+          export SERVICE_NAME="fe-qa-$CLEAN_VERSION"
+
+          # Set values using by output
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "service_name=$SERVICE_NAME" >> $GITHUB_OUTPUT
+          echo "clean_version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Vitest
+        run: npm run test
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: .docker/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:fe-qa-${{ steps.vars.outputs.clean_version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to QA Server
+    needs: build-and-push
+    runs-on: [self-hosted, fe, qa]
+
+    # Set output and secrets received through needs as global variables
+    env:
+      CLEAN_VERSION: ${{ needs.build-and-push.outputs.clean_version }}
+      TEAM_USER: ${{ secrets.TEAM_USER }}
+      TEAM_PASS: ${{ secrets.TEAM_PASS }}
+      ENVIRONMENT_FILE: ${{ secrets.FE_ENV_QA }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set variables
+        run: |
+          export SERVICE_NAME=fe-qa-${{ env.CLEAN_VERSION }}
+
+          echo "IMAGE_TAG=${{ env.IMAGE_NAME }}:fe-qa-${{ env.CLEAN_VERSION }}" >> $GITHUB_ENV
+          echo "SERVICE_NAME=fe-qa-${{ env.CLEAN_VERSION }}" >> $GITHUB_ENV
+          echo "HOST_NAME=fe-qa-${{ env.CLEAN_VERSION }}.${{ secrets.QA_DOMAIN }}" >> $GITHUB_ENV
+          echo "DEPLOY_PATH=${{ secrets.DOCKER_DIR }}/deployments/fe-qa-${{ env.CLEAN_VERSION }}" >> $GITHUB_ENV
+
+      - name: Create compose file from template
+        run: |
+          # Use envsubst to replace template variables with real values
+          # Store result into COMPOSE_CONTENT
+          export COMPOSE_CONTENT=$(envsubst < .docker/docker-compose.template.yaml)
+
+          # Securely forward multi-linear variables to SSH with GitHub Actions masking capabilities
+          echo "COMPOSE_CONTENT<<EOF" >> $GITHUB_ENV
+          echo "$COMPOSE_CONTENT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Deploy to server
+        run: |
+          set -e
+
+          mkdir -p ${{ env.DEPLOY_PATH }}
+
+          # write compose file from runner
+          echo "[LOG] build compose file ..."
+          cat <<'EOF' > ${{ env.DEPLOY_PATH }}/docker-compose.yaml
+          ${{ env.COMPOSE_CONTENT }}
+          EOF
+
+          # Write .env
+          echo "[LOG] build .env ..."
+          cat <<'EOF' > ${{ env.DEPLOY_PATH }}/.env
+          ${{ env.ENVIRONMENT_FILE }}
+          EOF
+
+          # change dir into deploy path
+          cd ${{ env.DEPLOY_PATH }}
+
+          # login ghcr
+          echo "[LOG] log-in Github container registry"
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USER }}" --password-stdin
+
+          # pull docker image
+          echo "[LOG] pull docker image"
+          docker pull ${{ env.IMAGE_TAG }}
+
+          # up docker compose
+          echo "[LOG] docker container up"
+          docker compose -f docker-compose.yaml -p ${{ env.SERVICE_NAME }} up -d --remove-orphans
+
+          # prune unnecessary image
+          docker image prune -f
+
+      - name: Notify Deployment Success
+        if: success() # When previous step finished completely
+        run: |
+          echo "### ✅ QA 서버 배포 성공" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 QA 서버가 성공적으로 배포되었습니다." >> $GITHUB_STEP_SUMMARY
+          echo "image tag: $IMAGE_TAG" >> $GITHUB_STEP_SUMMARY
+          echo "sub-domain: `qa-${{ needs.build-and-push.outputs.clean_version }}`" >> $GITHUB_STEP_SUMMARY
+        shell: bash

@@ -18,7 +18,7 @@ jobs:
   build-and-push:
     name: Build, Test and Push Image
     # Using self-hosted runner
-    runs-on: self-hosted
+    runs-on: [self-hosted, fe, qa]
 
     permissions:
       contents: read
@@ -70,7 +70,7 @@ jobs:
   deploy:
     name: Deploy to PR Server
     needs: build-and-push
-    runs-on: self-hosted
+    runs-on: [self-hosted, fe, qa]
 
     # Set output and secrets received through needs as global variables
     env:
@@ -112,8 +112,8 @@ jobs:
           ${{ env.COMPOSE_CONTENT }}
           EOF
 
-          # Write application.yaml
-          echo "[LOG] build application.yaml ..."
+          # Write .env
+          echo "[LOG] build .env ..."
           cat <<'EOF' > ${{ secrets.DOCKER_DIR }}/deployments/fe-staging/.env
           ${{ env.ENVIRONMENT_FILE }}
           EOF

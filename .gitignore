@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 __tests__
+
+.tanstack
+routeTree.gen.ts
