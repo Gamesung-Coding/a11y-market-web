@@ -73,9 +73,6 @@ function SellerOrdersPage() {
         );
         const { orderItems, totalOrderCount } = data;
 
-        console.log('Fetched received orders:', orderItems);
-        console.log('Total order count:', totalOrderCount);
-
         setTotalOrderCount(totalOrderCount);
         setOrderData(orderItems);
       } catch (err) {

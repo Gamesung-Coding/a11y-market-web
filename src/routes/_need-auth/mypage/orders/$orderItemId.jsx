@@ -62,7 +62,6 @@ function RouteComponent() {
         const resp = await orderApi.getMyOrderDetail(orderItemId);
 
         const order = resp.data;
-        console.log('Fetched order detail:', order);
         setorder(order);
         if (
           order.orderItem.orderItemStatus === 'PAID' ||
