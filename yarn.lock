@@ -905,6 +905,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@iconify/json@npm:^2.2.437":
+  version: 2.2.437
+  resolution: "@iconify/json@npm:2.2.437"
+  dependencies:
+    "@iconify/types": "npm:*"
+    pathe: "npm:^2.0.3"
+  checksum: 10c0/a213ec630a3eff2623ba4920fb22941c59b7ece165f199b2656e5ccab020f89ff5f3f501c95518f44fa006c814a534d129d8e5963eda703ff72505f27ef14f62
+  languageName: node
+  linkType: hard
+
+"@iconify/react@npm:^6.0.2":
+  version: 6.0.2
+  resolution: "@iconify/react@npm:6.0.2"
+  dependencies:
+    "@iconify/types": "npm:^2.0.0"
+  peerDependencies:
+    react: ">=16"
+  checksum: 10c0/1f53f588361d658c6f077fefcc31d52f6f5d375f06b63dd13cc73b71fd28cf9409edece921ea8fa5195a79d02ff9162aff8472c14e858c0178067eecc3128460
+  languageName: node
+  linkType: hard
+
+"@iconify/types@npm:*, @iconify/types@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@iconify/types@npm:2.0.0"
+  checksum: 10c0/65a3be43500c7ccacf360e136d00e1717f050b7b91da644e94370256ac66f582d59212bdb30d00788aab4fc078262e91c95b805d1808d654b72f6d2072a7e4b2
+  languageName: node
+  linkType: hard
+
 "@inquirer/ansi@npm:^1.0.2":
   version: 1.0.2
   resolution: "@inquirer/ansi@npm:1.0.2"
@@ -3632,6 +3660,8 @@ __metadata:
     "@eslint/js": "npm:^9"
     "@gscd-dev/a11y-engine": "npm:^1.0.5"
     "@hookform/resolvers": "npm:^5.2.2"
+    "@iconify/json": "npm:^2.2.437"
+    "@iconify/react": "npm:^6.0.2"
     "@reduxjs/toolkit": "npm:^2.11.2"
     "@tailwindcss/vite": "npm:^4.1.18"
     "@tanstack/eslint-plugin-query": "npm:^5.91.4"
@@ -3656,6 +3686,8 @@ __metadata:
     clsx: "npm:^2.1.1"
     csstype: "npm:^3.2.3"
     date-fns: "npm:^4.1.0"
+    embla-carousel-autoplay: "npm:^8.6.0"
+    embla-carousel-fade: "npm:^8.6.0"
     embla-carousel-react: "npm:^8.6.0"
     eslint: "npm:^9"
     eslint-config-prettier: "npm:^10.1.8"
@@ -3692,6 +3724,9 @@ __metadata:
     vitest: "npm:^4.0.18"
     zod: "npm:^4.3.6"
     zustand: "npm:^5.0.11"
+  dependenciesMeta:
+    prettier-plugin-tailwindcss@0.7.2:
+      unplugged: true
   languageName: unknown
   linkType: soft
 
@@ -4836,6 +4871,24 @@ __metadata:
   version: 1.5.286
   resolution: "electron-to-chromium@npm:1.5.286"
   checksum: 10c0/5384510f9682d7e46f98fa48b874c3901d9639de96e9e387afce1fe010fbac31376df0534524edc15f66e9902bfacee54037a5e598004e9c6a617884e379926d
+  languageName: node
+  linkType: hard
+
+"embla-carousel-autoplay@npm:^8.6.0":
+  version: 8.6.0
+  resolution: "embla-carousel-autoplay@npm:8.6.0"
+  peerDependencies:
+    embla-carousel: 8.6.0
+  checksum: 10c0/d7e5cb79c1474b3d27621302e63dedf783a281ae0464b21b87183d58103f938d22be9f6a4735de4b1b19806606006da43f6151497df91c3edbbc99a4dae4a94f
+  languageName: node
+  linkType: hard
+
+"embla-carousel-fade@npm:^8.6.0":
+  version: 8.6.0
+  resolution: "embla-carousel-fade@npm:8.6.0"
+  peerDependencies:
+    embla-carousel: 8.6.0
+  checksum: 10c0/00b44b6bd8df7d6854c7ca00e46a25996d58904c790043067e85210b29972fe0a602f0d36e98a27043fd92c229d9f46069be178b8462b7fcedfe13b14d3009b5
   languageName: node
   linkType: hard
 

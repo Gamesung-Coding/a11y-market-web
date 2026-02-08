@@ -15,6 +15,8 @@
   "dependencies": {
     "@gscd-dev/a11y-engine": "^1.0.5",
     "@hookform/resolvers": "^5.2.2",
+    "@iconify/json": "^2.2.437",
+    "@iconify/react": "^6.0.2",
     "@reduxjs/toolkit": "^2.11.2",
     "@tanstack/react-query": "^5.90.20",
     "@tanstack/react-router": "^1.158.4",
@@ -24,6 +26,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-fade": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.33.0",
     "lucide-react": "^0.563.0",
@@ -79,5 +83,10 @@
     "vite": "^7.3.1",
     "vitest": "^4.0.18"
   },
-  "packageManager": "yarn@4.12.0"
+  "packageManager": "yarn@4.12.0",
+  "dependenciesMeta": {
+    "prettier-plugin-tailwindcss@0.7.2": {
+      "unplugged": true
+    }
+  }
 }
