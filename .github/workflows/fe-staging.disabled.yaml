@@ -1,0 +1,145 @@
+name: FE | Staging - Build and Deploy
+
+on:
+  # push:
+  #   branches:
+  #     - develop
+  workflow_dispatch:
+
+concurrency:
+  group: '${{ github.workflow }}-staging'
+  cancel-in-progress: true
+
+env:
+  # GitHub Container Registry
+  IMAGE_NAME: ghcr.io/gamesung-coding/${{ github.event.repository.name }}
+
+jobs:
+  build-and-push:
+    name: Build, Test and Push Image
+    # Using self-hosted runner
+    runs-on: [self-hosted, fe, qa]
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Notify build Start
+        run: echo "### Staging 서버 빌드 및 테스트 시작" >> $GITHUB_STEP_SUMMARY
+        shell: bash
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Create .env file
+        run: echo "${{ secrets.FE_ENV_STAGING }}" > .env
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Vitest
+        run: npm run test
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: gamesung-coding
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: .docker/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:staging
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to PR Server
+    needs: build-and-push
+    runs-on: [self-hosted, fe, qa]
+
+    # Set output and secrets received through needs as global variables
+    env:
+      TEAM_USER: ${{ secrets.TEAM_USER }}
+      TEAM_PASS: ${{ secrets.TEAM_PASS }}
+      ENVIRONMENT_FILE: ${{ secrets.FE_ENV_STAGING }}
+      HOST_NAME: ${{ secrets.STAGING_DOMAIN }}
+      SERVICE_NAME: fe-staging
+      DEPLOY_PATH: ${{ secrets.DOCKER_DIR }}/deployments/fe-staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set variables
+        run: |
+          echo "IMAGE_TAG=${{ env.IMAGE_NAME }}:staging" >> $GITHUB_ENV
+
+      - name: Create compose file from template
+        run: |
+          # Use envsubst to replace template variables with real values
+          # Store result into COMPOSE_CONTENT
+          export COMPOSE_CONTENT=$(envsubst < .docker/docker-compose.template.yaml)
+
+          # Securely forward multi-linear variables to SSH with GitHub Actions masking capabilities
+          echo "COMPOSE_CONTENT<<EOF" >> $GITHUB_ENV
+          echo "$COMPOSE_CONTENT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Deploy to server
+        run: |
+          set -e
+
+          mkdir -p ${{ secrets.DOCKER_DIR }}/deployments/fe-staging
+
+          # write compose file from runner
+          echo "[LOG] build compose file ..."
+          cat <<'EOF' > ${{ secrets.DOCKER_DIR }}/deployments/fe-staging/docker-compose.yaml
+          ${{ env.COMPOSE_CONTENT }}
+          EOF
+
+          # Write .env
+          echo "[LOG] build .env ..."
+          cat <<'EOF' > ${{ secrets.DOCKER_DIR }}/deployments/fe-staging/.env
+          ${{ env.ENVIRONMENT_FILE }}
+          EOF
+
+          # change dir into deploy path
+          cd ${{ secrets.DOCKER_DIR }}/deployments/fe-staging
+
+          # login ghcr
+          echo "[LOG] log-in Github container registry"
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "gamesung-coding" --password-stdin
+
+          # pull docker image
+          echo "[LOG] pull docker image"
+          docker pull ${{ env.IMAGE_NAME }}:staging
+
+          # up docker compose
+          echo "[LOG] docker container up"
+          docker compose -f docker-compose.yaml -p fe-staging up -d --remove-orphans
+
+          # prune unnecessary image
+          docker image prune -f
+
+      - name: 🚀 Notify Deployment Success
+        if: success() # When previous step finished completely
+        run: |
+          echo "### ✅ Staging 서버 배포 성공" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Staging 서버가 성공적으로 배포되었습니다." >> $GITHUB_STEP_SUMMARY
+        shell: bash

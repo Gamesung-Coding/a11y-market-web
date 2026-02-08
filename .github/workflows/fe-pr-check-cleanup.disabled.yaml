@@ -1,11 +1,11 @@
 name: FE | PR Check - Cleanup
 
 on:
-  pull_request:
-    branches:
-      - develop
-    types:
-      - closed # when pr closed
+  # pull_request:
+  #   branches:
+  #     - develop
+  #   types:
+  #     - closed # when pr closed
   workflow_dispatch:
     inputs:
       pr_number:

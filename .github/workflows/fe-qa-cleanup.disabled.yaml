@@ -1,9 +1,9 @@
 name: FE | QA - Cleanup
 
 on:
-  delete:
-    branches:
-      - 'release/**'
+  # delete:
+  #   branches:
+  #     - 'release/**'
 
   workflow_dispatch:
     inputs:
