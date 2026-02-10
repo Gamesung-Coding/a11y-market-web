@@ -1,6 +1,9 @@
-// src/lib/a11yProfiles.js
+import type { A11ySettings } from '@/types/a11y';
 
-export const A11Y_PROFILES = {
+export const A11Y_PROFILES: Record<
+  string,
+  { label: string; items: { id: string; name: string; settings: Partial<A11ySettings> }[] }
+> = {
   vision: {
     label: '시각 접근성',
     items: [

@@ -2,7 +2,23 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
 
-export const A11yOptionCard = ({ label, icon, isActive, onClick, steps = 0, currentStep = 0 }) => {
+interface A11yOptionCardProps {
+  label: string;
+  icon?: React.ReactNode;
+  isActive: boolean;
+  onClick: () => void;
+  steps?: number;
+  currentStep?: number;
+}
+
+export const A11yOptionCard = ({
+  label,
+  icon,
+  isActive,
+  onClick,
+  steps = 0,
+  currentStep = 0,
+}: A11yOptionCardProps) => {
   return (
     <Button
       variant='outline'

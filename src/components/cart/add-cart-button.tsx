@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { useAddCartItem } from '@/hooks/useCartMutation';
+import { useAddCartItem } from '@/hooks/use-cart-mutation';
 import { cn } from '@/lib/utils';
 import type { MonthlyPopularProduct } from '@/types/main-page';
 import type { Product, SimpleProductInfo } from '@/types/product';

@@ -13,28 +13,47 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  resetAll,
-  setAllA11y,
-  toggleCursorHighlight,
-  toggleHighlightLinks,
-  toggleScreenReader,
-  toggleSmartContrast,
-} from '@/store/a11y-slice';
-
+import { useA11yActions, useA11yData } from '@/store/a11y-store';
+import type { A11ySettings, UserA11yProfileAddRequest } from '@/types/a11y';
 import { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 
-export default function A11yEditModal({ open, onClose, initialProfile, onSaved }) {
-  const dispatch = useDispatch();
+interface A11yEditModalProps {
+  open: boolean;
+  onClose: () => void;
+  initialProfile?: any;
+  onSaved?: () => void;
+}
 
-  const [profileName, setProfileName] = useState('');
-  const [description, setDescription] = useState('');
-  const [saveLoading, setSaveLoading] = useState(false);
+interface StepSelectorProps {
+  value: number;
+  max: number;
+  onChange: (value: number) => void;
+}
 
-  const a11yState = useSelector((state) => state.a11y);
-  const prevRef = useRef(null);
+interface ContrastSelectorProps {
+  value: number;
+  onChange: (value: number) => void;
+}
+
+interface ModalRowProps {
+  label: string;
+  control: React.ReactNode;
+}
+
+export default function A11yEditModal({
+  open,
+  onClose,
+  initialProfile,
+  onSaved,
+}: A11yEditModalProps) {
+  const [profileName, setProfileName] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [saveLoading, setSaveLoading] = useState<boolean>(false);
+
+  const a11yState = useA11yData();
+  const a11yActions = useA11yActions();
+  const prevRef = useRef<A11ySettings | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -50,7 +69,7 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
     }
   }, [initialProfile, open]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!profileName.trim()) {
@@ -58,44 +77,35 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
       return;
     }
 
-    const payload = {
+    const payload: UserA11yProfileAddRequest = {
       profileName: profileName.trim(),
-      description: description.trim() || null,
+      description: description.trim() || '',
       ...a11yState,
     };
 
-    try {
-      setSaveLoading(true);
+    setSaveLoading(true);
 
-      if (initialProfile) {
-        await a11yApi.updateA11yProfile(initialProfile.profileId, payload);
-        toast.success('프로필이 수정되었습니다.');
-      } else {
-        await a11yApi.createA11yProfile(payload);
-        toast.success('새 접근성 프로필이 생성되었습니다.');
-      }
-
-      onSaved && onSaved();
-      onClose();
-    } catch (err) {
-      const message =
-        err?.response?.data?.message ||
-        err?.response?.data?.errorMessage ||
-        '프로필 저장 중 오류가 발생했습니다.';
-      alert(message);
-    } finally {
-      setSaveLoading(false);
+    if (initialProfile) {
+      await a11yApi.updateA11yProfile({ profileId: initialProfile.profileId, data: payload });
+      toast.success('프로필이 수정되었습니다.');
+    } else {
+      await a11yApi.createA11yProfile(payload);
+      toast.success('새 접근성 프로필이 생성되었습니다.');
     }
+
+    onSaved && onSaved();
+    onClose();
+    setSaveLoading(false);
   };
 
   const handleClose = () => {
     if (prevRef.current) {
-      dispatch(setAllA11y(prevRef.current));
+      a11yActions.saveA11ySettings(prevRef.current);
     }
     onClose();
   };
 
-  function StepSelector({ value, max, onChange }) {
+  function StepSelector({ value, max, onChange }: StepSelectorProps) {
     return (
       <div className='flex items-center gap-2'>
         {Array.from({ length: max + 1 }, (_, i) => (
@@ -118,7 +128,7 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
     );
   }
 
-  function Row({ label, control }) {
+  function Row({ label, control }: ModalRowProps) {
     return (
       <div className='flex items-center gap-4'>
         <Label className='w-24 shrink-0 text-sm font-medium'>{label}</Label>
@@ -127,7 +137,7 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
     );
   }
 
-  function ContrastSelector({ value, onChange }) {
+  function ContrastSelector({ value, onChange }: ContrastSelectorProps) {
     const options = [
       { val: 0, label: '기본' },
       { val: 1, label: '다크' },
@@ -208,7 +218,7 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
                 control={
                   <Switch
                     checked={a11yState.screenReader}
-                    onCheckedChange={() => dispatch(toggleScreenReader())}
+                    onCheckedChange={() => a11yActions.toggleScreenReader()}
                   />
                 }
               />
@@ -218,7 +228,9 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
                 control={
                   <ContrastSelector
                     value={a11yState.contrastLevel}
-                    onChange={(v) => dispatch(setAllA11y({ ...a11yState, contrastLevel: v }))}
+                    onChange={(v) =>
+                      a11yActions.saveA11ySettings({ ...a11yState, contrastLevel: v })
+                    }
                   />
                 }
               />
@@ -228,7 +240,7 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
                 control={
                   <Switch
                     checked={a11yState.smartContrast}
-                    onCheckedChange={() => dispatch(toggleSmartContrast())}
+                    onCheckedChange={() => a11yActions.toggleSmartContrast()}
                   />
                 }
               />
@@ -239,7 +251,9 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
                   <StepSelector
                     value={a11yState.textSizeLevel}
                     max={2}
-                    onChange={(v) => dispatch(setAllA11y({ ...a11yState, textSizeLevel: v }))}
+                    onChange={(v) =>
+                      a11yActions.saveA11ySettings({ ...a11yState, textSizeLevel: v })
+                    }
                   />
                 }
               />
@@ -250,7 +264,9 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
                   <StepSelector
                     value={a11yState.textSpacingLevel}
                     max={2}
-                    onChange={(v) => dispatch(setAllA11y({ ...a11yState, textSpacingLevel: v }))}
+                    onChange={(v) =>
+                      a11yActions.saveA11ySettings({ ...a11yState, textSpacingLevel: v })
+                    }
                   />
                 }
               />
@@ -261,7 +277,9 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
                   <StepSelector
                     value={a11yState.lineHeightLevel}
                     max={2}
-                    onChange={(v) => dispatch(setAllA11y({ ...a11yState, lineHeightLevel: v }))}
+                    onChange={(v) =>
+                      a11yActions.saveA11ySettings({ ...a11yState, lineHeightLevel: v })
+                    }
                   />
                 }
               />
@@ -279,7 +297,9 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
                         type='button'
                         variant='outline'
                         key={opt.value}
-                        onClick={() => dispatch(setAllA11y({ ...a11yState, textAlign: opt.value }))}
+                        onClick={() =>
+                          a11yActions.saveA11ySettings({ ...a11yState, textAlign: opt.value })
+                        }
                         className={`rounded-md px-3 py-1 text-xs ${
                           a11yState.textAlign === opt.value
                             ? 'border-black bg-black text-white'
@@ -298,7 +318,7 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
                 control={
                   <Switch
                     checked={a11yState.highlightLinks}
-                    onCheckedChange={() => dispatch(toggleHighlightLinks())}
+                    onCheckedChange={() => a11yActions.toggleHighlightLinks()}
                   />
                 }
               />
@@ -308,7 +328,7 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
                 control={
                   <Switch
                     checked={a11yState.cursorHighlight}
-                    onCheckedChange={() => dispatch(toggleCursorHighlight())}
+                    onCheckedChange={() => a11yActions.toggleCursorHighlight()}
                   />
                 }
               />
@@ -317,7 +337,7 @@ export default function A11yEditModal({ open, onClose, initialProfile, onSaved }
                 type='button'
                 variant='outline'
                 className='mt-2 w-full'
-                onClick={() => dispatch(resetAll())}
+                onClick={() => a11yActions.resetA11ySettings()}
               >
                 모든 설정 초기화
               </Button>

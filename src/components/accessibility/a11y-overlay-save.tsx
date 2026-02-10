@@ -12,71 +12,72 @@ import { a11yApi } from '@/api/a11y-api';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Spinner } from '@/components/ui/spinner';
+import type { A11ySettings, UserA11yProfileAddRequest } from '@/types/a11y';
 import { AlertCircleIcon } from 'lucide-react';
 import { useState } from 'react';
 
-export default function A11yOverlaySave({ open, onClose, a11yState }) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+interface A11yOverlaySaveProps {
+  open: boolean;
+  onClose: () => void;
+  a11yState: A11ySettings;
+}
 
-  const [errors, setErrors] = useState({
+interface ErrorState {
+  submit: string | null;
+  name: string | null;
+}
+
+export default function A11yOverlaySave({ open, onClose, a11yState }: A11yOverlaySaveProps) {
+  const [name, setName] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+
+  const [errors, setErrors] = useState<ErrorState>({
     submit: null,
     name: null,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      setErrors((prev) => ({ ...prev, name: '프로필 이름을 입력해주세요.' }));
+      setErrors((prev: ErrorState) => ({ ...prev, name: '프로필 이름을 입력해주세요.' }));
       return;
     }
 
     setIsSubmitting(true);
 
-    try {
-      const payload = {
-        profileName: name.trim(),
-        description: description.trim() || null,
+    const payload: UserA11yProfileAddRequest = {
+      profileName: name.trim(),
+      description: description.trim(),
+      contrastLevel: a11yState.contrastLevel,
+      textSizeLevel: a11yState.textSizeLevel,
+      textSpacingLevel: a11yState.textSpacingLevel,
+      lineHeightLevel: a11yState.lineHeightLevel,
+      textAlign: a11yState.textAlign,
+      screenReader: a11yState.screenReader,
+      smartContrast: a11yState.smartContrast,
+      highlightLinks: a11yState.highlightLinks,
+      cursorHighlight: a11yState.cursorHighlight,
+    };
 
-        ...a11yState,
-        screenReader: a11yState.screenReader,
-        smartContrast: a11yState.smartContrast,
-        highlightLinks: a11yState.highlightLinks,
-        cursorHighlight: a11yState.cursorHighlight,
-      };
+    const status = await a11yApi.createA11yProfile(payload);
 
-      const resp = await a11yApi.createA11yProfile(payload);
-
-      if (resp.status === 201) {
-        window.dispatchEvent(new Event('a11yProfileSaved'));
-        alert('프로필이 저장되었습니다.');
-        setName('');
-        setDescription('');
-        onClose();
-        return;
-      }
-
-      if (resp.status === 409) {
-        setErrors((prev) => ({ ...prev, name: '이미 존재하는 프로필 이름입니다.' }));
-        return;
-      } else if (resp.status === 400) {
-        setErrors((prev) => ({ ...prev, submit: resp.message || '잘못된 요청입니다.' }));
-        return;
-      } else {
-        setErrors((prev) => ({ ...prev, submit: '프로필 저장에 실패했습니다.' }));
-        return;
-      }
-
-    } catch (err) {
-      if (err.error === 'Unauthorized') {
-        setErrors((prev) => ({ ...prev, submit: '로그인이 필요합니다.' }));
-        return;
-      }
-
-      setErrors((prev) => ({ ...prev, submit: '프로필 저장 중 오류가 발생했습니다.' }));
-    } finally {
-      setIsSubmitting(false);
+    if (status === 201) {
+      setName('');
+      setDescription('');
+      onClose();
+      return;
     }
+
+    if (status === 409) {
+      setErrors((prev) => ({ ...prev, name: '이미 존재하는 프로필 이름입니다.' }));
+    } else if (status === 400) {
+      setErrors((prev) => ({ ...prev, submit: '잘못된 요청입니다.' }));
+    } else {
+      setErrors((prev) => ({ ...prev, submit: '프로필 저장에 실패했습니다.' }));
+    }
+
+    setIsSubmitting(false);
+    return;
   };
 
   return (
@@ -90,7 +91,7 @@ export default function A11yOverlaySave({ open, onClose, a11yState }) {
         </DialogHeader>
         <Alert
           variant='destructive'
-          className={`grid border-red-500 bg-red-500/70 text-white ${errors.submit ? ' grid-rows-[1fr]' : 'mb-0 grid-rows-[0fr] p-0 opacity-0'} transition-all`}
+          className={`grid border-red-500 bg-red-500/70 text-white ${errors.submit ? 'grid-rows-[1fr]' : 'mb-0 grid-rows-[0fr] p-0 opacity-0'} transition-all`}
         >
           <AlertCircleIcon className={`${errors.submit ? '' : 'hidden'}`} />
           <AlertTitle className={`${errors.submit ? '' : 'hidden'}`}>{errors.submit}</AlertTitle>

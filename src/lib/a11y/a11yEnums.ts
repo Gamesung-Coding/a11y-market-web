@@ -65,6 +65,7 @@ export const A11yLineHeightClass = (lineHeightLevel: number) => {
 };
 
 export const A11yTextAlign = {
+  OPTION_SIZE: 3,
   LEFT: 'left',
   CENTER: 'center',
   RIGHT: 'right',

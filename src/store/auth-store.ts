@@ -5,13 +5,11 @@ interface AuthState {
   isAuthenticated: boolean;
 
   actions: {
-    // 로그인 성공 시 토큰 저장
+    // 로그인 성공 시 토큰 저장 또는 토큰 갱신 (Refresh Token Rotation 방식)
     loginSucess: (accessToken: string, refreshToken: string) => void;
     // 로그아웃 시 토큰 제거
     logout: () => void;
-    // 토큰 갱신
-    tokenRefresh: (accessToken: string) => void;
-  }
+  };
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -19,7 +17,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
 
   actions: {
-    loginSucess: (accessToken: string, refreshToken: string) =>{
+    loginSucess: (accessToken: string, refreshToken: string) => {
       localStorage.setItem('refreshToken', refreshToken);
       set(() => ({
         accessToken,
@@ -33,12 +31,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: false,
       }));
     },
-    tokenRefresh: (accessToken: string) =>
-      set(() => ({
-        accessToken,
-        isAuthenticated: true,
-      })),
   },
-}))
+}));
 
 export const useAuthActions = () => useAuthStore((state) => state.actions);

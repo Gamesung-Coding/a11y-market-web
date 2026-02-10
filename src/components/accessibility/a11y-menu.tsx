@@ -17,19 +17,8 @@ import {
   A11yTextSpacing,
 } from '@/lib/a11y/a11yEnums';
 import { A11Y_PROFILES } from '@/lib/a11y/profiles';
-import {
-  cycleContrast,
-  cycleLineHeight,
-  cycleTextAlign,
-  cycleTextSize,
-  cycleTextSpacing,
-  resetAll,
-  setAllA11y,
-  toggleCursorHighlight,
-  toggleHighlightLinks,
-  toggleScreenReader,
-  toggleSmartContrast,
-} from '@/store/a11y-slice';
+import { useA11yActions, useA11yData } from '@/store/a11y-store';
+import type { A11ySettings } from '@/types/a11y';
 import {
   AArrowUp,
   AlignCenter,
@@ -45,11 +34,15 @@ import {
   Volume2,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
-export const A11yMenu = ({ child }) => {
+interface A11yMenuProps {
+  child?: React.ReactNode;
+}
+
+export const A11yMenu = ({ child }: A11yMenuProps) => {
   //전역 상태
-  const a11yState = useSelector((state) => state.a11y);
+  const a11yState = useA11yData();
+
   const {
     contrastLevel,
     textSizeLevel,
@@ -62,13 +55,53 @@ export const A11yMenu = ({ child }) => {
     cursorHighlight,
   } = a11yState;
 
-  const dispatch = useDispatch();
+  const {
+    setContrastLevel,
+    setTextSizeLevel,
+    setTextSpacingLevel,
+    setLineHeightLevel,
+    setTextAlign,
+    toggleSmartContrast,
+    toggleHighlightLinks,
+    toggleCursorHighlight,
+    toggleScreenReader,
+    saveA11ySettings,
+    resetA11ySettings,
+  } = useA11yActions();
 
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [saveModalOpen, setSaveModalOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState('ko');
-  const [selectedProfile, setSelectedProfile] = useState(null); // vision/ cognitive/ screenReader/ senior/ custom
-  const [selectedSubMode, setSelectedSubMode] = useState(null);
+  const cycleLevel = (currentLevel: number, maxLevel: number) => {
+    return (currentLevel + 1) % maxLevel;
+  };
+
+  const cycleTextAlign = () => {
+    return textAlign === A11yTextAlign.LEFT
+      ? A11yTextAlign.CENTER
+      : textAlign === A11yTextAlign.CENTER
+        ? A11yTextAlign.RIGHT
+        : A11yTextAlign.LEFT;
+  };
+
+  const setAllA11y = (settings: Partial<A11ySettings>) => {
+    const newSettings = {
+      ...settings,
+      contrastLevel: settings.contrastLevel || contrastLevel,
+      textSizeLevel: settings.textSizeLevel || textSizeLevel,
+      textSpacingLevel: settings.textSpacingLevel || textSpacingLevel,
+      lineHeightLevel: settings.lineHeightLevel || lineHeightLevel,
+      textAlign: settings.textAlign || textAlign,
+      smartContrast: settings.smartContrast || smartContrast,
+      highlightLinks: settings.highlightLinks || highlightLinks,
+      cursorHighlight: settings.cursorHighlight || cursorHighlight,
+      screenReader: settings.screenReader || screenReader,
+    };
+    saveA11ySettings(newSettings);
+  };
+
+  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
+  const [saveModalOpen, setSaveModalOpen] = useState<boolean>(false);
+  const [selectedLang, setSelectedLang] = useState<string>('ko');
+  const [selectedProfile, setSelectedProfile] = useState<string>(''); // vision/ cognitive/ screenReader/ senior/ custom
+  const [selectedSubMode, setSelectedSubMode] = useState<string>('');
 
   const iconStyle = {
     class: 'size-10 mt-4',
@@ -104,7 +137,7 @@ export const A11yMenu = ({ child }) => {
         />
       ),
       isActive: screenReader,
-      onClick: () => dispatch(toggleScreenReader()),
+      onClick: () => toggleScreenReader(),
     },
     {
       label: contrastLabels[contrastLevel],
@@ -117,7 +150,7 @@ export const A11yMenu = ({ child }) => {
       isActive: contrastLevel > 0,
       steps: A11yContrast.OPTION_SIZE - 1,
       currentStep: contrastLevel,
-      onClick: () => dispatch(cycleContrast()),
+      onClick: () => setContrastLevel(cycleLevel(contrastLevel, A11yContrast.OPTION_SIZE)),
     },
     {
       label: '스마트 대비',
@@ -128,7 +161,7 @@ export const A11yMenu = ({ child }) => {
         />
       ),
       isActive: smartContrast,
-      onClick: () => dispatch(toggleSmartContrast()),
+      onClick: () => toggleSmartContrast(),
     },
     {
       label: '링크 강조',
@@ -139,7 +172,7 @@ export const A11yMenu = ({ child }) => {
         />
       ),
       isActive: highlightLinks,
-      onClick: () => dispatch(toggleHighlightLinks()),
+      onClick: () => toggleHighlightLinks(),
     },
     {
       label: '글자 크기',
@@ -152,7 +185,7 @@ export const A11yMenu = ({ child }) => {
       isActive: textSizeLevel > 0,
       steps: A11yTextSize.OPTION_SIZE - 1,
       currentStep: textSizeLevel,
-      onClick: () => dispatch(cycleTextSize()),
+      onClick: () => setTextSizeLevel(cycleLevel(textSizeLevel, A11yTextSize.OPTION_SIZE)),
     },
     {
       label: '자간 간격',
@@ -165,7 +198,7 @@ export const A11yMenu = ({ child }) => {
       isActive: textSpacingLevel > 0,
       steps: A11yTextSpacing.OPTION_SIZE - 1,
       currentStep: textSpacingLevel,
-      onClick: () => dispatch(cycleTextSpacing()),
+      onClick: () => setTextSpacingLevel(cycleLevel(textSpacingLevel, A11yTextSpacing.OPTION_SIZE)),
     },
     {
       label: '커서 강조',
@@ -176,7 +209,7 @@ export const A11yMenu = ({ child }) => {
         />
       ),
       isActive: cursorHighlight,
-      onClick: () => dispatch(toggleCursorHighlight()),
+      onClick: () => toggleCursorHighlight(),
     },
     {
       label: '텍스트 정렬',
@@ -184,7 +217,7 @@ export const A11yMenu = ({ child }) => {
       isActive: textAlign !== 'left',
       steps: A11yTextAlign.OPTION_SIZE - 1,
       currentStep: A11yTextAlign.getA11yTextAlignStep(textAlign),
-      onClick: () => dispatch(cycleTextAlign()),
+      onClick: () => setTextAlign(cycleTextAlign()),
     },
     {
       label: '행 높이',
@@ -197,19 +230,19 @@ export const A11yMenu = ({ child }) => {
       isActive: lineHeightLevel > 0,
       steps: A11yLineHeight.OPTION_SIZE - 1,
       currentStep: lineHeightLevel,
-      onClick: () => dispatch(cycleLineHeight()),
+      onClick: () => setLineHeightLevel(cycleLevel(lineHeightLevel, A11yLineHeight.OPTION_SIZE)),
     },
   ];
   const languages = [{ code: 'ko', label: '한국어' }];
 
-  const applyProfileSettings = (modeId) => {
+  const applyProfileSettings = (modeId: string) => {
     setSelectedSubMode(modeId);
-    dispatch(resetAll());
+    resetA11ySettings();
 
     const selectedMode = A11Y_PROFILES[selectedProfile].items.find((item) => item.id === modeId);
     if (!selectedMode || !selectedMode.settings) return;
 
-    dispatch(setAllA11y(selectedMode.settings));
+    setAllA11y(selectedMode.settings);
   };
 
   return (
@@ -274,7 +307,7 @@ export const A11yMenu = ({ child }) => {
                 value={selectedProfile ?? ''}
                 onValueChange={(val) => {
                   setSelectedProfile(val);
-                  setSelectedSubMode(null); //세부 모드 초기화
+                  setSelectedSubMode(''); //세부 모드 초기화
                 }}
               >
                 <SelectTrigger
@@ -344,7 +377,7 @@ export const A11yMenu = ({ child }) => {
             <Button
               variant='destructive'
               className='w-full'
-              onClick={() => dispatch(resetAll())}
+              onClick={() => resetA11ySettings()}
             >
               모든 설정 초기화
             </Button>

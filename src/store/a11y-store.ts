@@ -8,6 +8,8 @@ import {
 import type { A11ySettings } from '@/types/a11y';
 import { create } from 'zustand';
 
+const A11Y_STORAGE_KEY = 'a11y-settings';
+
 interface A11yState {
   data: A11ySettings;
 
@@ -23,26 +25,29 @@ interface A11yState {
     toggleScreenReader: () => void;
     loadA11ySettings: () => void;
     saveA11ySettings: (settings: A11ySettings) => void;
+    resetA11ySettings: () => void;
   };
 }
 
+const initialState = {
+  contrastLevel: A11yContrast.NORMAL,
+  textSizeLevel: A11yTextSize.NORMAL,
+  textSpacingLevel: A11yTextSpacing.NORMAL,
+  lineHeightLevel: A11yLineHeight.NORMAL,
+  textAlign: A11yTextAlign.LEFT,
+  smartContrast: false,
+  highlightLinks: false,
+  cursorHighlight: false,
+  screenReader: false,
+};
+
 const saveSetting = (data: A11ySettings, set: any) => {
   set(() => ({ data }));
-  localStorage.setItem('a11ySettings', JSON.stringify(data));
+  localStorage.setItem(A11Y_STORAGE_KEY, JSON.stringify(data));
 };
 
 export const useA11yStore = create<A11yState>((set) => ({
-  data: {
-    contrastLevel: A11yContrast.NORMAL,
-    textSizeLevel: A11yTextSize.NORMAL,
-    textSpacingLevel: A11yTextSpacing.NORMAL,
-    lineHeightLevel: A11yLineHeight.NORMAL,
-    textAlign: A11yTextAlign.LEFT,
-    smartContrast: false,
-    highlightLinks: false,
-    cursorHighlight: false,
-    screenReader: false,
-  },
+  data: initialState,
 
   actions: {
     setContrastLevel: (level: number) => {
@@ -77,7 +82,7 @@ export const useA11yStore = create<A11yState>((set) => ({
       saveSetting({ ...useA11yStore.getState().data, screenReader: !current }, set);
     },
     loadA11ySettings: () => {
-      const stored = localStorage.getItem('a11ySettings');
+      const stored = localStorage.getItem(A11Y_STORAGE_KEY);
       if (stored) {
         const parsed: A11ySettings = JSON.parse(stored);
         set(() => ({ data: parsed }));
@@ -85,6 +90,22 @@ export const useA11yStore = create<A11yState>((set) => ({
     },
     saveA11ySettings: (settings: A11ySettings) => {
       saveSetting(settings, set);
+    },
+    resetA11ySettings: () => {
+      saveSetting(
+        {
+          contrastLevel: A11yContrast.NORMAL,
+          textSizeLevel: A11yTextSize.NORMAL,
+          textSpacingLevel: A11yTextSpacing.NORMAL,
+          lineHeightLevel: A11yLineHeight.NORMAL,
+          textAlign: A11yTextAlign.LEFT,
+          smartContrast: false,
+          highlightLinks: false,
+          cursorHighlight: false,
+          screenReader: false,
+        },
+        set,
+      );
     },
   },
 }));

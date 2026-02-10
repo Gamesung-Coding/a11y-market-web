@@ -1,5 +1,6 @@
 // import { logout } from '@/store/slices/authSlice';
 import { authApi } from '@/api/auth-api';
+import { CartBadge } from '@/components/cart/cart-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Item, ItemContent } from '@/components/ui/item';
@@ -9,21 +10,20 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from '@/components/ui/navigation-menu';
+import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { logout } from '@/store/auth-slice';
-import { fetchCartCount } from '@/store/cart-slice';
+import { useCategory } from '@/hooks/use-category';
+import { useUser } from '@/hooks/use-user';
+import { useAuthStore } from '@/store/auth-store';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { LogIn, LogOut, Menu, Search, ShoppingCart, User, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { CartBadge } from '../cart/cart-badge';
-import { Separator } from '../ui/separator';
 
 export default function TopBar() {
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
-  const { categories, isLoading } = useSelector((state) => state.category);
+  const { isAuthenticated } = useAuthStore();
+  const { data: user } = useUser();
+  const { data: categories, isLoading } = useCategory();
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const router = useRouterState();
 
@@ -34,22 +34,12 @@ export default function TopBar() {
     setIsMobileMenuOpen(false);
   }, [router.location.pathname]);
 
-  useEffect(() => {
-    // 장바구니 아이템 수 가져오기
-
-    if (isAuthenticated) {
-      dispatch(fetchCartCount());
-    }
-  }, [isAuthenticated]);
-
   const handleLogout = async () => {
     try {
       navigate({ to: '/' });
       await authApi.logout();
     } catch (err) {
       console.warn('Logout API call failed:', err);
-    } finally {
-      dispatch(logout());
     }
   };
 
@@ -101,7 +91,6 @@ export default function TopBar() {
               <Sheet
                 open={isMobileMenuOpen}
                 onOpenChange={setIsMobileMenuOpen}
-                className='lg:hidden'
               >
                 <SheetTrigger asChild>
                   <Button
@@ -202,7 +191,7 @@ export default function TopBar() {
                   className='text-base text-neutral-800 dark:text-neutral-200'
                   aria-label='사용자 이름 표시'
                 >
-                  {user.userNickname || '사용자'}님
+                  {user?.userNickname || '사용자'}님
                 </span>
               )}
               <Button
@@ -237,7 +226,7 @@ export default function TopBar() {
                 className='relative'
               >
                 <ShoppingCart className='size-5' />
-                {isAuthenticated && <CartBadge />}
+                <CartBadge />
                 <span className='sr-only'>장바구니</span>
               </Button>
             </ItemContent>

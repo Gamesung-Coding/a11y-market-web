@@ -29,7 +29,7 @@ export interface CartItemGroup {
   sellerName: string;
   sellerId: string;
   groupTotal: number;
-  items: CartItem[]
+  items: CartItem[];
 }
 
 export interface CartItemResponse {
