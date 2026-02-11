@@ -1,11 +1,13 @@
-// src/routes/_need-auth/_admin/admin/orders.jsx
 import { createFileRoute } from '@tanstack/react-router';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 
-import { adminApi } from '@/api/admin-api';
+import type { AdminOrderSearchParams } from '@/api/admin/types';
+import type { OrderItem } from '@/api/order/types';
 import AdminOrdersFilter from '@/components/admin/admin-orders-filter';
 import OrderItemsDialog from '@/components/admin/order-items-dialog';
 
+import { useAdminOrders } from '@/api/admin/queries';
+import { useUpdateOrderItemStatus } from '@/api/seller/mutations';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import {
@@ -22,17 +24,7 @@ export const Route = createFileRoute('/_need-auth/_admin/admin/orders')({
   component: RouteComponent,
 });
 
-const FILTER_LABEL_TO_ENUM = {
-  결제대기: 'ORDERED',
-  결제완료: 'PAID',
-  주문승인: 'ACCEPTED',
-  주문거부: 'REJECTED',
-  배송중: 'SHIPPED',
-  배송완료: 'CONFIRMED',
-  주문취소: 'CANCELED',
-};
-
-const ORDER_STATUS_LABELS = {
+const ORDER_STATUS_LABELS: Record<string, string> = {
   ORDERED: '주문접수',
   PAID: '결제완료',
   ACCEPTED: '주문승인',
@@ -47,113 +39,61 @@ const ORDER_STATUS_LABELS = {
   RETURN_REJECTED: '반품거부',
 };
 
-function formatDateOnly(date) {
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+function formatDateOnly(date: Date | undefined): string {
+  if (!date || !(date instanceof Date) || Number.isNaN(date.getTime())) return '';
   return date.toISOString().slice(0, 10);
 }
 
-function getRepresentativeStatus(orderItems = []) {
+function getRepresentativeStatus(orderItems: OrderItem[] = []): string {
   if (!orderItems.length) return '';
   return orderItems[0]?.orderItemStatus ?? '';
 }
 
 function RouteComponent() {
-  const [orders, setOrders] = useState([]);
-  const [expandedRows, setExpandedRows] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [orderStatusDraft, setOrderStatusDraft] = useState({});
-  const [currentFilter, setCurrentFilter] = useState(null);
+  const [expandedRows, setExpandedRows] = useState<number[]>([]);
+  const [orderStatusDraft, setOrderStatusDraft] = useState<Record<number, string>>({});
+  const [currentFilter, setCurrentFilter] = useState<AdminOrderSearchParams>({
+    searchType: '',
+    keyword: '',
+    startDate: '',
+    endDate: '',
+  });
 
-  const toggleRow = (orderId) => {
+  const { data: orders = [], isLoading: loading, error } = useAdminOrders(currentFilter);
+
+  const { mutateAsync: updateOrderItemStatus } = useUpdateOrderItemStatus();
+
+  const toggleRow = (orderId: number) => {
     setExpandedRows((prev) =>
       prev.includes(orderId) ? prev.filter((id) => id !== orderId) : [...prev, orderId],
     );
   };
 
-  const buildSearchParams = (filter) => {
-    if (!filter) return {};
+  const buildSearchParams = (filter: AdminOrderSearchParams): AdminOrderSearchParams => {
+    if (!filter) return { searchType: '', keyword: '', startDate: '', endDate: '' };
 
-    const { searchField, searchKeyword, dateRange } = filter;
-
-    const startDate =
-      dateRange?.from instanceof Date && !Number.isNaN(dateRange.from.getTime())
-        ? formatDateOnly(dateRange.from)
-        : '';
-    const endDate =
-      dateRange?.to instanceof Date && !Number.isNaN(dateRange.to.getTime())
-        ? formatDateOnly(dateRange.to)
-        : '';
+    const { searchType, keyword, startDate, endDate } = filter;
 
     return {
-      searchType: searchField || '',
-      keyword: searchKeyword || '',
-      startDate: startDate || '',
-      endDate: endDate || '',
+      searchType,
+      keyword,
+      startDate: formatDateOnly(new Date(startDate)),
+      endDate: formatDateOnly(new Date(endDate)),
     };
   };
 
-  const fetchOrders = async (filter = currentFilter) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const params = buildSearchParams(filter);
-      const data = await adminApi.getAdminOrders(params);
-
-      let normalized = Array.isArray(data)
-        ? data.map((order) => ({
-            ...order,
-            orderItems: order.items ?? [],
-          }))
-        : [];
-
-      if (filter?.orderStatus) {
-        const targetEnum = FILTER_LABEL_TO_ENUM[filter.orderStatus];
-        if (targetEnum) {
-          normalized = normalized.filter((order) =>
-            (order.orderItems ?? []).some((item) => item.orderItemStatus === targetEnum),
-          );
-        }
-      }
-
-      setOrders(normalized);
-
-      const nextDraft = {};
-      normalized.forEach((order) => {
-        const rep = getRepresentativeStatus(order.orderItems);
-        if (rep) {
-          nextDraft[order.orderId] = rep;
-        }
-      });
-      setOrderStatusDraft(nextDraft);
-    } catch (err) {
-      console.error('관리자 주문 목록 조회 실패:', err);
-      setError('주문 목록을 불러오는 중 오류가 발생했습니다.');
-      toast.error('주문 목록을 불러오는 데 실패했습니다.');
-    } finally {
-      setLoading(false);
-    }
+  const handleFilterChange = (filter: AdminOrderSearchParams) => {
+    setCurrentFilter(buildSearchParams(filter));
   };
 
-  useEffect(() => {
-    fetchOrders();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleFilterChange = (filter) => {
-    setCurrentFilter(filter);
-    fetchOrders(filter);
-  };
-
-  const handleOrderStatusChange = (orderId, newStatus) => {
+  const handleOrderStatusChange = (orderId: number, newStatus: string) => {
     setOrderStatusDraft((prev) => ({
       ...prev,
       [orderId]: newStatus,
     }));
   };
 
-  const handleSave = async (orderId) => {
+  const handleSave = async (orderId: number) => {
     const targetOrder = orders.find((o) => o.orderId === orderId);
     if (!targetOrder) {
       toast.error('주문 정보를 찾을 수 없습니다.');
@@ -166,29 +106,15 @@ function RouteComponent() {
       return;
     }
 
-    if (!targetOrder.orderItems || targetOrder.orderItems.length === 0) {
+    if (!targetOrder.items || targetOrder.items.length === 0) {
       toast.error('변경할 주문 항목이 없습니다.');
       return;
     }
 
     try {
       await Promise.all(
-        targetOrder.orderItems.map((item) =>
-          adminApi.updateOrderItemStatus(item.orderItemId, newStatus),
-        ),
-      );
-
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.orderId === orderId
-            ? {
-                ...order,
-                orderItems: order.orderItems.map((item) => ({
-                  ...item,
-                  orderItemStatus: newStatus,
-                })),
-              }
-            : order,
+        targetOrder.items.map((item) =>
+          updateOrderItemStatus({ orderItemId: item.orderItemId, status: newStatus }),
         ),
       );
 
@@ -199,9 +125,9 @@ function RouteComponent() {
     }
   };
 
-  const handleReset = (orderId) => {
+  const handleReset = (orderId: number) => {
     const targetOrder = orders.find((o) => o.orderId === orderId);
-    const rep = targetOrder ? getRepresentativeStatus(targetOrder.orderItems) : '';
+    const rep = targetOrder ? getRepresentativeStatus(targetOrder.items) : '';
 
     setOrderStatusDraft((prev) => {
       const next = { ...prev };
@@ -226,7 +152,7 @@ function RouteComponent() {
 
       {error && (
         <div className='border-destructive/40 bg-destructive/5 text-destructive mb-3 rounded-xl border px-4 py-3 text-sm'>
-          {error}
+          {error.message}
         </div>
       )}
 
@@ -266,7 +192,7 @@ function RouteComponent() {
 
           {!loading &&
             orders.map((order) => {
-              const representativeStatus = getRepresentativeStatus(order.orderItems);
+              const representativeStatus = getRepresentativeStatus(order.items);
               const selectedStatus = orderStatusDraft[order.orderId] || representativeStatus || '';
               const statusLabel =
                 selectedStatus && ORDER_STATUS_LABELS[selectedStatus]
@@ -289,7 +215,7 @@ function RouteComponent() {
                         <Select
                           value={selectedStatus}
                           onValueChange={(val) => handleOrderStatusChange(order.orderId, val)}
-                          disabled={!order.orderItems || order.orderItems.length === 0}
+                          disabled={!order.items || order.items.length === 0}
                         >
                           <SelectTrigger className='w-36'>{statusLabel}</SelectTrigger>
                           <SelectContent>
@@ -309,10 +235,20 @@ function RouteComponent() {
                     </TableCell>
                     <TableCell className='text-center'>
                       <div className='mt-2 flex justify-center gap-2'>
-                        <Button onClick={() => handleSave(order.orderId)}>저장</Button>
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSave(order.orderId);
+                          }}
+                        >
+                          저장
+                        </Button>
                         <Button
                           className='border border-black bg-white text-black hover:text-white'
-                          onClick={() => handleReset(order.orderId)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReset(order.orderId);
+                          }}
                         >
                           초기화
                         </Button>
@@ -350,7 +286,7 @@ function RouteComponent() {
                               <dt className='font-semibold'>총 결제 금액:</dt>
                               <dd>{order.totalPrice?.toLocaleString('ko-KR')}원</dd>
                             </div>
-                            <OrderItemsDialog orderItems={order.orderItems ?? []} />
+                            <OrderItemsDialog orderItems={order.items ?? []} />
                           </div>
                         </div>
                       </TableCell>

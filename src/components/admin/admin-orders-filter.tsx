@@ -1,3 +1,4 @@
+import type { AdminOrderSearchParams } from '@/api/admin/types';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -15,12 +16,7 @@ import { useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 
 interface AdminOrdersFilterProps {
-  onFilterChange: (filters: {
-    searchField: string;
-    searchKeyword: string;
-    orderStatus: string | null;
-    dateRange: DateRange | undefined;
-  }) => void;
+  onFilterChange: (filters: AdminOrderSearchParams) => void;
 }
 
 export default function AdminOrdersFilter({ onFilterChange }: AdminOrdersFilterProps) {
@@ -30,7 +26,12 @@ export default function AdminOrdersFilter({ onFilterChange }: AdminOrdersFilterP
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   const handleSearch = () =>
-    onFilterChange({ searchField, searchKeyword, orderStatus: orderStatus || null, dateRange });
+    onFilterChange({
+      searchType: searchField,
+      keyword: searchKeyword,
+      startDate: dateRange?.from?.toISOString() || '',
+      endDate: dateRange?.to?.toISOString() || '',
+    });
 
   const resetFilters = () => {
     setSearchField('userName');
@@ -38,10 +39,10 @@ export default function AdminOrdersFilter({ onFilterChange }: AdminOrdersFilterP
     setOrderStatus(undefined);
     setDateRange(undefined);
     onFilterChange({
-      searchField: '',
-      searchKeyword: '',
-      orderStatus: null,
-      dateRange: undefined,
+      searchType: '',
+      keyword: '',
+      startDate: '',
+      endDate: '',
     });
   };
 

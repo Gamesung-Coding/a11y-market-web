@@ -1,10 +1,12 @@
-// src/routes/_need-auth/_admin/admin/users.jsx
 import { createFileRoute } from '@tanstack/react-router';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { toast } from 'sonner';
 
-import { adminApi } from '@/api/admin-api';
+import { useUpdateUserRole } from '@/api/admin/mutations';
+import { useUsers } from '@/api/admin/queries';
+import type { User } from '@/api/user/types';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -20,7 +22,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const Route = createFileRoute('/_need-auth/_admin/admin/users')({
   component: RouteComponent,
@@ -34,18 +35,20 @@ const ROLE_OPTIONS = [
 ];
 
 function RouteComponent() {
-  const [users, setUsers] = useState([]);
-  const [expandedRows, setExpandedRows] = useState([]);
+  const { data: users = [] } = useUsers();
+  const { mutateAsync: updateUserRole } = useUpdateUserRole();
+
+  const [expandedRows, setExpandedRows] = useState<string[]>([]);
   // userId → 변경 예정 role
-  const [roleDrafts, setRoleDrafts] = useState({});
+  const [roleDrafts, setRoleDrafts] = useState<Record<string, string>>({});
 
   /** 행 열고 닫기 */
-  const toggleRow = (id) => {
+  const toggleRow = (id: string) => {
     setExpandedRows((prev) => (prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]));
   };
 
   /**  헬퍼 컴포넌트 */
-  const InfoRow = ({ label, value }) => (
+  const InfoRow = ({ label, value }: { label: string; value: string | number | undefined }) => (
     <div className='flex justify-between gap-2'>
       <span className='font-kakao-little text-[11px] text-neutral-500 dark:text-neutral-400'>
         {label}
@@ -56,23 +59,8 @@ function RouteComponent() {
     </div>
   );
 
-  useEffect(() => {
-    async function fetchUsers() {
-      try {
-        const response = await adminApi.getUsers();
-        // console.log('getUsers 응답', response.data);
-        setUsers(response.data);
-      } catch (err) {
-        console.error('회원 목록 정보를 불러오는데 실패했습니다.', err);
-        toast.error('회원 목록 정보를 불러오는 데 실패했습니다.');
-      }
-    }
-
-    fetchUsers();
-  }, []);
-
   /** 셀렉트 박스에서 권한 바꿀 때 임시 값 저장 */
-  const handleRoleSelectChange = (userId, nextRole) => {
+  const handleRoleSelectChange = (userId: string, nextRole: string) => {
     setRoleDrafts((prev) => ({
       ...prev,
       [userId]: nextRole,
@@ -80,7 +68,7 @@ function RouteComponent() {
   };
 
   /** "권한 변경" 버튼 눌렀을 때 */
-  const handleApplyRoleChange = async (user) => {
+  const handleApplyRoleChange = async (user: User) => {
     const draftRole = roleDrafts[user.userId];
 
     // 변경할 값이 없으면 그냥 리턴
@@ -90,24 +78,11 @@ function RouteComponent() {
     }
 
     try {
-      const res = await adminApi.updateUserRole({
+      await updateUserRole({
         userId: user.userId,
         role: draftRole,
       });
 
-      const updatedUser = res.data;
-
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.userId === user.userId
-            ? {
-                ...u,
-                userRole: updatedUser.userRole ?? draftRole,
-                updatedAt: updatedUser.updatedAt ?? new Date().toISOString(),
-              }
-            : u,
-        ),
-      );
       toast.success('회원 권한이 성공적으로 변경되었습니다.');
     } catch (error) {
       console.error('회원 권한 변경에 실패했습니다.', error);

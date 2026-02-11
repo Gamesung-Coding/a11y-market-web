@@ -1,7 +1,13 @@
 import axiosInstance from '@/api/axios-instance';
 import type { User } from '@/api/user/types';
 import type { Seller, SellerDetail } from '../seller/types';
-import type { AdminSellerUpdateRequest, SellerApprovalRequest } from './types';
+import type {
+  AdminDashboardData,
+  AdminOrder,
+  AdminOrderSearchParams,
+  AdminSellerUpdateRequest,
+  SellerApprovalRequest,
+} from './types';
 
 export const adminApi = {
   getUsers: async (): Promise<User[]> => {
@@ -54,24 +60,21 @@ export const adminApi = {
     await axiosInstance.post(`/v1/admin/sellers/${sellerId}/reject`);
   },
 
-  getDashboardStats: async (): Promise<{
-    pendingSellerCount: number;
-    pendingProductCount: number;
-  }> => {
-    const { data } = await axiosInstance.get('/v1/admin/dashboard');
+  getDashboardStats: async (): Promise<AdminDashboardData> => {
+    const { data } = await axiosInstance.get<AdminDashboardData>('/v1/admin/dashboard');
     return data;
   },
 
   updateUserRole: async (data: { userId: string; role: string }) => {
-    const { data: responseData } = await axiosInstance.patch(
+    const { data: respData } = await axiosInstance.patch<void>(
       `/v1/admin/users/${data.userId}/role`,
       { role: data.role },
     );
-    return { data: responseData }; // return object to match existing usage { data: ... }
+    return respData;
   },
 
-  getAdminOrders: async (params: any) => {
-    const { data } = await axiosInstance.get('/v1/admin/orders', { params });
+  getAdminOrders: async (search: AdminOrderSearchParams) => {
+    const { data } = await axiosInstance.get<AdminOrder[]>('/v1/admin/orders', { params: search });
     return data;
   },
 

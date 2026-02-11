@@ -1,8 +1,8 @@
-// src/routes/_need-auth/_admin/admin/products.jsx
+// src/routes/_need-auth/_admin/admin/products/approval.tsx
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 
-import { adminApi } from '@/api/admin-api';
+import { adminApi } from '@/api/admin';
 
 import {
   AlertDialog,
@@ -24,22 +24,36 @@ export const Route = createFileRoute('/_need-auth/_admin/admin/products/approval
   component: AdminProductPendingPage,
 });
 
+// Assuming a local interface or imported one.
+// Since 'adminApi.getPendingProducts' returns 'any[]' in current index.ts, we need to be flexible or define a type.
+// I will define a type here matching usage.
+interface PendingProduct {
+  productId: string;
+  productName: string;
+  categoryName: string;
+  sellerName: string;
+  productPrice: number;
+  productStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+  submitDate: string;
+}
+
 /** /admin/products/pending : 관리자 상품 등록 신청 관리 페이지 */
 function AdminProductPendingPage() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<PendingProduct[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
 
       try {
-        const { data } = await adminApi.getPendingProducts();
+        const data = await adminApi.getPendingProducts();
         setProducts(data);
       } catch (err) {
         console.error('승인 대기 상품 조회 실패:', err);
         toast.error('승인 대기 상품 조회 중 오류가 발생했습니다.');
+        setError('승인 대기 상품 조회 중 오류가 발생했습니다.');
       } finally {
         setLoading(false);
       }
@@ -55,7 +69,13 @@ function AdminProductPendingPage() {
     { label: '반려 처리', value: products.filter((p) => p.productStatus === 'REJECTED').length },
   ];
 
-  const productStatusOptions = {
+  const productStatusOptions: Record<
+    string,
+    {
+      label: string;
+      variant: 'default' | 'destructive' | 'outline' | 'secondary' | null | undefined;
+    }
+  > = {
     PENDING: {
       label: '승인 대기',
       variant: 'outline',
@@ -71,7 +91,7 @@ function AdminProductPendingPage() {
   };
 
   // 승인/반려 - 실제 API 연동 + 로컬 상태 동기화
-  const handleUpdateStatus = async (productId, nextStatus) => {
+  const handleUpdateStatus = async (productId: string, nextStatus: string) => {
     const actionLabel = nextStatus === 'APPROVED' ? '승인' : '반려';
 
     try {
@@ -79,7 +99,11 @@ function AdminProductPendingPage() {
 
       // 로컬 상태도 함께 업데이트
       setProducts((prev) =>
-        prev.map((p) => (p.productId === productId ? { ...p, productStatus: nextStatus } : p)),
+        prev.map((p) =>
+          p.productId === productId
+            ? { ...p, productStatus: nextStatus as 'APPROVED' | 'REJECTED' }
+            : p,
+        ),
       );
 
       toast.success(`상품이 성공적으로 ${actionLabel} 처리되었습니다.`);
@@ -149,7 +173,10 @@ function AdminProductPendingPage() {
         {!loading && products.length > 0 && (
           <div className='divide-y'>
             {products.map((product) => (
-              <div className='grid grid-cols-12 items-center px-4 py-3 text-sm'>
+              <div
+                className='grid grid-cols-12 items-center px-4 py-3 text-sm'
+                key={product.productId}
+              >
                 {/* 상품 정보 */}
                 <div className='col-span-4 min-w-0'>
                   <div className='truncate font-medium'>{product.productName}</div>

@@ -5,6 +5,23 @@ import { toast } from 'sonner';
 import type { ProductStatus } from '../product/types';
 import type { AdminSellerUpdateRequest } from './types';
 
+export const useUpdateUserRole = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
+      adminApi.updateUserRole({ userId, role }),
+    onSuccess: () => {
+      toast.success('회원 권한이 변경되었습니다.');
+      queryClient.invalidateQueries({ queryKey: ADMIN_KEYS.users() });
+    },
+    onError: (error) => {
+      console.error('Failed to update user role:', error);
+      toast.error('회원 권한 변경에 실패했습니다.');
+    },
+  });
+};
+
 export const useUpdateProductStatus = () => {
   const queryClient = useQueryClient();
 

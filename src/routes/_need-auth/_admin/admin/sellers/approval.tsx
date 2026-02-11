@@ -1,4 +1,6 @@
-import { adminApi } from '@/api/admin-api';
+// src/routes/_need-auth/_admin/admin/sellers/approval.tsx
+import { adminApi } from '@/api/admin';
+import type { SellerApprovalRequest } from '@/api/admin/types';
 import { LoadingEmpty } from '@/components/main/loading-empty';
 import {
   AlertDialog,
@@ -41,22 +43,16 @@ export const Route = createFileRoute('/_need-auth/_admin/admin/sellers/approval'
 });
 
 function RouteComponent() {
-  // 임시 더미 데이터
-  const [sellerData, setSellerData] = useState([]);
-  const [sellers, setSellers] = useState([]);
-  const [processedSellers, setProcessedSellers] = useState({});
+  const [sellerData, setSellerData] = useState<SellerApprovalRequest[]>([]);
+  const [sellers, setSellers] = useState<SellerApprovalRequest[]>([]);
+  const [processedSellers, setProcessedSellers] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
       setIsLoading(true);
       try {
-        const { status, data } = await adminApi.getPendingSellers();
-
-        if (status !== 200) {
-          throw new Error('판매자 목록을 불러오지 못했습니다.');
-        }
-
+        const data = await adminApi.getPendingSellers();
         setSellerData(data);
         setSellers(data);
       } catch (err) {
@@ -69,35 +65,17 @@ function RouteComponent() {
   }, []);
 
   // 승인 핸들러
-  const handleApprove = async (id) => {
-    try {
-      const resp = await adminApi.updateSellerStatus(id, 'APPROVED');
+  const handleApprove = async (id: string) => {
+    await adminApi.approveSeller(id);
 
-      if (resp.status === 204) {
-        setProcessedSellers((prev) => ({ ...prev, [id]: 'APPROVED' }));
-      } else {
-        throw new Error('Failed to approve seller');
-      }
-    } catch (err) {
-      console.error('Error approving seller:', err);
-      toast.error('판매자 승인 중 오류가 발생했습니다.');
-    }
+    setProcessedSellers((prev) => ({ ...prev, [id]: 'APPROVED' }));
   };
 
   // 거절 핸들러
-  const handleReject = async (id) => {
-    try {
-      const resp = await adminApi.updateSellerStatus(id, 'REJECTED');
+  const handleReject = async (id: string) => {
+    await adminApi.rejectSeller(id);
 
-      if (resp.status === 204) {
-        setProcessedSellers((prev) => ({ ...prev, [id]: 'REJECTED' }));
-      } else {
-        throw new Error('Failed to reject seller');
-      }
-    } catch (err) {
-      console.error('Error rejecting seller:', err);
-      toast.error('판매자 거절 중 오류가 발생했습니다.');
-    }
+    setProcessedSellers((prev) => ({ ...prev, [id]: 'REJECTED' }));
   };
 
   if (isLoading) {
@@ -131,8 +109,8 @@ function RouteComponent() {
               setSellers(
                 sellerData.filter(
                   (seller) =>
-                    seller.sellerName.toLowerCase().includes(query) ||
-                    seller.businessNumber.toLowerCase().includes(query),
+                    seller.sellerName?.toLowerCase().includes(query) ||
+                    seller.businessNumber?.toLowerCase().includes(query),
                 ),
               );
             }}
@@ -192,19 +170,20 @@ function RouteComponent() {
                               <strong>판매자 상호명:</strong> {seller.sellerName}
                             </span>
                             <span>
-                              <strong>이름:</strong> {seller.sellerName}
+                              <strong>이름:</strong> {seller.representativeName}
                             </span>
                             <span>
-                              <strong>이메일:</strong> {seller.userEmail}
+                              <strong>이메일:</strong> {seller.email}
                             </span>
                             <span>
-                              <strong>전화번호:</strong> {seller.userPhone}
+                              <strong>전화번호:</strong> {seller.contactNumber}
                             </span>
                             <span>
                               <strong>사업자등록번호:</strong> {seller.businessNumber}
                             </span>
                             <span>
-                              <strong>판매자 소개:</strong> {seller.sellerIntro}
+                              <strong>설명:</strong>{' '}
+                              {'N/A' /* sellerIntro not in SellerApprovalRequest? */}
                             </span>
                           </div>
                           <DialogFooter>
@@ -247,9 +226,6 @@ function RouteComponent() {
                     <ItemDescription className='text-primary flex flex-col space-y-1'>
                       <span>
                         <strong>사업자등록번호:</strong> {seller.businessNumber}
-                      </span>
-                      <span>
-                        <strong>판매자 소개:</strong> {seller.sellerIntro}
                       </span>
                     </ItemDescription>
                   </ItemContent>
