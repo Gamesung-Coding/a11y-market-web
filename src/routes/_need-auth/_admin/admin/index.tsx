@@ -1,9 +1,9 @@
-import { adminApi } from '@/api/admin-api';
+import { useDashboardStats } from '@/api/admin/queries';
+import { ErrorEmpty } from '@/components/main/error-empty';
 import { LoadingEmpty } from '@/components/main/loading-empty';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
 
 export const Route = createFileRoute('/_need-auth/_admin/admin/')({
   component: RouteComponent,
@@ -11,30 +11,19 @@ export const Route = createFileRoute('/_need-auth/_admin/admin/')({
 
 function RouteComponent() {
   const navigate = useNavigate();
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState({
-    pendingSellersCount: 0,
-    pendingProductsCount: 0,
-  });
-
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      const data = await adminApi.getDashboardStats();
-
-      setDashboardData((prev) => ({
-        ...prev,
-        pendingSellersCount: data.pendingSellerCount || 0,
-        pendingProductsCount: data.pendingProductCount || 0,
-      }));
-
-      setIsLoading(false);
-    })();
-  }, []);
+  const { data: dashboardData, isLoading } = useDashboardStats();
 
   if (isLoading) {
     return <LoadingEmpty />;
+  }
+
+  if (!dashboardData) {
+    return (
+      <ErrorEmpty
+        message='대시보드 정보를 불러오지 못했습니다.'
+        prevPath='/'
+      />
+    );
   }
 
   return (

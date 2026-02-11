@@ -1,3 +1,4 @@
+import { useGetProfile } from '@/api/user/queries';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,7 +10,6 @@ import { ROLES } from '@/constants/roles';
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 
 export const Route = createFileRoute('/_need-auth/_admin/admin')({
   component: RouteComponent,
@@ -21,15 +21,15 @@ function RouteComponent() {
   const router = useRouterState();
   const navigate = useNavigate();
 
-  const { user } = useSelector((state) => state.auth);
+  const { data: user } = useGetProfile();
 
   useEffect(() => {
-    if (user?.userRole !== ROLES.ADMIN) {
+    if (user && user.userRole !== ROLES.ADMIN) {
       navigate({
         to: '/unauthorized',
       });
     }
-  });
+  }, [user, navigate]);
 
   // variables and constants
   const currentPath = router.location.pathname;
@@ -63,7 +63,7 @@ function RouteComponent() {
         {/* Navigation Buttons */}
         <div className='flex items-center'>
           <nav
-            orientation='vertical'
+            aria-orientation='vertical'
             className='w-full'
             aria-label='관리자 페이지 내비게이션'
           >

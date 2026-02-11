@@ -1,6 +1,7 @@
 import { adminApi } from '@/api/admin';
 import { ADMIN_KEYS } from '@/api/admin/keys';
 import { useQuery } from '@tanstack/react-query';
+import type { AdminOrderSearchParams } from './types';
 
 export const useUsers = () => {
   return useQuery({
@@ -27,5 +28,19 @@ export const usePendingSellers = () => {
   return useQuery({
     queryKey: ADMIN_KEYS.pendingSellers(),
     queryFn: () => adminApi.getPendingSellers(),
+  });
+};
+
+export const useDashboardStats = () => {
+  return useQuery({
+    queryKey: ADMIN_KEYS.dashboardStats(),
+    queryFn: () => adminApi.getDashboardStats(),
+  });
+};
+
+export const useAdminOrders = (search: AdminOrderSearchParams) => {
+  return useQuery({
+    queryKey: ADMIN_KEYS.orders(),
+    queryFn: () => adminApi.getAdminOrders(search),
   });
 };

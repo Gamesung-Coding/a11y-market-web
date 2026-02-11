@@ -1,4 +1,6 @@
-import { adminApi } from '@/api/admin-api';
+// src/routes/_need-auth/_admin/admin/sellers/index.tsx
+import { adminApi } from '@/api/admin';
+import type { Seller } from '@/api/seller/types';
 import { SellerInfoItem } from '@/components/admin/seller-info-item';
 import { LoadingEmpty } from '@/components/main/loading-empty';
 import {
@@ -19,18 +21,14 @@ export const Route = createFileRoute('/_need-auth/_admin/admin/sellers/')({
 });
 
 function RouteComponent() {
-  const [sellers, setSellers] = useState([]);
+  const [sellers, setSellers] = useState<Seller[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
       setIsLoading(true);
       try {
-        const { status, data } = await adminApi.getSellerList();
-
-        if (status !== 200) {
-          throw new Error('판매자 목록을 불러오지 못했습니다.');
-        }
+        const data = await adminApi.getAllSellers();
 
         setSellers(data);
       } catch (err) {

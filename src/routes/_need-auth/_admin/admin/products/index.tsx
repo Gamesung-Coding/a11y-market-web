@@ -1,4 +1,6 @@
-import { adminApi } from '@/api/admin-api';
+// src/routes/_need-auth/_admin/admin/products/index.tsx
+import { adminApi } from '@/api/admin';
+import type { Product, ProductStatus } from '@/api/product/types';
 import { ProductRowSheet } from '@/components/admin/product-row-sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,33 +32,27 @@ export const Route = createFileRoute('/_need-auth/_admin/admin/products/')({
 
 function RouteComponent() {
   // hooks
-  const [productData, setProductData] = useState([]);
+  const [productData, setProductData] = useState<Product[]>([]);
   const [searchField, setSearchField] = useState('product');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [orderStatus, setOrderStatus] = useState('ALL');
-  const [page, setPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchProducts = async () => {
     try {
-      const status = orderStatus === 'ALL' ? '' : orderStatus;
-
-      const resp = await adminApi.getAllProducts(searchKeyword || '', status || '', page - 1, 20);
-
-      const { totalCount: fetchedTotalCount, products } = resp.data;
-      setTotalCount(fetchedTotalCount);
+      const products = await adminApi.getPendingProducts();
       setProductData(products);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch product data:', err);
       toast.error(err.message || '상품 데이터를 불러오는 데 실패했습니다.');
     }
   };
 
-  const handleStatusChange = (productId, newStatus) => {
+  const handleStatusChange = (productId: string, newStatus: ProductStatus) => {
     setProductData((prevData) =>
       prevData.map((product) =>
         product.productId === productId ? { ...product, productStatus: newStatus } : product,
@@ -92,16 +88,20 @@ function RouteComponent() {
                 검색 조건
               </Label>
               <Select
-                id='searchField'
                 value={searchField}
                 onValueChange={setSearchField}
               >
-                <SelectTrigger className='w-34'>
-                  {
+                <SelectTrigger
+                  id='searchField'
+                  className='w-34'
+                >
+                  <SelectValue>
                     {
-                      product: '상품명 및 내용',
-                    }[searchField]
-                  }
+                      {
+                        product: '상품명 및 내용',
+                      }[searchField]
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value='product'>상품명 및 내용</SelectItem>
@@ -141,12 +141,13 @@ function RouteComponent() {
               주문 상태
             </Label>
             <Select
-              id='orderStatus'
               value={orderStatus ?? undefined}
               onValueChange={setOrderStatus}
-              placeholder='전체'
             >
-              <SelectTrigger className='w-36'>
+              <SelectTrigger
+                id='orderStatus'
+                className='w-36'
+              >
                 <SelectValue placeholder='전체'>
                   {orderStatus === 'ALL' ? '전체' : getProductStatusLabel(orderStatus)}
                 </SelectValue>
@@ -209,7 +210,7 @@ function RouteComponent() {
                   </Badge>
                 </TableCell>
                 <TableCell className='text-center'>
-                  {new Date(product.submitDate)?.toLocaleDateString('ko-KR') || 'N/A'}
+                  {new Date(product.createdAt).toLocaleDateString('ko-KR') || 'N/A'}
                 </TableCell>
                 <TableCell className='pr-8 text-center'>
                   <ProductRowSheet
