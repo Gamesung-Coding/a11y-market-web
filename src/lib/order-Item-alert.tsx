@@ -10,7 +10,7 @@ import {
   Timer,
   Truck,
 } from 'lucide-react';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface OrderItemAlertInfo {
   label: string;

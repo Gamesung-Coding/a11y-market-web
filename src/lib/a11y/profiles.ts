@@ -1,4 +1,4 @@
-import type { A11ySettings } from '@/types/a11y';
+import type { A11ySettings } from '@/api/a11y/types';
 
 export const A11Y_PROFILES: Record<
   string,

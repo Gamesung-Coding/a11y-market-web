@@ -1,4 +1,4 @@
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { getMyPageMenu } from './mypage-menu';
 
 describe('getMypageMenu', () => {
