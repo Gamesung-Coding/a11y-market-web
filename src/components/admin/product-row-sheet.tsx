@@ -1,4 +1,5 @@
-import { adminApi } from '@/api/admin-api';
+import { adminApi } from '@/api/admin';
+import type { Product, ProductStatus } from '@/api/product/types';
 import { Button } from '@/components/ui/button';
 import {
   Field,
@@ -28,8 +29,13 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
 
-export const ProductRowSheet = ({ product, onStatusChange }) => {
-  const [productStatus, setProductStatus] = useState(product.productStatus);
+interface ProductRowSheetProps {
+  product: Product;
+  onStatusChange?: (productId: string, status: ProductStatus) => void;
+}
+
+export const ProductRowSheet = ({ product, onStatusChange }: ProductRowSheetProps) => {
+  const [productStatus, setProductStatus] = useState<ProductStatus>(product.productStatus);
 
   const handleStatusChange = async () => {
     try {
@@ -37,10 +43,14 @@ export const ProductRowSheet = ({ product, onStatusChange }) => {
 
       onStatusChange && onStatusChange(product.productId, productStatus);
       toast.success('상품 상태가 성공적으로 업데이트되었습니다.');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to update product status:', err);
       toast.error(err.message || '상품 상태 업데이트에 실패했습니다.');
     }
+  };
+
+  const handleStatusSelectChange = (value: string) => {
+    setProductStatus(value as ProductStatus);
   };
 
   return (
@@ -49,7 +59,11 @@ export const ProductRowSheet = ({ product, onStatusChange }) => {
         <Button
           variant='default'
           className='font-medium'
-          href={`/need-auth/admin/admin/products/${product.productId}`}
+          // href prop removed as Button might not support it directly or it's for Link behavior.
+          // If it was supposed to be a Link, it should be wrapped or use 'asChild' with Link.
+          // However, in the original code it was just a Button with href (which is invalid for shadcn Button usually unless it's an anchor).
+          // But here it is a trigger for Sheet, so it shouldn't navigate.
+          // I will remove href.
         >
           상세정보 보기
         </Button>
@@ -73,7 +87,7 @@ export const ProductRowSheet = ({ product, onStatusChange }) => {
                       <span>{product.productId}</span>
                       <Select
                         value={productStatus}
-                        onValueChange={setProductStatus}
+                        onValueChange={handleStatusSelectChange}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder='상품 상태 변경'>

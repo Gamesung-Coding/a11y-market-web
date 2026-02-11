@@ -1,30 +1,65 @@
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { format } from 'date-fns';
-import ko from 'date-fns/locale/ko';
+import { ko } from 'date-fns/locale/ko';
 import { CalendarIcon } from 'lucide-react';
 import { useState } from 'react';
+import type { DateRange } from 'react-day-picker';
 
-export default function AdminOrdersFilter({ onFilterChange }) {
+interface AdminOrdersFilterProps {
+  onFilterChange: (filters: {
+    searchField: string;
+    searchKeyword: string;
+    orderStatus: string | null;
+    dateRange: DateRange | undefined;
+  }) => void;
+}
+
+export default function AdminOrdersFilter({ onFilterChange }: AdminOrdersFilterProps) {
   const [searchField, setSearchField] = useState('userName');
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [orderStatus, setOrderStatus] = useState(null);
-  const [dateRange, setDateRange] = useState({ from: null, to: null });
+  const [orderStatus, setOrderStatus] = useState<string | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
-  const handleSearch = () => onFilterChange({ searchField, searchKeyword, orderStatus, dateRange });
+  const handleSearch = () =>
+    onFilterChange({ searchField, searchKeyword, orderStatus: orderStatus || null, dateRange });
+
   const resetFilters = () => {
     setSearchField('userName');
     setSearchKeyword('');
-    setOrderStatus(null);
-    setDateRange({ from: null, to: null });
+    setOrderStatus(undefined);
+    setDateRange(undefined);
     onFilterChange({
       searchField: '',
       searchKeyword: '',
       orderStatus: null,
-      dateRange: { from: null, to: null },
+      dateRange: undefined,
     });
+  };
+
+  const getSearchFieldLabel = (field: string) => {
+    switch (field) {
+      case 'userName':
+        return '주문자명';
+      case 'receiverName':
+        return '수령자명';
+      case 'userPhone':
+        return '주문자 전화번호';
+      case 'receiverPhone':
+        return '수령자 전화번호';
+      case 'orderId':
+        return '주문번호';
+      default:
+        return '선택';
+    }
   };
 
   return (
@@ -39,15 +74,7 @@ export default function AdminOrdersFilter({ onFilterChange }) {
               onValueChange={setSearchField}
             >
               <SelectTrigger className='w-34'>
-                {
-                  {
-                    userName: '주문자명',
-                    receiverName: '수령자명',
-                    userPhone: '주문자 전화번호',
-                    receiverPhone: '수령자 전화번호',
-                    orderId: '주문번호',
-                  }[searchField]
-                }
+                <SelectValue>{getSearchFieldLabel(searchField)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='userName'>주문자명</SelectItem>
@@ -80,7 +107,7 @@ export default function AdminOrdersFilter({ onFilterChange }) {
                 variant='outline'
                 className='w-full justify-between'
               >
-                {dateRange.from && dateRange.to
+                {dateRange?.from && dateRange?.to
                   ? `${format(dateRange.from, 'yyyy-MM-dd')} ~ ${format(dateRange.to, 'yyyy-MM-dd')}`
                   : '기간 선택'}
                 <CalendarIcon className='ml-2 h-4 w-4' />
@@ -90,7 +117,7 @@ export default function AdminOrdersFilter({ onFilterChange }) {
               <Calendar
                 locale={ko}
                 mode='range'
-                selected={dateRange.from && dateRange.to ? dateRange : undefined}
+                selected={dateRange}
                 onSelect={setDateRange}
               />
             </PopoverContent>
@@ -101,11 +128,12 @@ export default function AdminOrdersFilter({ onFilterChange }) {
         <div className='flex w-48 flex-col gap-1'>
           <label className='ml-2 text-sm font-semibold'>주문 상태</label>
           <Select
-            value={orderStatus ?? undefined}
+            value={orderStatus}
             onValueChange={setOrderStatus}
-            placeholder='전체'
           >
-            <SelectTrigger className='w-36'>{orderStatus ?? '전체'}</SelectTrigger>
+            <SelectTrigger className='w-36'>
+              <SelectValue placeholder='전체' />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value='결제대기'>결제대기</SelectItem>
               <SelectItem value='결제완료'>결제완료</SelectItem>

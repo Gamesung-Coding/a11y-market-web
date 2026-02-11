@@ -1,4 +1,5 @@
-import { adminApi } from '@/api/admin-api';
+import { adminApi } from '@/api/admin';
+import type { Seller } from '@/api/admin/types';
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item';
 import {
   Select,
@@ -23,7 +24,11 @@ import {
 } from '../ui/sheet';
 import { SellerDetailInfo } from './seller-detail-info';
 
-export const SellerInfoItem = ({ seller, ...props }) => {
+interface SellerInfoItemProps extends React.ComponentPropsWithoutRef<typeof Item> {
+  seller: Seller;
+}
+
+export const SellerInfoItem = ({ seller, ...props }: SellerInfoItemProps) => {
   const [grade, setGrade] = useState(seller.sellerGrade);
   const [isA11yGuarantee, setIsA11yGuarantee] = useState(seller.isA11yGuarantee);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -36,13 +41,13 @@ export const SellerInfoItem = ({ seller, ...props }) => {
     a11yGuarantee: seller.isA11yGuarantee,
   };
 
-  const gradeColors = {
+  const gradeColors: Record<string, string> = {
     NEWER: 'bg-yellow-200 text-yellow-800 border border-yellow-800',
     REGULAR: 'bg-blue-200 text-blue-800 border border-blue-800',
     TRUSTED: 'bg-green-200 text-green-800 border border-green-800',
   };
 
-  const handleChangeGrade = async (newGrade) => {
+  const handleChangeGrade = async (newGrade: 'NEWER' | 'REGULAR' | 'TRUSTED') => {
     setIsUpdating(true);
     try {
       const resp = await adminApi.updateSellerInfo(seller.sellerId, {
@@ -86,13 +91,14 @@ export const SellerInfoItem = ({ seller, ...props }) => {
 
   return (
     <Item
-      key={seller.sellerId}
       variant='outline'
       {...props}
     >
       <ItemContent>
         <ItemTitle>
-          <h3 className='flex justify-center text-lg font-bold'>{seller.sellerName}</h3>
+          <div className='flex justify-center'>
+            <span className='text-lg font-bold'>{seller.sellerName}</span>
+          </div>
           {seller.isA11yGuarantee && (
             <Badge
               variant='secondary'
@@ -130,7 +136,7 @@ export const SellerInfoItem = ({ seller, ...props }) => {
         <span className='ml-2 self-start text-left font-bold'>등급 조정</span>
         <div className='flow-row flex w-full items-center gap-4'>
           <Select
-            onValueChange={handleChangeGrade}
+            onValueChange={(val) => handleChangeGrade(val as 'NEWER' | 'REGULAR' | 'TRUSTED')}
             value={grade}
             disabled={isUpdating}
           >

@@ -1,8 +1,6 @@
-import { adminApi } from '@/api/admin-api';
+import { useGetSellerDetail } from '@/api/admin/queries';
 import { useNavigate } from '@tanstack/react-router';
 import { CheckCircle, Circle } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { ErrorEmpty } from '../main/error-empty';
 import { LoadingEmpty } from '../main/loading-empty';
 import { Badge } from '../ui/badge';
@@ -10,37 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Item, ItemContent } from '../ui/item';
 import { ScrollArea } from '../ui/scroll-area';
 
-export const SellerDetailInfo = ({ sellerId }) => {
-  // hooks and states
-  const [sellerDetail, setSellerDetail] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [err, setErr] = useState(null);
+interface SellerDetailInfoProps {
+  sellerId: string;
+}
+
+export const SellerDetailInfo = ({ sellerId }: SellerDetailInfoProps) => {
+  const { data: sellerDetail, error, isLoading } = useGetSellerDetail(sellerId);
 
   const navigate = useNavigate();
 
-  // effects
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      try {
-        const resp = await adminApi.getSellerDetail(sellerId);
-        if (resp.status !== 200) {
-          throw new Error('Failed to fetch seller detail info');
-        }
-
-        setSellerDetail(resp.data);
-      } catch (err) {
-        console.error('Error fetching seller detail info:', err);
-        toast.error('판매자 상세 정보 조회 중 오류가 발생했습니다.');
-        setErr(err);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
-
   // variables and constants
-  const gradeColors = {
+  const gradeColors: Record<string, string> = {
     NEWER: 'bg-yellow-200 text-yellow-800 border border-yellow-800',
     REGULAR: 'bg-blue-200 text-blue-800 border border-blue-800',
     TRUSTED: 'bg-green-200 text-green-800 border border-green-800',
@@ -48,14 +26,17 @@ export const SellerDetailInfo = ({ sellerId }) => {
 
   const productInfo = {
     products: sellerDetail?.products || [],
-    approvedProducts: sellerDetail?.products.filter((p) => p.productStatus === 'APPROVED').length,
-    pendingProducts: sellerDetail?.products.filter((p) => p.productStatus === 'PENDING').length,
-    rejectedProducts: sellerDetail?.products.filter((p) => p.productStatus === 'REJECTED').length,
+    approvedProducts:
+      sellerDetail?.products.filter((p) => p.productStatus === 'APPROVED').length || 0,
+    pendingProducts:
+      sellerDetail?.products.filter((p) => p.productStatus === 'PENDING').length || 0,
+    rejectedProducts:
+      sellerDetail?.products.filter((p) => p.productStatus === 'REJECTED').length || 0,
   };
 
   // functions
   const getA11yGuaranteeBadge = () => {
-    if (sellerDetail.isA11yGuarantee) {
+    if (sellerDetail?.isA11yGuarantee) {
       return (
         <Badge className='border border-green-800 bg-green-200 text-green-800'>
           <CheckCircle className='mr-1 inline-block h-4 w-4' />
@@ -72,7 +53,7 @@ export const SellerDetailInfo = ({ sellerId }) => {
     }
   };
 
-  const getProductStatusBadge = (status) => {
+  const getProductStatusBadge = (status: string) => {
     switch (status) {
       case 'APPROVED':
         return (
@@ -96,7 +77,7 @@ export const SellerDetailInfo = ({ sellerId }) => {
     return <LoadingEmpty />;
   }
 
-  if (err) {
+  if (error || !sellerDetail) {
     return (
       <ErrorEmpty
         prevPath='/admin/sellers'
@@ -119,7 +100,7 @@ export const SellerDetailInfo = ({ sellerId }) => {
             <span>판매자 등급: </span>
             <Badge
               variant='secondary'
-              className={`px-2 py-1 font-bold ${gradeColors[sellerDetail.sellerGrade]}`}
+              className={`px-2 py-1 font-bold ${gradeColors[sellerDetail.sellerGrade] || ''}`}
             >
               {sellerDetail.sellerGrade === 'NEWER'
                 ? '신규'

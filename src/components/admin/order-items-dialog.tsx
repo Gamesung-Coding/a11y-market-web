@@ -1,3 +1,4 @@
+import type { OrderItem } from '@/api/order/types';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -15,7 +16,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-export default function OrderItemsDialog({ orderItems }) {
+interface OrderItemsDialogProps {
+  orderItems: OrderItem[];
+}
+
+export default function OrderItemsDialog({ orderItems }: OrderItemsDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
