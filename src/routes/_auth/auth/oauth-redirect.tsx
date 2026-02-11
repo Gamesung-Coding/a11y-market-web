@@ -1,31 +1,40 @@
-import { authApi } from '@/api/auth-api';
+import { authApi } from '@/api/auth';
 import { Spinner } from '@/components/ui/spinner';
-import { loginSuccess } from '@/store/auth-slice';
+import { useAuthActions } from '@/store/auth-store';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+
+interface OAuthRedirectSearch {
+  redirect?: string;
+  token?: string;
+}
 
 export const Route = createFileRoute('/_auth/auth/oauth-redirect')({
   component: RouteComponent,
-  validateSearch: (search) => ({
-    redirect: search.redirect || '/',
-    accessToken: search.token || null,
+  validateSearch: (search: Record<string, unknown>): OAuthRedirectSearch => ({
+    redirect: (search.redirect as string) || '/',
+    token: (search.token as string) || undefined,
   }),
 });
 
 function RouteComponent() {
-  const { accessToken, redirect } = Route.useSearch();
+  const { token: accessToken, redirect } = Route.useSearch();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { setToken: loginSuccess } = useAuthActions();
 
   const checkLogin = async () => {
     if (accessToken) {
       try {
-        const resp = await authApi.getUserInfo(accessToken);
-        const { user, newAccessToken, refreshToken } = resp.data;
+        const tokens = await authApi.getUserInfo(accessToken);
 
-        dispatch(loginSuccess({ user, accessToken: newAccessToken, refreshToken }));
-        navigate({ to: redirect });
+        const { accessToken: newAccessToken, refreshToken } = tokens;
+
+        if (newAccessToken && refreshToken) {
+          loginSuccess(newAccessToken, refreshToken);
+          navigate({ to: redirect });
+        } else {
+          throw new Error('Missing tokens');
+        }
       } catch (err) {
         navigate({
           to: '/login',

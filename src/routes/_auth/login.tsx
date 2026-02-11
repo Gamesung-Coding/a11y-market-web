@@ -1,4 +1,4 @@
-import { authApi } from '@/api/auth-api';
+import { authApi } from '@/api/auth';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,19 +11,23 @@ import {
 } from '@/components/ui/card';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { loginSuccess } from '@/store/auth-slice';
+import { useAuthStore } from '@/store/auth-store';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { AlertCircleIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
+interface LoginSearch {
+  redirect?: string;
+  error?: string;
+}
+
 export const Route = createFileRoute('/_auth/login')({
-  validateSearch: (search) => {
+  validateSearch: (search: Record<string, unknown>): LoginSearch => {
     return {
-      redirect: search.redirect || '/',
-      error: search.error || '',
+      redirect: (search.redirect as string) || '/',
+      error: (search.error as string) || '',
     };
   },
   component: RouteComponent,
@@ -31,23 +35,20 @@ export const Route = createFileRoute('/_auth/login')({
 
 function RouteComponent() {
   const { redirect, error } = Route.useSearch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorType, setErrorType] = useState(null);
+  const [errorType, setErrorType] = useState<string | null>(null);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
     try {
-      const resp = await authApi.login(email, password);
-      const { user, accessToken, refreshToken } = resp.data;
+      await authApi.login({ email, password });
 
-      dispatch(loginSuccess({ user, accessToken, refreshToken }));
       navigate({ to: redirect });
     } catch (err) {
       console.error('Login failed:', err);
@@ -55,7 +56,7 @@ function RouteComponent() {
     }
   };
 
-  const getErrorMessage = (errType) => {
+  const getErrorMessage = (errType: string | null) => {
     switch (errType) {
       case 'login_required':
         return '로그인이 필요한 서비스입니다.';
@@ -166,7 +167,7 @@ function RouteComponent() {
                   variant='default'
                   className='w-full bg-yellow-300 text-base text-black hover:bg-yellow-400'
                   onClick={() =>
-                    (window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao?redirect=${encodeURIComponent(redirect)}`)
+                    (window.location.href = `${API_BASE_URL}/oauth2/authorization/kakao?redirect=${encodeURIComponent(redirect || '/')}`)
                   }
                 >
                   카카오로 3초만에 로그인

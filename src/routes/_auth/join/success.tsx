@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,6 @@ export const Route = createFileRoute('/_auth/join/success')({
 
 function JoinSuccessPage() {
   const navigate = useNavigate();
-  const [openA11y, setOpenA11y] = useState(false);
 
   return (
     <div className='flex min-h-screen items-center justify-center bg-gray-100 px-6 py-14'>
