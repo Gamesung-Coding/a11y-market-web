@@ -1,69 +1,28 @@
-import { addressApi } from '@/api/address-api';
+import { useDeleteAddress } from '@/api/address/mutations';
+import { useGetAddressList } from '@/api/address/queries';
+import type { Address } from '@/api/address/types';
 import AddressList from '@/components/address/address-list';
 import DefaultAddress from '@/components/address/default-address';
 import { NewAddressForm } from '@/components/address/new-address-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 export const AddressManager = () => {
   const [activeTab, setActiveTab] = useState('default');
-  const [editingAddress, setEditingAddress] = useState(null);
-  const [addresses, setAddresses] = useState([]);
-  const handleEdit = (addr) => setEditingAddress(addr);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const { data: addresses } = useGetAddressList();
+  const { mutateAsync: deleteAddress } = useDeleteAddress();
 
-  const handleDelete = async (addressId) => {
-    try {
-      await addressApi.deleteAddress(addressId);
-      setAddresses((prev) => prev.filter((a) => a.addressId !== addressId));
-      toast.success('배송지가 삭제되었습니다,');
-    } catch (err) {
-      toast.message('배송지 삭제를 실패했습니다.');
-    }
+  const handleEdit = (addr: Address) => setEditingAddress(addr);
+
+  const handleDelete = async (addressId: string) => {
+    await deleteAddress(addressId);
+    toast.success('배송지가 삭제되었습니다.');
   };
 
-  const handleSave = async () => {
-    try {
-      const resp = await addressApi.getAddressList();
-      const updated = resp.data;
-
-      setAddresses(updated);
-      setEditingAddress(null);
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || '배송지 목록을 불러오는데 실패했습니다.');
-    }
-  };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const listResp = await addressApi.getAddressList();
-
-        let list = listResp.data.map((addr) => ({
-          ...addr,
-        }));
-        let defaultAddr = null;
-        try {
-          const defaultResp = await addressApi.getDefaultAddress();
-          defaultAddr = defaultResp.data;
-        } catch (err) {
-          defaultAddr = null;
-        }
-
-        if (defaultAddr && !list.find((a) => a.isDefault)) {
-          list.push(defaultAddr);
-        }
-        setAddresses(list);
-      } catch (err) {
-        console.error(err);
-        setAddresses([]);
-      }
-    })();
-  }, []);
-
-  const defaultAddr = addresses.find((a) => a.isDefault) || null;
+  const defaultAddr = addresses?.find((a) => a.isDefault) || null;
 
   return (
     <Card>
@@ -92,8 +51,10 @@ export const AddressManager = () => {
           <TabsContent value='default'>
             {editingAddress?.addressId === defaultAddr?.addressId ? (
               <NewAddressForm
-                mode='add'
+                mode='edit'
+                initialForm={editingAddress}
                 isDefault={true}
+                onCancel={() => setEditingAddress(null)}
               />
             ) : (
               <DefaultAddress
@@ -114,12 +75,11 @@ export const AddressManager = () => {
               <NewAddressForm
                 mode='edit'
                 initialForm={editingAddress}
-                onSave={handleSave}
                 onCancel={() => setEditingAddress(null)}
               />
             ) : (
               <AddressList
-                addresses={addresses}
+                addresses={addresses || []}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />

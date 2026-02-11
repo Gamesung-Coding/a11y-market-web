@@ -1,8 +1,7 @@
-import { orderApi } from '@/api/order-api';
+import { useGetMyOrders } from '@/api/order/queries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@iconify/react';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { useNavigate } from '@tanstack/react-router';
 import { LoadingEmpty } from '../main/loading-empty';
 import OrderCard from '../order/order-card';
 import { Button } from '../ui/button';
@@ -16,24 +15,8 @@ import {
 } from '../ui/empty';
 
 export const OrderHistory = () => {
-  const [orders, setOrders] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const resp = await orderApi.getMyOrders();
-        if (resp.status === 200) {
-          setOrders(resp.data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch orders:', error);
-        toast.error('주문 내역을 불러오는 데 실패했습니다. 다시 시도해주세요.');
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
+  const navigate = useNavigate();
+  const { data: orders = [], isLoading } = useGetMyOrders();
 
   if (isLoading) {
     return <LoadingEmpty />;
@@ -43,7 +26,7 @@ export const OrderHistory = () => {
     <Card>
       <CardHeader>
         <CardTitle>
-          <h2 className='text-2xl font-bold'>주문 내역</h2>
+          <span className='text-2xl font-bold'>주문 내역</span>
         </CardTitle>
         <CardDescription className='text-lg'>
           구매하신 상품의 주문 내역을 확인하세요

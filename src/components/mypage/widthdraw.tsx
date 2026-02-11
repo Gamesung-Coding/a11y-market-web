@@ -1,14 +1,13 @@
-import { userApi } from '@/api/user-api';
+import { useLogout } from '@/api/auth/mutations';
+import { useWithdrawAccount } from '@/api/user/mutations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { logout } from '@/store/auth-slice';
 import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 import { Separator } from '../ui/separator';
 import { Spinner } from '../ui/spinner';
@@ -19,28 +18,19 @@ export const Widthdraw = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { mutate: logout } = useLogout();
+  const { mutateAsync: withdrawAccount } = useWithdrawAccount();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const { status } = await userApi.withdrawAccount(password);
+    await withdrawAccount(password);
 
-      if (status !== 204) {
-        new Error('회원 탈퇴에 실패했습니다. 다시 시도해주세요.');
-      }
-
-      navigate({ to: '/' });
-      dispatch(logout());
-      toast.success('회원 탈퇴가 완료되었습니다.');
-    } catch (err) {
-      console.error('회원 탈퇴 오류:', err);
-      toast.error('회원 탈퇴에 실패했습니다. 다시 시도해주세요.');
-    } finally {
-      setIsLoading(false);
-    }
+    navigate({ to: '/' });
+    logout();
+    toast.success('회원 탈퇴가 완료되었습니다.');
+    setIsLoading(false);
   };
 
   return (

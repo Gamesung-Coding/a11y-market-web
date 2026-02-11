@@ -22,7 +22,8 @@ export interface User {
 }
 
 export interface UpdateProfileRequest {
-  userNickname?: string;
+  userName?: string;
   userPhone?: string;
+  userNickname?: string;
   userPassword?: string;
 }

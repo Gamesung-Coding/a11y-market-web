@@ -22,7 +22,6 @@ interface NewAddressFormProps {
 export const NewAddressForm = ({
   mode,
   initialForm = null,
-  onSave,
   onCancel,
   isDefault = false,
 }: NewAddressFormProps) => {
@@ -40,6 +39,9 @@ export const NewAddressForm = ({
       isDefault: isDefault,
     },
   });
+
+  const { mutateAsync: createAddress } = useCreateAddress();
+  const { mutateAsync: updateAddress } = useUpdateAddress();
 
   useEffect(() => {
     if (initialForm) {
@@ -101,16 +103,16 @@ export const NewAddressForm = ({
     return formattedValue;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     try {
       if (mode === 'add') {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { addressId, ...data } = formData;
-        await useCreateAddress().mutateAsync(data as any);
+        await createAddress(data as any);
       } else {
         if (formData.addressId) {
-          await useUpdateAddress().mutateAsync({
+          await updateAddress({
             addressId: formData.addressId,
             data: formData.data,
           });
@@ -119,7 +121,6 @@ export const NewAddressForm = ({
         }
       }
       toast.success('배송지를 저장했습니다.');
-      onSave && onSave();
     } catch (err: any) {
       console.error('배송지 저장 실패:', err);
       toast.error(err.message || '배송지 저장에 실패했습니다.');
@@ -145,7 +146,7 @@ export const NewAddressForm = ({
           </Button>
         </>
       ) : (
-        <>
+        <form onSubmit={handleSubmit}>
           <div>
             <h3 className='text-lg font-semibold'>
               {mode === 'add' ? '배송지 추가' : '배송지 수정'}
@@ -276,7 +277,6 @@ export const NewAddressForm = ({
             variant='default'
             className='mt-4'
             type='submit'
-            onClick={handleSubmit}
             aria-label={mode === 'add' ? '배송지 추가 버튼' : '배송지 수정 버튼'}
           >
             {mode === 'add' ? '추가하기' : '수정하기'}
@@ -291,7 +291,7 @@ export const NewAddressForm = ({
               취소
             </Button>
           )}
-        </>
+        </form>
       )}
     </div>
   );
