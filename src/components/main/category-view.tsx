@@ -1,37 +1,16 @@
-import { mainApi } from '@/api/main-api';
+import { useGetRecommendCategories } from '@/api/main/queries';
+import type { Product } from '@/api/product/types';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { IconMap } from '@/lib/category-icon-mapping';
-import type { Product } from '@/types/product';
 import { useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
 import { ProductCard } from './product-card';
 
 export function CategoryView() {
   const navigate = useNavigate();
-  const [itemList, setItemList] = useState<Product[]>([]);
+  const { data: items } = useGetRecommendCategories();
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const resp = await mainApi.getCategories();
-        setItemList(resp.data);
-      } catch (error) {
-        console.error('Failed to fetch categories:', error);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  const handleSelectCategory = (categoryId: string) => {
-    const filteredProducts = itemList.filter(
-      (product: Product) => product.categoryId === categoryId,
-    );
-    setItemList(filteredProducts);
-  };
-
-  if (!itemList || itemList.length === 0) {
+  if (!items || items.length === 0) {
     return null;
   }
 
@@ -50,17 +29,16 @@ export function CategoryView() {
       </header>
       <div className='container mx-auto px-4'>
         <Tabs
-          defaultValue='019a69f3-b7b4-7c2d-afb2-2fcb168bfe12'
+          defaultValue={items[0]?.categoryId}
           className='w-full'
         >
           <TabsList className='mb-8 h-auto w-full flex-wrap justify-start gap-2 rounded-full bg-neutral-200 p-1 dark:bg-neutral-600'>
-            {itemList.map((item) => {
+            {items.map((item) => {
               return (
                 <TabsTrigger
-                  key={item.categoryId.toString()}
-                  value={item.categoryId.toString()}
+                  key={item.categoryId}
+                  value={item.categoryId}
                   className='gap-2 rounded-full px-4'
-                  onClick={() => handleSelectCategory(item.categoryId)}
                 >
                   <IconMap
                     categoryName={item.categoryName}
@@ -71,16 +49,16 @@ export function CategoryView() {
               );
             })}
           </TabsList>
-          {itemList.map((item) => (
+          {items.map((item) => (
             <TabsContent
               key={item.categoryId}
-              value={item.categoryId.toString()}
+              value={item.categoryId}
             >
               <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4'>
                 {item.products.map((product) => (
                   <ProductCard
                     key={product.productId}
-                    product={product}
+                    product={product as Product}
                   />
                 ))}
               </div>

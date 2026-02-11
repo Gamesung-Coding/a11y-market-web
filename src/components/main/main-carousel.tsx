@@ -1,4 +1,4 @@
-import { mainApi } from '@/api/main-api';
+import { useGetEventBanners } from '@/api/main/queries';
 import { Button } from '@/components/ui/button';
 import {
   Carousel,
@@ -7,7 +7,6 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
-import type { EventBanner } from '@/types/main-page';
 import { useNavigate } from '@tanstack/react-router';
 import Autoplay from 'embla-carousel-autoplay';
 import Fade from 'embla-carousel-fade';
@@ -21,13 +20,12 @@ export const MainCarousel = () => {
   const fade = useRef(Fade());
 
   const navigate = useNavigate();
+  const { data: bannerData, isLoading } = useGetEventBanners();
 
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState<number>(0);
   const [count, setCount] = useState<number>(0);
   const [isAutoPlay, setIsAutoPlay] = useState<boolean>(true);
-  const [bannerData, setBannerData] = useState<EventBanner[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (!api) return;
@@ -39,22 +37,6 @@ export const MainCarousel = () => {
       setCurrent(api.selectedScrollSnap());
     });
   }, [api]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const data = await mainApi.getEventBanners();
-        setBannerData(data);
-      } catch (error) {
-        console.error('배너 데이터를 불러오는 중 오류 발생:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const apiButtonStyles =
     'absolute opacity-80 top-1/2 size-12 -translate-y-1/2 rounded-full bg-neutral-50 text-neutral-700 shadow-lg hover:opacity-100 hover:bg-white dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-500';

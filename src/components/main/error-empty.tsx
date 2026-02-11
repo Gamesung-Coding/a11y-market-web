@@ -10,7 +10,12 @@ import {
 import { Icon } from '@iconify/react';
 import { useNavigate } from '@tanstack/react-router';
 
-export const ErrorEmpty = ({ prevPath, message }) => {
+interface ErrorEmptyProps {
+  prevPath: string;
+  message?: string;
+}
+
+export const ErrorEmpty = ({ prevPath, message }: ErrorEmptyProps) => {
   const navigate = useNavigate();
 
   return (

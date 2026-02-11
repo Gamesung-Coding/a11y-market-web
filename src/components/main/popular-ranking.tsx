@@ -1,4 +1,4 @@
-import { mainApi } from '@/api/main-api';
+import { useGetPopularItems } from '@/api/main/queries';
 import { Button } from '@/components/ui/button';
 import {
   Carousel,
@@ -7,28 +7,17 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
-import type { MonthlyPopularProduct } from '@/types/main-page';
 import { Icon } from '@iconify/react';
 import { useNavigate } from '@tanstack/react-router';
 import { TrendingUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ProductCard } from './product-card';
 
 export function PopularRanking() {
   const navigate = useNavigate();
+  const { data } = useGetPopularItems();
 
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
-  const [data, setData] = useState<MonthlyPopularProduct[]>([]);
-
-  useEffect(() => {
-    // Fetch popular items from the API
-    const fetchPopularItems = async () => {
-      const data = await mainApi.getPopularItems();
-      setData(data);
-    };
-
-    fetchPopularItems();
-  }, []);
 
   const apiButtonStyles =
     'absolute top-1/2 size-12 -translate-y-1/2 rounded-full bg-neutral-50 text-neutral-700 shadow-lg';

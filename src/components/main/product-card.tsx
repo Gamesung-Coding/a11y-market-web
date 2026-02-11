@@ -1,8 +1,8 @@
+import type { MonthlyPopularProduct } from '@/api/main/types';
+import type { Product, SimpleProductInfo } from '@/api/product/types';
 import { AddCartButton } from '@/components/cart/add-cart-button';
 import { ImageWithFallback } from '@/components/image-with-fallback';
 import { Badge } from '@/components/ui/badge';
-import type { MonthlyPopularProduct } from '@/types/main-page';
-import type { Product, SimpleProductInfo } from '@/types/product';
 import { Link } from '@tanstack/react-router';
 
 interface ProductCardProps {

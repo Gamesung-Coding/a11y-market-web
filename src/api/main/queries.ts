@@ -16,7 +16,7 @@ export const useGetPopularItems = () => {
   });
 };
 
-export const useGetCategories = () => {
+export const useGetRecommendCategories = () => {
   return useQuery({
     queryKey: mainKeys.categories(),
     queryFn: mainApi.getCategories,
