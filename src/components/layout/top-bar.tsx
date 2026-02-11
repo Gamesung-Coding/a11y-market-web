@@ -1,5 +1,6 @@
 // import { logout } from '@/store/slices/authSlice';
-import { authApi } from '@/api/auth-api';
+import { useLogout } from '@/api/auth/mutations';
+import { useGetCategories } from '@/api/category/queries';
 import { CartBadge } from '@/components/cart/cart-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,6 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { useCategory } from '@/hooks/use-category';
 import { useUser } from '@/hooks/use-user';
 import { useAuthStore } from '@/store/auth-store';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
@@ -21,8 +21,9 @@ import { useEffect, useState } from 'react';
 
 export default function TopBar() {
   const { isAuthenticated } = useAuthStore();
+  const { mutate: logout } = useLogout();
   const { data: user } = useUser();
-  const { data: categories, isLoading } = useCategory();
+  const { data: categories, isLoading } = useGetCategories();
 
   const navigate = useNavigate();
   const router = useRouterState();
@@ -33,15 +34,6 @@ export default function TopBar() {
     // pathname이 변경될 때마다 실행
     setIsMobileMenuOpen(false);
   }, [router.location.pathname]);
-
-  const handleLogout = async () => {
-    try {
-      navigate({ to: '/' });
-      await authApi.logout();
-    } catch (err) {
-      console.warn('Logout API call failed:', err);
-    }
-  };
 
   const isAdminPage = router.location.pathname.startsWith('/admin');
 
@@ -198,7 +190,7 @@ export default function TopBar() {
                 variant='ghost'
                 size='sm'
                 aria-label={isAuthenticated ? '로그아웃 버튼' : '로그인 페이지로 이동'}
-                onClick={() => (isAuthenticated ? handleLogout() : navigate({ to: '/login' }))}
+                onClick={() => (isAuthenticated ? logout() : navigate({ to: '/login' }))}
                 className='relative'
               >
                 {isAuthenticated ? <LogOut className='size-5' /> : <LogIn className='size-5' />}
