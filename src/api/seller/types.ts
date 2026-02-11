@@ -1,4 +1,5 @@
 import type { OrderItem } from '@/api/order/types';
+import type { Product } from '../product/types';
 
 export const ESellerSubmitStatus = {
   PENDING: 'PENDING',
@@ -6,7 +7,14 @@ export const ESellerSubmitStatus = {
   REJECTED: 'REJECTED',
 } as const;
 
+export const ESellerGrade = {
+  NEWER: 'NEWER',
+  REGULAR: 'REGULAR',
+  TRUSTED: 'TRUSTED',
+} as const;
+
 export type SellerSubmitStatus = keyof typeof ESellerSubmitStatus;
+export type SellerGrade = keyof typeof ESellerGrade;
 
 export interface DashboardStats {
   totalRevenue: number;
@@ -46,4 +54,26 @@ export interface OrderSummary {
   shippingOrders: number;
   completedOrders: number;
   claimedOrders: number;
+}
+
+export interface Seller {
+  sellerId: string;
+  sellerName: string;
+  businessNumber: string;
+  storeIntro: string;
+  contactEmail: string;
+  contactPhone: string;
+  sellerGrade: 'NEWER' | 'REGULAR' | 'TRUSTED';
+  isA11yGuarantee: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SellerDetail extends Seller {
+  profileStatus: string;
+  submitDate: string;
+  approvedDate: string;
+  lastUpdatedDate: string;
+  orders: OrderItem[];
+  products: Product[];
 }

@@ -1,6 +1,6 @@
 import { cartApi } from '@/api/cart';
 import { CART_KEYS } from '@/api/cart/keys';
-import type { AddCartItemRequest } from '@/api/cart/types';
+import type { AddCartItemRequest, UpdateCartItemRequest } from '@/api/cart/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -38,6 +38,72 @@ export const useAddCartItem = () => {
     },
 
     // 성공 또는 실패 후 쿼리 무효화
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: CART_KEYS.count() });
+      queryClient.invalidateQueries({ queryKey: CART_KEYS.items() });
+    },
+  });
+};
+
+export const useUpdateCartItem = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (params: UpdateCartItemRequest) => cartApi.updateCartItemQuantity(params),
+
+    onMutate: async (newItem) => {
+      await queryClient.cancelQueries({ queryKey: CART_KEYS.count() });
+
+      const previousCount = queryClient.getQueryData<number>(CART_KEYS.count());
+
+      queryClient.setQueryData<number>(CART_KEYS.count(), (old) => {
+        return (old ?? 0) + newItem.quantity;
+      });
+
+      return { previousCount };
+    },
+
+    onError: (_err, _newItem, context) => {
+      if (context?.previousCount !== undefined) {
+        queryClient.setQueryData<number>(CART_KEYS.count(), context.previousCount);
+      }
+
+      toast.error('장바구니에 추가하는 중 오류가 발생했습니다.');
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: CART_KEYS.count() });
+      queryClient.invalidateQueries({ queryKey: CART_KEYS.items() });
+    },
+  });
+};
+
+export const useDeleteCartItems = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (params: string[]) => cartApi.deleteCartItems(params),
+
+    onMutate: async (newItem) => {
+      await queryClient.cancelQueries({ queryKey: CART_KEYS.count() });
+
+      const previousCount = queryClient.getQueryData<number>(CART_KEYS.count());
+
+      queryClient.setQueryData<number>(CART_KEYS.count(), (old) => {
+        return (old ?? 0) - newItem.length;
+      });
+
+      return { previousCount };
+    },
+
+    onError: (_err, _newItem, context) => {
+      if (context?.previousCount !== undefined) {
+        queryClient.setQueryData<number>(CART_KEYS.count(), context.previousCount);
+      }
+
+      toast.error('장바구니에 추가하는 중 오류가 발생했습니다.');
+    },
+
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: CART_KEYS.count() });
       queryClient.invalidateQueries({ queryKey: CART_KEYS.items() });

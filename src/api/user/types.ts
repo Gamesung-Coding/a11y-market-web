@@ -1,4 +1,4 @@
-import type { SellerSubmitStatus } from '@/types/seller';
+import type { SellerSubmitStatus } from '@/api/seller/types';
 
 const EUserRole = {
   USER: 'USER',

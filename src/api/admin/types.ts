@@ -1,5 +1,5 @@
-import type { Product } from '@/api/product/types';
-import type { OrderItem } from '../order/types';
+import type { SellerGrade, SellerSubmitStatus } from '../seller/types';
+import type { UserRole } from '../user/types';
 
 export interface AdminStats {
   totalUsers: number;
@@ -17,30 +17,8 @@ export interface SellerApprovalRequest {
   representativeName: string;
   contactNumber: string;
   email: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: SellerSubmitStatus;
   requestedAt: string;
-}
-
-export interface Seller {
-  sellerId: string;
-  sellerName: string;
-  businessNumber: string;
-  storeIntro: string;
-  contactEmail: string;
-  contactPhone: string;
-  sellerGrade: 'NEWER' | 'REGULAR' | 'TRUSTED';
-  isA11yGuarantee: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface SellerDetail extends Seller {
-  profileStatus: string;
-  submitDate: string;
-  approvedDate: string;
-  lastUpdatedDate: string;
-  orders: OrderItem[];
-  products: Product[];
 }
 
 export interface DashboardStats {
@@ -57,5 +35,12 @@ export interface AdminOrderSearchParams {
 
 export interface UpdateUserRoleRequest {
   userId: string;
-  role: 'USER' | 'SELLER' | 'ADMIN';
+  role: UserRole;
+}
+
+export interface AdminSellerUpdateRequest {
+  sellerName: string;
+  businessNumber: string;
+  sellerGrade: SellerGrade;
+  a11yGuarantee: boolean;
 }

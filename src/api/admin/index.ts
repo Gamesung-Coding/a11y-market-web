@@ -1,6 +1,7 @@
 import axiosInstance from '@/api/axios-instance';
 import type { User } from '@/api/user/types';
-import type { Seller, SellerApprovalRequest, SellerDetail } from './types';
+import type { Seller, SellerDetail } from '../seller/types';
+import type { AdminSellerUpdateRequest, SellerApprovalRequest } from './types';
 
 export const adminApi = {
   getUsers: async (): Promise<User[]> => {
@@ -25,6 +26,20 @@ export const adminApi = {
     return data;
   },
 
+  // 판매자 정보 수정
+  updateSellerInfo: async (
+    sellerId: string,
+    sellerInfo: AdminSellerUpdateRequest,
+  ): Promise<void> => {
+    await axiosInstance.patch(`/v1/admin/sellers/${sellerId}`, sellerInfo);
+  },
+
+  // 전체 판매자 목록 조회
+  getAllSellers: async (): Promise<Seller[]> => {
+    const { data } = await axiosInstance.get<Seller[]>('/v1/admin/sellers');
+    return data;
+  },
+
   getSellerDetail: async (sellerId: string): Promise<SellerDetail> => {
     const { data } = await axiosInstance.get<SellerDetail>(`/v1/admin/sellers/${sellerId}`);
     return data;
@@ -37,11 +52,6 @@ export const adminApi = {
 
   rejectSeller: async (sellerId: string): Promise<void> => {
     await axiosInstance.post(`/v1/admin/sellers/${sellerId}/reject`);
-  },
-
-  getAllSellers: async (): Promise<Seller[]> => {
-    const { data } = await axiosInstance.get<Seller[]>('/v1/admin/sellers');
-    return data;
   },
 
   getDashboardStats: async (): Promise<{
