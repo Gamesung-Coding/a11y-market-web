@@ -12,7 +12,7 @@ const userItems = [{ label: '판매자 신청', path: '/seller/apply', redirect:
 
 const sellerItems = [{ label: '판매자 센터', path: '/seller/dashboard', redirect: true }];
 
-export const getMyPageMenu = (userRole) => {
+export const getMyPageMenu = (userRole: string) => {
   if (userRole === ROLES.USER) {
     return [...menuItems, ...userItems];
   } else if (userRole === ROLES.SELLER) {

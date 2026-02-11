@@ -14,7 +14,7 @@ export const ORDER_ITEM_STATUS = {
   RETURN_REJECTED: 'RETURN_REJECTED',
 };
 
-export const statusLabel = (status) => {
+export const statusLabel = (status: string) => {
   switch (status) {
     case ORDER_ITEM_STATUS.ORDERED:
       return {

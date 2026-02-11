@@ -10,9 +10,17 @@ import {
   Timer,
   Truck,
 } from 'lucide-react';
+import { ReactNode } from 'react';
 
-export const orderItemStatusAlert = {
-  ORDERD: {
+interface OrderItemAlertInfo {
+  label: string;
+  description: string;
+  color: string;
+  icon: ReactNode;
+}
+
+export const orderItemStatusAlert: Record<string, OrderItemAlertInfo> = {
+  ORDERED: {
     label: '결제 대기',
     description: '주문서는 발행되었으나, 결제 대기 상태입니다.',
     color:

@@ -1,4 +1,4 @@
-export const formatPhoneNumber = (value) => {
+export const formatPhoneNumber = (value: string) => {
   // Format the phone number as XXX-XXXX-XXXX or XXX-XXX-XXXX
   if (value.length > 3 && value.length <= 7) {
     value = `${value.slice(0, 3)}-${value.slice(3)}`;

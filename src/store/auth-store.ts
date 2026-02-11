@@ -6,7 +6,7 @@ interface AuthState {
 
   actions: {
     // 로그인 성공 시 토큰 저장 또는 토큰 갱신 (Refresh Token Rotation 방식)
-    loginSucess: (accessToken: string, refreshToken: string) => void;
+    setToken: (accessToken: string, refreshToken: string) => void;
     // 로그아웃 시 토큰 제거
     logout: () => void;
   };
@@ -17,7 +17,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
 
   actions: {
-    loginSucess: (accessToken: string, refreshToken: string) => {
+    setToken: (accessToken: string, refreshToken: string) => {
       localStorage.setItem('refreshToken', refreshToken);
       set(() => ({
         accessToken,

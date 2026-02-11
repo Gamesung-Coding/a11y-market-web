@@ -1,4 +1,4 @@
-const ProectStatusMapping = {
+const ProectStatusMapping: Record<string, string> = {
   PENDING: '승인 대기',
   APPROVED: '판매 중',
   REJECTED: '승인 거절',
@@ -6,11 +6,11 @@ const ProectStatusMapping = {
   DELETED: '삭제됨',
 };
 
-export const getProductStatusLabel = (status) => {
+export const getProductStatusLabel = (status: string): string => {
   return ProectStatusMapping[status] || '알 수 없음';
 };
 
-export const getProductStatusStyle = (status) => {
+export const getProductStatusStyle = (status: string): string => {
   switch (status) {
     case 'PENDING':
       return 'bg-blue-100 text-blue-800 border-blue-800';

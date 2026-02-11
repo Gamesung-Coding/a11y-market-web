@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function useAuthInit() {
-  const { loginSucess, logout } = useAuthActions();
+  const { setToken: loginSuccess, logout } = useAuthActions();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -23,7 +23,7 @@ export function useAuthInit() {
 
         const { accessToken, refreshToken: newRefreshToken } = resp.data;
 
-        loginSucess(accessToken, newRefreshToken);
+        loginSuccess(accessToken, newRefreshToken);
       } catch (err) {
         console.error('Auth initialization failed:', err);
         logout();
