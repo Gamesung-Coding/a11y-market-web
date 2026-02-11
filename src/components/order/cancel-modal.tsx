@@ -1,3 +1,4 @@
+import type { OrderItem } from '@/api/order/types';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +12,14 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 
-export default function CancelModal({ isOpen, onClose, onSubmit, item }) {
+interface CancelModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (reason: string) => void;
+  item: OrderItem | null;
+}
+
+export default function CancelModal({ isOpen, onClose, onSubmit, item }: CancelModalProps) {
   const [reason, setReason] = useState('');
   const presetReasons = ['단순 변심', '사이즈/옵션 선택 실수', '상품 설명과 다름'];
   const [customMode, setCustomMode] = useState(false);

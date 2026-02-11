@@ -1,5 +1,6 @@
-// components/order/OrderCard.jsx
+// components/order/OrderCard.tsx
 
+import type { Order } from '@/api/order/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { statusLabel } from '@/constants/order-item-status';
@@ -9,7 +10,11 @@ import { ImageWithFallback } from '../image-with-fallback';
 import { Button } from '../ui/button';
 import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '../ui/item';
 
-export default function OrderCard({ order }) {
+interface OrderCardProps {
+  order: Order;
+}
+
+export default function OrderCard({ order }: OrderCardProps) {
   const navigate = useNavigate();
 
   return (
