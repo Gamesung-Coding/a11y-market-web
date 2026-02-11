@@ -1,4 +1,5 @@
-import { addressApi } from '@/api/address-api';
+import { addressApi } from '@/api/address';
+import type { Address } from '@/api/address/types';
 import { AddressModifier } from '@/components/address/address-modifier';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,10 +26,15 @@ import { formatPhoneNumber } from '@/lib/phone-number-formatter';
 import { useEffect, useState } from 'react';
 import { Spinner } from '../ui/spinner';
 
-export const AddressSelector = ({ defaultAddressId, onSelectAddress }) => {
+interface AddressSelectorProps {
+  defaultAddressId: string | null;
+  onSelectAddress: (address: Address) => void;
+}
+
+export const AddressSelector = ({ defaultAddressId, onSelectAddress }: AddressSelectorProps) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [addresses, setAddresses] = useState([]);
-  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -38,10 +44,8 @@ export const AddressSelector = ({ defaultAddressId, onSelectAddress }) => {
   const fetchAddresses = async () => {
     setIsLoading(true);
     try {
-      const { data, status } = await addressApi.getAddressList();
-      if (status !== 200) {
-        throw new Error('Failed to fetch address list');
-      }
+      const data = await addressApi.getAddressList();
+
       setAddresses(data);
       if (selectedAddress == null) {
         const defaultAddr = data.find((addr) => addr.addressId === defaultAddressId) || data[0];
@@ -59,7 +63,7 @@ export const AddressSelector = ({ defaultAddressId, onSelectAddress }) => {
     }
   };
 
-  const handleAddressSelect = (address) => {
+  const handleAddressSelect = (address: Address) => {
     setSelectedAddress(address);
     onSelectAddress(address);
   };
@@ -106,7 +110,7 @@ export const AddressSelector = ({ defaultAddressId, onSelectAddress }) => {
                   <Item
                     variant='outline'
                     key={address.addressId}
-                    className={`${address.addressId === selectedAddress.addressId ? 'border-3 border-blue-300' : ''}`}
+                    className={`${address.addressId === selectedAddress?.addressId ? 'border-3 border-blue-300' : ''}`}
                   >
                     <ItemContent>
                       <ItemTitle>{address.addressName}</ItemTitle>

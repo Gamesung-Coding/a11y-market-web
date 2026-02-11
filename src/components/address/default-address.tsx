@@ -1,7 +1,13 @@
+import type { Address } from '@/api/address/types';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
-export default function DefaultAddress({ defaultAddress, onEdit }) {
+interface DefaultAddressProps {
+  defaultAddress: Address | null;
+  onEdit?: (address: Address) => void;
+}
+
+export default function DefaultAddress({ defaultAddress, onEdit }: DefaultAddressProps) {
   if (!defaultAddress) {
     return <div className='p-5'>기본배송지가 설정되어 있지 않습니다.</div>;
   }

@@ -1,3 +1,4 @@
+import type { Address } from '@/api/address/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -9,7 +10,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-export default function AddressList({ addresses = [], onEdit, onDelete }) {
+interface AddressListProps {
+  addresses: Address[];
+  onEdit?: (address: Address) => void;
+  onDelete?: (addressId: string) => void;
+}
+
+export default function AddressList({ addresses = [], onEdit, onDelete }: AddressListProps) {
   return (
     <Card>
       <CardContent>

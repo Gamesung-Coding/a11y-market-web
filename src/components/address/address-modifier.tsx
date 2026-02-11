@@ -1,4 +1,5 @@
-import { addressApi } from '@/api/address-api';
+import { useCreateAddress, useUpdateAddress } from '@/api/address/mutations';
+import type { AddressRequest } from '@/api/address/types';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import {
@@ -20,11 +21,24 @@ import { toast } from 'sonner';
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
 
-export const AddressModifier = ({ mode, onChange, className = '', variant = 'outline' }) => {
+interface AddressModifierProps {
+  mode: 'add' | 'edit';
+  onChange?: () => void;
+  className?: string;
+  variant?: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | null;
+}
+
+export const AddressModifier = ({
+  mode,
+  onChange,
+  className = '',
+  variant = 'outline',
+}: AddressModifierProps) => {
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
   const [isModifierDialogOpen, setIsModifierDialogOpen] = useState(false);
   const [formattedPhone, setFormattedPhone] = useState('');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{ addressId: string } & AddressRequest>({
+    addressId: '',
     addressName: '',
     receiverName: '',
     receiverPhone: '',
@@ -37,7 +51,7 @@ export const AddressModifier = ({ mode, onChange, className = '', variant = 'out
   const transparentScrollbarStyle =
     '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-400 [&::-webkit-scrollbar-thumb:hover]:bg-neutral-500 [&::-webkit-scrollbar-track]:bg-transparent';
 
-  const formatPhoneNumber = (value) => {
+  const formatPhoneNumber = (value: string) => {
     if (!value) return '';
     const input = value.replace(/[^0-9]/g, '');
     setFormData((prev) => ({ ...prev, receiverPhone: input }));
@@ -54,7 +68,7 @@ export const AddressModifier = ({ mode, onChange, className = '', variant = 'out
     return formattedValue;
   };
 
-  const handleOnComplete = (data) => {
+  const handleOnComplete = (data: any) => {
     let fullAddress = data.address;
     let extraAddress = '';
 
@@ -76,20 +90,27 @@ export const AddressModifier = ({ mode, onChange, className = '', variant = 'out
     setIsAddressDialogOpen(false);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       if (mode === 'add') {
-        await addressApi.createAddress(formData);
+        await useCreateAddress().mutateAsync(formData);
       } else {
-        await addressApi.updateAddress(formData);
+        if ('addressId' in formData) {
+          await useUpdateAddress().mutateAsync({
+            addressId: formData.addressId,
+            data: formData,
+          });
+        } else {
+          console.error('No addressId found for update');
+        }
       }
 
       onChange && onChange();
       setIsModifierDialogOpen(false);
       toast.success('배송지를 저장했습니다.');
-    } catch (err) {
+    } catch (err: any) {
       console.error('배송지 저장 실패:', err);
       toast.error(err.message || '배송지 저장에 실패했습니다.');
     }
@@ -148,7 +169,7 @@ export const AddressModifier = ({ mode, onChange, className = '', variant = 'out
                           <Checkbox
                             id='isDefault'
                             checked={formData.isDefault}
-                            onCheckedChange={(value) =>
+                            onCheckedChange={(value: boolean) =>
                               setFormData((prev) => ({ ...prev, isDefault: value }))
                             }
                           />

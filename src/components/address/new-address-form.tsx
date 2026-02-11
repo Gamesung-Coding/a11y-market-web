@@ -1,4 +1,5 @@
-import { addressApi } from '@/api/address-api';
+import { useCreateAddress, useUpdateAddress } from '@/api/address/mutations';
+import type { Address, AddressRequest } from '@/api/address/types';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -10,42 +11,55 @@ import { useEffect, useState } from 'react';
 import DaumPostcodeEmbed from 'react-daum-postcode';
 import { toast } from 'sonner';
 
+interface NewAddressFormProps {
+  mode: 'add' | 'edit';
+  initialForm?: Address | null;
+  onSave?: () => void;
+  onCancel?: () => void;
+  isDefault?: boolean;
+}
+
 export const NewAddressForm = ({
   mode,
   initialForm = null,
   onSave,
   onCancel,
   isDefault = false,
-}) => {
+}: NewAddressFormProps) => {
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
   const [formattedPhone, setFormattedPhone] = useState('');
-  const [formData, setFormData] = useState({
-    addressName: '',
-    receiverName: '',
-    receiverPhone: '',
-    receiverZipcode: '',
-    receiverAddr1: '',
-    receiverAddr2: '',
-    isDefault: isDefault,
+  const [formData, setFormData] = useState<{ addressId: string; data: AddressRequest }>({
+    addressId: '',
+    data: {
+      addressName: '',
+      receiverName: '',
+      receiverPhone: '',
+      receiverZipcode: '',
+      receiverAddr1: '',
+      receiverAddr2: '',
+      isDefault: isDefault,
+    },
   });
 
   useEffect(() => {
     if (initialForm) {
       setFormData({
         addressId: initialForm.addressId,
-        addressName: initialForm.addressName,
-        receiverName: initialForm.receiverName,
-        receiverPhone: initialForm.receiverPhone,
-        receiverZipcode: initialForm.receiverZipcode,
-        receiverAddr1: initialForm.receiverAddr1,
-        receiverAddr2: initialForm.receiverAddr2,
-        isDefault: initialForm.isDefault,
+        data: {
+          addressName: initialForm.addressName,
+          receiverName: initialForm.receiverName,
+          receiverPhone: initialForm.receiverPhone,
+          receiverZipcode: initialForm.receiverZipcode,
+          receiverAddr1: initialForm.receiverAddr1,
+          receiverAddr2: initialForm.receiverAddr2,
+          isDefault: initialForm.isDefault,
+        },
       });
       setFormattedPhone(formatPhoneNumber(initialForm.receiverPhone));
     }
   }, [initialForm]);
 
-  const handleOnComplete = (data) => {
+  const handleOnComplete = (data: any) => {
     let fullAddress = data.address;
     let extraAddress = '';
 
@@ -70,7 +84,7 @@ export const NewAddressForm = ({
   const transparentScrollbarStyle =
     '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-400 [&::-webkit-scrollbar-thumb:hover]:bg-neutral-500 [&::-webkit-scrollbar-track]:bg-transparent';
 
-  const formatPhoneNumber = (value) => {
+  const formatPhoneNumber = (value: string) => {
     if (!value) return '';
     const input = value.replace(/[^0-9]/g, '');
     setFormData((prev) => ({ ...prev, receiverPhone: input }));
@@ -87,17 +101,26 @@ export const NewAddressForm = ({
     return formattedValue;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (mode === 'add') {
-        await addressApi.createAddress(formData);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { addressId, ...data } = formData;
+        await useCreateAddress().mutateAsync(data as any);
       } else {
-        await addressApi.updateAddress(formData.addressId, formData);
+        if (formData.addressId) {
+          await useUpdateAddress().mutateAsync({
+            addressId: formData.addressId,
+            data: formData.data,
+          });
+        } else {
+          throw new Error('Address ID is missing for update');
+        }
       }
       toast.success('배송지를 저장했습니다.');
       onSave && onSave();
-    } catch (err) {
+    } catch (err: any) {
       console.error('배송지 저장 실패:', err);
       toast.error(err.message || '배송지 저장에 실패했습니다.');
     }
@@ -139,9 +162,9 @@ export const NewAddressForm = ({
                 <div className='flex flex-row items-center gap-2'>
                   <Checkbox
                     id='isDefault'
-                    checked={formData.isDefault}
-                    onCheckedChange={(value) =>
-                      setFormData((prev) => ({ ...prev, isDefault: value }))
+                    checked={formData.data.isDefault}
+                    onCheckedChange={(value: boolean) =>
+                      setFormData((prev) => ({ ...prev, data: { ...prev.data, isDefault: value } }))
                     }
                     disabled={mode === 'add' && isDefault}
                   />
@@ -156,7 +179,7 @@ export const NewAddressForm = ({
               <Input
                 id='addressName'
                 placeholder='주소명을 입력하세요'
-                value={formData.addressName}
+                value={formData.data.addressName}
                 onChange={(value) =>
                   setFormData((prev) => ({ ...prev, addressName: value.target.value }))
                 }
@@ -168,9 +191,12 @@ export const NewAddressForm = ({
               <Input
                 id='receiverName'
                 placeholder='받는 분 이름을 입력하세요'
-                value={formData.receiverName}
+                value={formData.data.receiverName}
                 onChange={(value) =>
-                  setFormData((prev) => ({ ...prev, receiverName: value.target.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    data: { ...prev.data, receiverName: value.target.value },
+                  }))
                 }
                 required
               />
@@ -195,9 +221,12 @@ export const NewAddressForm = ({
                 <Input
                   id='receiverZipcode'
                   placeholder='우편번호'
-                  value={formData.receiverZipcode}
+                  value={formData.data.receiverZipcode}
                   onChange={(value) =>
-                    setFormData((prev) => ({ ...prev, receiverZipcode: value.target.value }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      data: { ...prev.data, receiverZipcode: value.target.value },
+                    }))
                   }
                   readOnly
                   required
@@ -216,9 +245,12 @@ export const NewAddressForm = ({
               <Input
                 id='receiverAddr1'
                 placeholder='주소를 입력하세요'
-                value={formData.receiverAddr1}
+                value={formData.data.receiverAddr1}
                 onChange={(value) =>
-                  setFormData((prev) => ({ ...prev, receiverAddr1: value.target.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    data: { ...prev.data, receiverAddr1: value.target.value },
+                  }))
                 }
                 readOnly
                 required
@@ -229,9 +261,12 @@ export const NewAddressForm = ({
               <Input
                 id='receiverAddr2'
                 placeholder='상세주소를 입력하세요'
-                value={formData.receiverAddr2 || ''}
+                value={formData.data.receiverAddr2 || ''}
                 onChange={(value) =>
-                  setFormData((prev) => ({ ...prev, receiverAddr2: value.target.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    data: { ...prev.data, receiverAddr2: value.target.value },
+                  }))
                 }
                 required
               />
