@@ -1,3 +1,6 @@
+import type { Product } from '@/api/product/types';
+import type { OrderItem } from '../order/types';
+
 export interface AdminStats {
   totalUsers: number;
   totalSellers: number;
@@ -31,9 +34,12 @@ export interface Seller {
   updatedAt: string;
 }
 
-import type { Product } from '@/api/product/types';
-
 export interface SellerDetail extends Seller {
+  profileStatus: string;
+  submitDate: string;
+  approvedDate: string;
+  lastUpdatedDate: string;
+  orders: OrderItem[];
   products: Product[];
 }
 

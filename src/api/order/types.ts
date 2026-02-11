@@ -7,7 +7,7 @@ export interface OrderItem {
   productTotalPrice: number;
   productImageUrl: string;
   orderItemStatus: string;
-  hasReview: boolean;
+  cancelReason: string;
 }
 
 export interface Order {

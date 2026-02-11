@@ -9,6 +9,13 @@ export const useUsers = () => {
   });
 };
 
+export const useGetSellerDetail = (sellerId: string) => {
+  return useQuery({
+    queryKey: ADMIN_KEYS.sellerDetail(sellerId),
+    queryFn: () => adminApi.getSellerDetail(sellerId),
+  });
+};
+
 export const usePendingProducts = () => {
   return useQuery({
     queryKey: ADMIN_KEYS.pendingProducts(),

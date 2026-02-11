@@ -1,6 +1,6 @@
 import axiosInstance from '@/api/axios-instance';
 import type { User } from '@/api/user/types';
-import type { Seller, SellerApprovalRequest } from './types';
+import type { Seller, SellerApprovalRequest, SellerDetail } from './types';
 
 export const adminApi = {
   getUsers: async (): Promise<User[]> => {
@@ -22,6 +22,11 @@ export const adminApi = {
   // 판매자 승인 대기 목록 조회
   getPendingSellers: async (): Promise<SellerApprovalRequest[]> => {
     const { data } = await axiosInstance.get<SellerApprovalRequest[]>('/v1/admin/sellers/pending');
+    return data;
+  },
+
+  getSellerDetail: async (sellerId: string): Promise<SellerDetail> => {
+    const { data } = await axiosInstance.get<SellerDetail>(`/v1/admin/sellers/${sellerId}`);
     return data;
   },
 
