@@ -1,11 +1,11 @@
-import type { UserA11yProfileResponse } from '@/api/a11y/types';
+import type { UserA11yProfile } from '@/api/a11y/types';
 import { Button } from '@/components/ui/button';
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item';
 
 interface A11yProfileListProps {
-  profiles: UserA11yProfileResponse[];
-  onApply: (profile: UserA11yProfileResponse) => void;
-  onEdit: (profile: UserA11yProfileResponse) => void;
+  profiles: UserA11yProfile[];
+  onApply: (profile: UserA11yProfile) => void;
+  onEdit: (profile: UserA11yProfile) => void;
   onDelete: (profileId: string) => void;
 }
 

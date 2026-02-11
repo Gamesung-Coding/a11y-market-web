@@ -10,7 +10,7 @@ export interface A11ySettings {
   screenReader: boolean;
 }
 
-export interface UserA11yProfileResponse {
+export interface UserA11yProfile {
   profileId: string;
   profileName: string;
   description: string;

@@ -22,7 +22,6 @@ interface A11yEditModalProps {
   open: boolean;
   onClose: () => void;
   initialProfile?: any;
-  onSaved?: () => void;
 }
 
 interface StepSelectorProps {
@@ -41,15 +40,12 @@ interface ModalRowProps {
   control: React.ReactNode;
 }
 
-export default function A11yEditModal({
-  open,
-  onClose,
-  initialProfile,
-  onSaved,
-}: A11yEditModalProps) {
+export default function A11yEditModal({ open, onClose, initialProfile }: A11yEditModalProps) {
   const [profileName, setProfileName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const { mutateAsync: createProfile } = useCreateA11yProfile();
+  const { mutateAsync: updateProfile } = useUpdateA11yProfile();
 
   const a11yState = useA11yData();
   const a11yActions = useA11yActions();
@@ -86,17 +82,16 @@ export default function A11yEditModal({
     setSaveLoading(true);
 
     if (initialProfile) {
-      await useUpdateA11yProfile().mutateAsync({
+      await updateProfile({
         profileId: initialProfile.profileId,
         data: payload,
       });
       toast.success('프로필이 수정되었습니다.');
     } else {
-      await useCreateA11yProfile().mutateAsync(payload);
+      await createProfile(payload);
       toast.success('새 접근성 프로필이 생성되었습니다.');
     }
 
-    onSaved && onSaved();
     onClose();
     setSaveLoading(false);
   };
