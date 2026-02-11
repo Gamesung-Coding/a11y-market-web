@@ -1,7 +1,20 @@
 import { Button } from '@/components/ui/button';
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item';
+import type { UserA11yProfileResponse } from '@/types/a11y';
 
-export default function A11yProfileList({ profiles, onApply, onEdit, onDelete }) {
+interface A11yProfileListProps {
+  profiles: UserA11yProfileResponse[];
+  onApply: (profile: UserA11yProfileResponse) => void;
+  onEdit: (profile: UserA11yProfileResponse) => void;
+  onDelete: (profileId: string) => void;
+}
+
+export default function A11yProfileList({
+  profiles,
+  onApply,
+  onEdit,
+  onDelete,
+}: A11yProfileListProps) {
   if (!profiles || profiles.length === 0) {
     return <p className='text-slate-500'>저장된 프로필이 없습니다.</p>;
   }
@@ -14,10 +27,10 @@ export default function A11yProfileList({ profiles, onApply, onEdit, onDelete })
           className='rounded-xl p-4 shadow-sm transition-shadow hover:shadow-md'
         >
           <ItemContent className='space-y-1'>
-            <ItemTitle >{p.profileName}</ItemTitle>
+            <ItemTitle>{p.profileName}</ItemTitle>
 
             {p.description && (
-              <ItemDescription className=' text-slate-600'>{p.description}</ItemDescription>
+              <ItemDescription className='text-slate-600'>{p.description}</ItemDescription>
             )}
           </ItemContent>
           <ItemActions className='flex gap-2'>

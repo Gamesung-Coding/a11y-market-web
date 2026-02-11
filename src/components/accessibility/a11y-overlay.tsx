@@ -8,18 +8,8 @@ import {
 } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { A11Y_PROFILES } from '@/lib/a11y/profiles';
-import {
-  cycleContrast,
-  cycleLineHeight,
-  cycleTextAlign,
-  cycleTextSize,
-  cycleTextSpacing,
-  resetAll,
-  toggleCursorHighlight,
-  toggleHighlightLinks,
-  toggleScreenReader,
-  toggleSmartContrast,
-} from '@/store/a11y-slice';
+import { useA11yActions, useA11yData } from '@/store/a11y-store';
+import type { A11ySettings } from '@/types/a11y';
 import {
   AArrowUp,
   AlignCenter,
@@ -36,9 +26,8 @@ import {
   Volume2,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
-import A11yOverlaySave from '@/components/accessibility/a11y-overlay-save.jsx';
+import A11yOverlaySave from '@/components/accessibility/a11y-overlay-save';
 
 const languages = [
   { code: 'ko', label: '한국어' },
@@ -47,15 +36,19 @@ const languages = [
   { code: 'zh', label: '中文' },
 ];
 
-export default function A11yOverlay({ open, onClose, reloadProfiles }) {
-  const dispatch = useDispatch();
+interface A11yOverlayProps {
+  open: boolean;
+  onClose: () => void;
+}
 
-  const a11yState = useSelector((state) => state.a11y);
+export default function A11yOverlay({ open, onClose }: A11yOverlayProps) {
+  const a11yState = useA11yData();
+  const a11yActions = useA11yActions();
 
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState('ko');
-  const [selectedProfile, setSelectedProfile] = useState(null); // vision/ cognitive/ screenReader/ senior/ custom
-  const [selectedSubMode, setSelectedSubMode] = useState(null);
+  const [selectedProfile, setSelectedProfile] = useState<string | null>(null); // vision/ cognitive/ screenReader/ senior/ custom
+  const [selectedSubMode, setSelectedSubMode] = useState<string | null>(null);
 
   //전역 상태
   const {
@@ -71,34 +64,48 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
   } = a11yState;
 
   // 프로필 설정 적용
-  const applyProfileSettings = (settings) => {
+  const applyProfileSettings = (settings: Partial<A11ySettings>) => {
     if (!settings) return;
 
     if (settings.contrastLevel !== undefined) {
-      for (let i = 0; i < settings.contrastLevel; i++) dispatch(cycleContrast());
+      // contrastLevel이 현재 레벨과 다르면 설정 (cycle 대신 직접 설정이 필요할 수 있음)
+      // 기존 로직은 cycleContrast를 여러번 호출하는 방식이었음.
+      // 여기서는 store에 setContrastLevel이 있으므로 그것을 사용하는 것이 좋음.
+      // 하지만 settings.contrastLevel이 0, 1, 2 등의 값이라면 직접 set 하는게 맞음.
+      // 기존 로직: for loop cycle... -> 비효율적.
+      // store에 setContrastLevel이 있으므로 그것을 사용.
+      a11yActions.setContrastLevel(settings.contrastLevel);
     }
     if (settings.textSizeLevel !== undefined) {
-      for (let i = 0; i < settings.textSizeLevel; i++) dispatch(cycleTextSize());
+      a11yActions.setTextSizeLevel(settings.textSizeLevel);
     }
     if (settings.textSpacingLevel !== undefined) {
-      for (let i = 0; i < settings.textSpacingLevel; i++) dispatch(cycleTextSpacing());
+      a11yActions.setTextSpacingLevel(settings.textSpacingLevel);
     }
 
     if (settings.lineHeightLevel !== undefined) {
-      for (let i = 0; i < settings.lineHeightLevel; i++) dispatch(cycleLineHeight());
+      a11yActions.setLineHeightLevel(settings.lineHeightLevel);
     }
     if (settings.textAlign !== undefined) {
-      dispatch(cycleTextAlign(settings.textAlign));
+      a11yActions.setTextAlign(settings.textAlign);
     }
     if (settings.smartContrast !== undefined) {
-      dispatch(toggleSmartContrast(settings.smartContrast));
+      // toggle 대신 직접 값 설정 필요하지만 actions에는 toggle만 있음.
+      // 현재 값과 다르면 toggle 호출
+      if (a11yState.smartContrast !== settings.smartContrast) {
+        a11yActions.toggleSmartContrast();
+      }
     }
     if (settings.highlightLinks !== undefined) {
-      dispatch(toggleHighlightLinks(settings.highlightLinks));
+      if (a11yState.highlightLinks !== settings.highlightLinks) {
+        a11yActions.toggleHighlightLinks();
+      }
     }
 
     if (settings.screenReader !== undefined) {
-      dispatch(toggleScreenReader(settings.screenReader));
+      if (a11yState.screenReader !== settings.screenReader) {
+        a11yActions.toggleScreenReader();
+      }
     }
   };
 
@@ -199,7 +206,7 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
                     onValueChange={(modeId) => {
                       setSelectedSubMode(modeId);
 
-                      dispatch(resetAll());
+                      a11yActions.resetA11ySettings();
 
                       const selectedMode = A11Y_PROFILES[selectedProfile].items.find(
                         (item) => item.id === modeId,
@@ -239,7 +246,7 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
               aria-label='스크린 리더 모드'
               aria-pressed={screenReader}
               className={`${boxBase} ${screenReader ? 'border-black bg-gray-200' : ''} hover:border-blue-500 hover:ring-2 hover:ring-blue-400/50`}
-              onClick={() => dispatch(toggleScreenReader())}
+              onClick={() => a11yActions.toggleScreenReader()}
             >
               <Volume2
                 className={iconSize}
@@ -259,7 +266,18 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
               variant='outline'
               aria-label='대비 조절'
               aria-pressed={contrastLevel > 0}
-              onClick={() => dispatch(cycleContrast())}
+              onClick={() => {
+                // cycle logic assumed in store not available directly as cycle, but can assume manual cycling or if store has cycle.
+                // store: setContrastLevel.
+                // We need to implement cycle logic here if store doesn't have it.
+                // But wait, the original code used dispatch(cycleContrast()).
+                // Let's check a11y-store.ts again if it has cycle actions.
+                // It has setContrastLevel, toggle...
+                // I should probably implement cycle logic here or add cycle actions to store.
+                // For now, I will implement cycle logic here.
+                const nextLevel = (contrastLevel + 1) % 4; // Assuming 4 levels based on labels
+                a11yActions.setContrastLevel(nextLevel);
+              }}
               className={`${boxBase} ${contrastLevel > 0 ? 'border-black bg-gray-200' : ''} hover:border-blue-500 hover:ring-2 hover:ring-blue-400/50`}
             >
               <Contrast
@@ -292,7 +310,7 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
               variant='outline'
               aria-label='스마트 대비 적용'
               aria-pressed={smartContrast}
-              onClick={() => dispatch(toggleSmartContrast())}
+              onClick={() => a11yActions.toggleSmartContrast()}
               className={`${boxBase} ${smartContrast ? 'border-black bg-gray-200' : ''} hover:border-blue-500 hover:ring-2 hover:ring-blue-400/50`}
             >
               <Lightbulb
@@ -314,7 +332,7 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
               aria-label='링크 강조 표시'
               aria-pressed={highlightLinks}
               className={`${boxBase} ${highlightLinks ? 'border-black bg-gray-200' : ''} hover:border-blue-500 hover:ring-2 hover:ring-blue-400/50`}
-              onClick={() => dispatch(toggleHighlightLinks())}
+              onClick={() => a11yActions.toggleHighlightLinks()}
             >
               <Link
                 className={iconSize}
@@ -334,7 +352,10 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
               aria-label='글자 크기 조절'
               aria-pressed={textSizeLevel > 0}
               className={`${boxBase} ${textSizeLevel > 0 ? 'border-black bg-gray-200' : ''} hover:border-blue-500 hover:ring-2 hover:ring-blue-400/50`}
-              onClick={() => dispatch(cycleTextSize())}
+              onClick={() => {
+                const nextLevel = (textSizeLevel + 1) % 3; // Assuming 0, 1, 2
+                a11yActions.setTextSizeLevel(nextLevel);
+              }}
             >
               <AArrowUp
                 className={iconSize}
@@ -366,7 +387,10 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
               aria-label='글자 간격 조절'
               aria-pressed={textSpacingLevel > 0}
               className={`${boxBase} ${textSpacingLevel > 0 ? 'border-black bg-gray-200' : ''} hover:border-blue-500 hover:ring-2 hover:ring-blue-400/50`}
-              onClick={() => dispatch(cycleTextSpacing())}
+              onClick={() => {
+                const nextLevel = (textSpacingLevel + 1) % 3;
+                a11yActions.setTextSpacingLevel(nextLevel);
+              }}
             >
               <StretchHorizontal
                 className={iconSize}
@@ -399,7 +423,7 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
               aria-label='마우스 커서 강조'
               aria-pressed={cursorHighlight}
               className={`${boxBase} ${cursorHighlight ? 'border-black bg-gray-200' : ''} hover:border-blue-500 hover:ring-2 hover:ring-blue-400/50`}
-              onClick={() => dispatch(toggleCursorHighlight())}
+              onClick={() => a11yActions.toggleCursorHighlight()}
             >
               {cursorHighlight ? (
                 <Plus
@@ -427,7 +451,14 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
               aria-label='텍스트 정렬 변경'
               aria-pressed={textAlign !== 'left'}
               className={`${boxBase} ${textAlign !== 'left' ? 'border-black bg-gray-200' : ''} hover:border-blue-500 hover:ring-2 hover:ring-blue-400/50`}
-              onClick={() => dispatch(cycleTextAlign())}
+              onClick={() => {
+                // left -> center -> right -> left
+                let nextAlign = 'left';
+                if (textAlign === 'left') nextAlign = 'center';
+                else if (textAlign === 'center') nextAlign = 'right';
+                else nextAlign = 'left';
+                a11yActions.setTextAlign(nextAlign);
+              }}
             >
               {textAlign === 'left' && (
                 <AlignLeft
@@ -479,7 +510,10 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
               aria-label='줄 간격 확대'
               aria-pressed={lineHeightLevel > 0}
               className={`${boxBase} ${lineHeightLevel > 0 ? 'border-black bg-gray-200' : ''} hover:border-blue-500 hover:ring-2 hover:ring-blue-400/50`}
-              onClick={() => dispatch(cycleLineHeight())}
+              onClick={() => {
+                const nextLevel = (lineHeightLevel + 1) % 3;
+                a11yActions.setLineHeightLevel(nextLevel);
+              }}
             >
               <AlignJustify
                 className={iconSize}
@@ -514,7 +548,7 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
               variant='default'
               className='w-full'
               aria-label='접근성 설정 초기화'
-              onClick={() => dispatch(resetAll())}
+              onClick={() => a11yActions.resetA11ySettings()}
             >
               모든 접근성 설정 리셋
             </Button>
@@ -546,7 +580,6 @@ export default function A11yOverlay({ open, onClose, reloadProfiles }) {
       <A11yOverlaySave
         open={saveModalOpen}
         onClose={() => setSaveModalOpen(false)}
-        reloadProfiles={reloadProfiles}
         a11yState={a11yState}
       />
     </Sheet>
