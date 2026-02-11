@@ -28,6 +28,7 @@ export interface VerifyPaymentRequest {
 }
 
 export interface CancelOrderRequest {
+  orderItemId: string;
   cancelReason: string;
 }
 
