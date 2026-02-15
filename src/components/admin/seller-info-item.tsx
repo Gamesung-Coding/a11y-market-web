@@ -39,7 +39,7 @@ export const SellerInfoItem = ({ seller, ...props }: SellerInfoItemProps) => {
     sellerName: seller.sellerName,
     businessNumber: seller.businessNumber,
     sellerGrade: seller.sellerGrade,
-    sellerIntro: seller.storeIntro,
+    sellerIntro: seller.sellerIntro,
     a11yGuarantee: seller.isA11yGuarantee,
   };
 
@@ -115,7 +115,7 @@ export const SellerInfoItem = ({ seller, ...props }: SellerInfoItemProps) => {
         </ItemTitle>
         <ItemDescription className='text-primary flex flex-col space-y-1'>
           <span>
-            <strong>이메일:</strong> {seller.contactEmail}
+            <strong>이메일:</strong> {seller.sellerEmail}
           </span>
           <span>
             <strong>사업자등록번호:</strong> {seller.businessNumber}

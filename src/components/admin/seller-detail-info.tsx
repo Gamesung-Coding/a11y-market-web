@@ -113,7 +113,7 @@ export const SellerDetailInfo = ({ sellerId }: SellerDetailInfoProps) => {
             <span>접근성 인증 상태: </span>
             {getA11yGuaranteeBadge()}
           </p>
-          <p className='mb-2'>{`판매자 소개: ${sellerDetail.storeIntro}`}</p>
+          <p className='mb-2'>{`판매자 소개: ${sellerDetail.sellerIntro}`}</p>
         </CardContent>
       </Card>
       <Card className='gap-0 p-6'>
@@ -123,8 +123,8 @@ export const SellerDetailInfo = ({ sellerId }: SellerDetailInfoProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className='mb-2'>{`이메일: ${sellerDetail.contactEmail}`}</p>
-          <p className='mb-2'>{`전화번호: ${sellerDetail.contactPhone}`}</p>
+          <p className='mb-2'>{`이메일: ${sellerDetail.sellerEmail}`}</p>
+          <p className='mb-2'>{`전화번호: ${sellerDetail.sellerPhone}`}</p>
         </CardContent>
       </Card>
       <Card className='gap-0 p-6'>
