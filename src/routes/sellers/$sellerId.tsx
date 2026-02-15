@@ -1,12 +1,11 @@
-import { sellerApi } from '@/api/seller-api';
+import { useSellerInfo } from '@/api/seller/queries';
+import { ErrorEmpty } from '@/components/main/error-empty';
 import { LoadingEmpty } from '@/components/main/loading-empty';
 import { ProductCard } from '@/components/main/product-card';
 import { Badge } from '@/components/ui/badge';
 import { formatPhoneNumber } from '@/lib/phone-number-formatter';
 import { createFileRoute } from '@tanstack/react-router';
 import { CheckCircle, Mail, Phone, Shield, ShieldCheck, ShieldPlus, Store } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 
 export const Route = createFileRoute('/sellers/$sellerId')({
   component: RouteComponent,
@@ -15,39 +14,16 @@ export const Route = createFileRoute('/sellers/$sellerId')({
 function RouteComponent() {
   const { sellerId } = Route.useParams();
 
-  const [loading, setLoading] = useState(true);
-  const [seller, setSeller] = useState({
-    sellerName: '',
-    sellerIntro: '',
-    sellerPhone: '',
-    sellerEmail: '',
-    sellerGrade: '',
-    isA11yGuarantee: false,
-    products: [],
-  });
+  const { data: seller, isLoading: loading } = useSellerInfo(sellerId);
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const resp = await sellerApi.getSellerInfo(sellerId);
-
-        if (resp.status !== 200) {
-          throw new Error('Failed to fetch seller info');
-        }
-
-        setSeller((prev) => ({
-          ...prev,
-          ...resp.data,
-        }));
-      } catch (err) {
-        console.error('Error fetching seller info:', err);
-        toast.error('판매자 정보를 불러오는 데 실패했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  if (!seller) {
+    return (
+      <ErrorEmpty
+        message='판매자를 찾을 수 없습니다.'
+        prevPath='/products'
+      />
+    );
+  }
 
   const getGradeBadge = () => {
     switch (seller.sellerGrade) {

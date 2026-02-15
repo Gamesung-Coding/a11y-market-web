@@ -1,3 +1,5 @@
+import type { CartItem } from '../cart/types';
+
 export interface OrderItem {
   orderItemId: string;
   productId: string;
@@ -42,10 +44,9 @@ export interface CheckoutInfoV2Request {
 
 export interface CheckoutInfoResponse {
   totalAmount: number;
-  discountAmount: number;
-  paymentAmount: number;
   shippingFee: number;
-  orderName: string;
+  finalAmount: number;
+  items: CartItem[];
 }
 
 export interface OrderDetailResponse {

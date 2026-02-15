@@ -8,8 +8,7 @@ export const useCancelOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ orderId, data }: { orderId: string | number; data: CancelOrderRequest }) =>
-      orderApi.cancelOrder(orderId, data),
+    mutationFn: (data: CancelOrderRequest) => orderApi.cancelOrder(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderKeys.list() });
       toast.success('주문 취소 요청이 접수되었습니다.');
@@ -41,11 +40,24 @@ export const useVerifyPayment = () => {
   });
 };
 
+export const useGetCheckoutInfo = () => {
+  return useMutation({
+    mutationFn: (data: {
+      cartItemIds: string[];
+      directOrderItem?: { productId: string; quantity: number };
+    }) => orderApi.getCheckoutInfoV2(data.cartItemIds, data.directOrderItem),
+    onError: (error) => {
+      console.error('Get checkout info error:', error);
+      toast.error('결제 전 정보 조회에 실패했습니다.');
+    },
+  });
+};
+
 export const useConfirmOrderItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { orderItemId: number }) => orderApi.confirmOrderItem(data),
+    mutationFn: (data: { orderItemId: string }) => orderApi.confirmOrderItem(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderKeys.list() });
       toast.success('구매 확정이 완료되었습니다.');

@@ -10,4 +10,5 @@ export const SELLER_KEYS = {
   orders: (page: number, size: number, status: string | null) =>
     [...SELLER_KEYS.all, 'orders', page, size, status] as const,
   orderSummary: () => [...SELLER_KEYS.all, 'order-summary'] as const,
+  info: (sellerId: string) => [...SELLER_KEYS.all, 'info', sellerId] as const,
 };

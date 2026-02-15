@@ -35,8 +35,8 @@ export const orderApi = {
 
   // 결제 전 주문 정보 조회 V2
   getCheckoutInfoV2: async (
-    cartItemIds: number[],
-    directOrderItem?: { productId: number; quantity: number },
+    cartItemIds: string[],
+    directOrderItem?: { productId: string; quantity: number },
   ): Promise<CheckoutInfoResponse> => {
     const { data } = await axiosInstance.post<CheckoutInfoResponse>('/v2/orders/pre-check', {
       cartItemIds,
@@ -56,7 +56,7 @@ export const orderApi = {
     await axiosInstance.post(`/v1/payments/verify`, data);
   },
 
-  confirmOrderItem: async (data: { orderItemId: number }): Promise<void> => {
+  confirmOrderItem: async (data: { orderItemId: string }): Promise<void> => {
     await axiosInstance.post(`/v1/users/me/orders/items/confirm`, data);
   },
 };

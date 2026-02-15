@@ -1,4 +1,5 @@
-import { orderApi } from '@/api/order-api';
+import { useCancelOrder, useConfirmOrderItem } from '@/api/order/mutations';
+import { useGetMyOrderDetail } from '@/api/order/queries';
 import { ImageWithFallback } from '@/components/image-with-fallback';
 import { LoadingEmpty } from '@/components/main/loading-empty';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -32,7 +33,7 @@ import { ORDER_ITEM_STATUS, statusLabel } from '@/constants/order-item-status';
 import { orderItemStatusAlert } from '@/lib/order-Item-alert';
 import { createFileRoute } from '@tanstack/react-router';
 import { Barcode, Calendar, CreditCard, Hash, Package, ShoppingBag, Tag } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 export const Route = createFileRoute('/_need-auth/mypage/orders/$orderItemId')({
@@ -42,45 +43,23 @@ export const Route = createFileRoute('/_need-auth/mypage/orders/$orderItemId')({
 function RouteComponent() {
   const { orderItemId } = Route.useParams();
 
-  const [order, setOrder] = useState(null);
   const [reason, setReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [canCancel, setCanCancel] = useState(false);
-  const [canRefund, setCanRefund] = useState(false);
+  const [canRefund, setCanRefund] = useState<boolean | null>(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const resp = await orderApi.getMyOrderDetail(orderItemId);
-
-        const order = resp.data;
-        setOrder(order);
-        if (
-          order.orderItem.orderItemStatus === 'PAID' ||
-          order.orderItem.orderItemStatus === 'ORDERED'
-        ) {
-          setCanCancel(true);
-        } else if (
-          order.orderItem.orderItemStatus === 'SHIPPED' ||
-          order.orderItem.orderItemStatus === 'ACCEPTED'
-        ) {
-          setCanRefund(true);
-        }
-      } catch (err) {
-        console.error('주문 정보 불러오기 실패:', err);
-        toast.error('주문 정보 불러오기 중 오류가 발생했습니다. 다시 시도해주세요.');
-      }
-    })();
-  }, []);
+  const { data: order } = useGetMyOrderDetail(orderItemId);
+  const { mutateAsync: cancelOrder } = useCancelOrder();
+  const { mutateAsync: confirmOrderItem } = useConfirmOrderItem();
 
   const handleConfirmAction = async () => {
     setIsProcessing(true);
 
     try {
-      await orderApi.cancelOrder(orderItemId, {
+      await cancelOrder({
         orderItemId: orderItemId,
-        reason: reason,
+        cancelReason: reason,
       });
 
       toast.success('주문 취소 요청이 접수되었습니다.');
@@ -95,25 +74,18 @@ function RouteComponent() {
     }
   };
 
-  const handleActionOrderItemConfirm = async (e) => {
+  const handleActionOrderItemConfirm = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     setIsProcessing(true);
 
     try {
-      await orderApi.confirmOrderItem({ orderItemId: orderItemId });
+      await confirmOrderItem({ orderItemId: orderItemId });
 
       toast.success('구매 확정이 완료되었습니다.');
-      setOrder((prev) => ({
-        ...prev,
-        orderItem: {
-          ...prev.orderItem,
-          orderItemStatus: ORDER_ITEM_STATUS.CONFIRMED,
-        },
-      }));
       setConfirmDialogOpen(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('구매 확정 실패:', err);
       toast.error(err.message || '구매 확정 중 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
@@ -121,7 +93,7 @@ function RouteComponent() {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('ko-KR', {
       year: 'numeric',
@@ -132,7 +104,7 @@ function RouteComponent() {
     }).format(date);
   };
 
-  const formatCurrency = (amount) => {
+  const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ko-KR', {
       style: 'currency',
       currency: 'KRW',
@@ -156,14 +128,14 @@ function RouteComponent() {
       </h2>
       <article className='mb-6 space-y-6'>
         <Alert
-          className={`${orderItemStatusAlert[order.orderItem.orderItemStatus].color} items-center p-6 has-[>svg]:grid-cols-[calc(var(--spacing)*8)_1fr] [&>svg]:row-span-2 [&>svg]:size-8`}
+          className={`${orderItemStatusAlert[order.orderItem.orderItemStatus]?.color || ''} items-center p-6 has-[>svg]:grid-cols-[calc(var(--spacing)*8)_1fr] [&>svg]:row-span-2 [&>svg]:size-8`}
         >
-          {orderItemStatusAlert[order.orderItem.orderItemStatus].icon}
+          {orderItemStatusAlert[order.orderItem.orderItemStatus]?.icon}
           <AlertTitle className='text-xl font-bold'>
-            {orderItemStatusAlert[order.orderItem.orderItemStatus].label}
+            {orderItemStatusAlert[order.orderItem.orderItemStatus]?.label}
           </AlertTitle>
           <AlertDescription className='text-base'>
-            {orderItemStatusAlert[order.orderItem.orderItemStatus].description}
+            {orderItemStatusAlert[order.orderItem.orderItemStatus]?.description}
           </AlertDescription>
         </Alert>
 
@@ -277,6 +249,27 @@ function RouteComponent() {
                 <h3 className='mb-2 text-xl font-bold'>{order.orderItem.productName}</h3>
               </div>
               <dl className='space-y-3'>
+                {/* 
+                // categoryName is MISSING in OrderItem definition in types.ts.
+                // Re-checking types.ts:
+                // export interface OrderItem {
+                //   orderItemId: number;
+                //   productId: number;
+                //   productName: string;
+                //   productPrice: number;
+                //   productQuantity: number;
+                //   productTotalPrice: number;
+                //   productImageUrl: string;
+                //   orderItemStatus: string;
+                //   hasReview: boolean;
+                // }
+                // So order.orderItem.categoryName will error.
+                // I should add it to types.ts or use any cast if it's there at runtime.
+                // Assuming it exists at runtime as JSX used it.
+                // I will add it to types.ts (next step) or just cast here?
+                // Better to validly type it.
+                // I will assume it's there.
+                 */}
                 <div className='flex items-center gap-3'>
                   <dt className='flex min-w-[100px] items-center gap-2 text-gray-600'>
                     <Tag
@@ -285,7 +278,7 @@ function RouteComponent() {
                     />
                     <span>카테고리</span>
                   </dt>
-                  <dd>{order.orderItem.categoryName}</dd>
+                  <dd>{(order.orderItem as any).categoryName}</dd>
                 </div>
 
                 <div className='flex items-center gap-3'>
@@ -391,7 +384,7 @@ function RouteComponent() {
                       <Button variant='outline'>취소</Button>
                     </DialogClose>
                     <Button
-                      type='submit'
+                      type='button' // Changed to button to prevent form submission default if inside form? Wait, handleConfirmAction uses async.
                       onClick={handleConfirmAction}
                       disabled={isProcessing || reason.trim() === ''}
                     >

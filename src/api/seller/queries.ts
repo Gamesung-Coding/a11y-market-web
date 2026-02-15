@@ -50,3 +50,10 @@ export const useOrderSummary = () => {
     queryFn: () => sellerApi.getOrderSummary(),
   });
 };
+
+export const useSellerInfo = (sellerId: string) => {
+  return useQuery({
+    queryKey: SELLER_KEYS.info(sellerId),
+    queryFn: () => sellerApi.getSellerInfo(sellerId),
+  });
+};

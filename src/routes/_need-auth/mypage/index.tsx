@@ -1,4 +1,4 @@
-import { userApi } from '@/api/user-api';
+import { useGetProfile } from '@/api/user/queries';
 import { LoadingEmpty } from '@/components/main/loading-empty';
 import { A11ySetting } from '@/components/mypage/a11y-setting';
 import { AccountInfo } from '@/components/mypage/account-info';
@@ -19,17 +19,21 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ROLES } from '@/constants/roles';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth-store'; // Replaced redux
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import { CircleX, FileText, LogOut, Scale, Store } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
+
+interface MyPageSearch {
+  tab?: string;
+}
 
 export const Route = createFileRoute('/_need-auth/mypage/')({
   component: RouteComponent,
-  validateSearch: (search) => ({
-    tab: search.tab,
+  validateSearch: (search: Record<string, unknown>): MyPageSearch => ({
+    tab: (search.tab as string) || undefined,
   }),
 });
 
@@ -42,14 +46,13 @@ function RouteComponent() {
     { label: '배송지 관리', value: 'address', redirect: false },
     { label: '회원 탈퇴', value: 'withdraw', redirect: true },
   ];
+  const logout = useAuthStore((state) => state.actions.logout);
 
-  const { user, logout } = useSelector((state) => state.auth);
   const { tab } = Route.useSearch();
-
-  const [userInfo, setUserInfo] = useState({});
   const [activeTab, setActiveTab] = useState('');
-  const [sellerSubmitStatus, setSellerSubmitStatus] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const { data: userInfo } = useGetProfile();
 
   const navigate = useNavigate();
 
@@ -63,26 +66,9 @@ function RouteComponent() {
     setLoading(false);
   }, [tab]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        const resp = await userApi.getProfile();
-
-        setUserInfo(resp.data);
-        setSellerSubmitStatus(resp.data.sellerSubmitStatus);
-      } catch (err) {
-        console.error('유저 정보 불러오기 실패:', err);
-        toast.error('유저 정보 불러오기 실패. 다시 시도해주세요.');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
   const handleLogout = () => {
     logout();
-    navigate('/'); // 로그아웃 후 홈으로 이동
+    navigate({ to: '/' }); // 로그아웃 후 홈으로 이동. changed navigate('/') to object
     toast('성공적으로 로그아웃되었습니다.', {
       description: '다음에 또 만나요!',
       action: {
@@ -93,7 +79,7 @@ function RouteComponent() {
   };
 
   const getRoleBadge = () => {
-    switch (user?.userRole) {
+    switch (userInfo?.userRole) {
       case ROLES.ADMIN:
         return (
           <Badge
@@ -125,7 +111,7 @@ function RouteComponent() {
   };
 
   const getSubmitStatusText = () => {
-    switch (sellerSubmitStatus) {
+    switch (userInfo?.sellerSubmitStatus) {
       case 'PENDING':
         return (
           <>
@@ -150,7 +136,7 @@ function RouteComponent() {
     }
   };
 
-  if (loading) {
+  if (loading || !userInfo) {
     return (
       <main
         className='font-kakao-big flex-1 bg-neutral-50 dark:bg-neutral-900'
@@ -172,17 +158,14 @@ function RouteComponent() {
           className='my-4 rounded-xl p-8 shadow-sm transition-shadow hover:shadow-md'
         >
           <ItemMedia>
-            <Avatar
-              alt='프로필 이미지'
-              className='size-16 bg-neutral-200'
-            />
+            <Avatar className='size-16 bg-neutral-200' />
           </ItemMedia>
           <ItemContent>
             <ItemTitle>
               <h1 className='text-2xl'>{`${userInfo.userNickname} 님`}</h1>
               {getRoleBadge()}
             </ItemTitle>
-            <ItemDescription className='text-gray-600'>{user?.userEmail}</ItemDescription>
+            <ItemDescription className='text-gray-600'>{userInfo.userEmail}</ItemDescription>
           </ItemContent>
           <ItemActions>
             <Button
@@ -201,7 +184,7 @@ function RouteComponent() {
           defaultValue={activeTab}
           onValueChange={(value) => {
             setActiveTab(value);
-            navigate({ to: '/mypage/', search: { tab: value } });
+            navigate({ to: '/_need-auth/mypage', search: { tab: value } }); // Fixed path to match route
           }}
           className='mb-8 w-full'
         >
@@ -229,11 +212,11 @@ function RouteComponent() {
                   </TabsTrigger>
                 ))}
               </TabsList>
-              {user?.userRole === ROLES.USER && (
+              {userInfo.userRole === ROLES.USER && (
                 <Button
                   className='group w-full gap-2 shadow-md transition-all duration-400 hover:text-base md:h-12'
                   variant='outline'
-                  disabled={!!sellerSubmitStatus}
+                  disabled={!!userInfo.sellerSubmitStatus}
                   onClick={() =>
                     navigate({
                       to: '/seller/apply',
@@ -243,11 +226,11 @@ function RouteComponent() {
                   {getSubmitStatusText()}
                 </Button>
               )}
-              {user?.userRole === ROLES.SELLER && (
+              {userInfo.userRole === ROLES.SELLER && (
                 <Button
                   onClick={() =>
                     navigate({
-                      to: '/seller/dashboard',
+                      to: '/seller/dashboard', // TODO: check if this route exists and is correct name
                     })
                   }
                   className='group w-full gap-2 shadow-md transition-all duration-400 hover:text-base md:h-12'

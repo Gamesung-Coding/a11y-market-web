@@ -1,5 +1,5 @@
-// src/routes/cart.jsx
-import { cartApi } from '@/api/cart-api';
+import { useDeleteCartItems, useUpdateCartItem } from '@/api/cart/mutations';
+import { useCartItems } from '@/api/cart/queries';
 import { CartGroup } from '@/components/cart/cart-group';
 import { LoadingEmpty } from '@/components/main/loading-empty';
 import { Alert, AlertTitle } from '@/components/ui/alert';
@@ -32,38 +32,20 @@ export const Route = createFileRoute('/_need-auth/cart/')({
 });
 
 function CartPage() {
-  const [cartGroups, setCartGroups] = useState([]);
-  const [selectedItems, setSelectedItems] = useState(new Set());
-  const [fetching, setFetching] = useState(false);
+  // const [cartGroups, setCartGroups] = useState<CartResponse>({ items: [], total: 0 });
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  // const [fetching, setFetching] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [submitType, setSubmitType] = useState('none');
-  const [err, setErr] = useState(null);
+  const [submitType, setSubmitType] = useState<'none' | 'partial' | 'all'>('none');
+
+  const { data: cartGroups, isLoading: fetching, error: err } = useCartItems();
+  const { mutateAsync: deleteCartItem } = useDeleteCartItems();
+  const { mutateAsync: updateQuantity } = useUpdateCartItem();
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCartData = async () => {
-      setFetching(true);
-      try {
-        const resp = await cartApi.getCartItems();
-
-        if (resp.status !== 200) {
-          throw new Error('Failed to fetch cart items');
-        }
-
-        setCartGroups(resp.data);
-        // setTotalPrice(resp.data?.total || 0);
-      } catch (error) {
-        console.error('Failed to fetch cart items:', error);
-        toast.error('장바구니 정보를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.');
-      } finally {
-        setFetching(false);
-      }
-    };
-    fetchCartData();
-  }, []);
-
-  useEffect(() => {
+    if (!cartGroups) return;
     if (!cartGroups.items) return;
 
     let total = 0;
@@ -79,19 +61,19 @@ function CartPage() {
     setTotalPrice(total);
   }, [cartGroups, selectedItems]);
 
-  const handleOrder = async (type) => {
+  const handleOrder = async (type: 'partial' | 'all') => {
+    if (!cartGroups) {
+      toast.error('장바구니에 담긴 상품이 없습니다.');
+      return;
+    }
+
     setSubmitType(type);
 
     const selectedIds = Array.from(selectedItems);
 
-    const options = {
-      selectedItems: selectedIds,
-      orderAllItems: type === 'all',
-    };
-
     navigate({
       to: '/order/checkout',
-      search: (old) => ({
+      search: (old: any) => ({
         ...old,
         type: 'CART',
         cartItemIds:
@@ -104,22 +86,22 @@ function CartPage() {
     });
   };
 
-  const handleOnDeleteGroup = (sellerId) => {
-    const updatedGroups = cartGroups.items.filter((group) => group.sellerId !== sellerId);
-    setCartGroups((prev) => ({ ...prev, items: updatedGroups }));
+  const handleOnDeleteGroup = (sellerId: string) => {
+    if (!cartGroups) return;
+
+    // const updatedGroups = cartGroups.items.filter((group) => group.sellerId !== sellerId);
+    const toDeleteIds = cartGroups.items
+      .find((group) => group.sellerId === sellerId)
+      ?.items.map((item) => item.cartItemId);
+    if (!toDeleteIds) return;
+
+    deleteCartItem(toDeleteIds);
   };
 
-  const handleUpdateQuantity = (cartItemId, newQty) => {
-    setCartGroups((prev) => {
-      const newGroups = { ...prev };
-      newGroups.items = newGroups.items.map((group) => ({
-        ...group,
-        items: group.items.map((item) =>
-          item.cartItemId === cartItemId ? { ...item, quantity: newQty } : item,
-        ),
-      }));
-      return newGroups;
-    });
+  const handleUpdateQuantity = (cartItemId: string, newQty: number) => {
+    if (!cartGroups) return;
+
+    updateQuantity({ itemId: cartItemId, quantity: newQty });
   };
 
   if (fetching) {
@@ -131,7 +113,7 @@ function CartPage() {
   }
 
   const getContent = () => {
-    if (!cartGroups.items || cartGroups.items.length === 0) {
+    if (!cartGroups || !cartGroups.items || cartGroups.items.length === 0) {
       return (
         <div className='flex h-fit flex-col items-center justify-center py-8'>
           <Empty>
@@ -193,10 +175,10 @@ function CartPage() {
           <section className='w-full'>
             <Alert
               variant='destructive'
-              className={`border-red-500 bg-red-500/70 text-white ${err ? `mb-8 grid-rows-[1fr]` : `mb-0 grid-rows-[0fr] p-0 opacity-0`} transition-all`}
+              className={`border-red-500 bg-red-500/70 text-white ${err?.message ? `mb-8 grid-rows-[1fr]` : `mb-0 grid-rows-[0fr] p-0 opacity-0`} transition-all`}
             >
-              <AlertCircleIcon className={`${err ? `` : `hidden`}`} />
-              <AlertTitle className={`${err ? `` : `hidden`}`}>{err}</AlertTitle>
+              <AlertCircleIcon className={`${err?.message ? `` : `hidden`}`} />
+              <AlertTitle className={`${err?.message ? `` : `hidden`}`}>{err?.message}</AlertTitle>
             </Alert>
           </section>
           <section className='w-full'>
@@ -219,14 +201,6 @@ function CartPage() {
                 disabled={selectedItems.size === 0 || submitType !== 'none'}
                 onClick={() => {
                   handleOrder('partial');
-                  // navigate({
-                  //   to: '/order/checkout',
-                  //   search: (old) => ({
-                  //     ...old,
-                  //     from: 'cart',
-                  //     itemIds: Array.from(selectedItems).join(','),
-                  //   }),
-                  // });
                 }}
               >
                 {submitType === 'partial' ? (
@@ -244,18 +218,6 @@ function CartPage() {
                 disabled={submitType !== 'none'}
                 onClick={() => {
                   handleOrder('all');
-                  // navigate({
-                  //   to: '/order/checkout',
-                  //   search: (old) => ({
-                  //     ...old,
-                  //     from: 'cart',
-                  //     itemIds: Array.from(
-                  //       cartGroups.items.flatMap((group) =>
-                  //         group.items.map((item) => item.cartItemId),
-                  //       ),
-                  //     ).join(','),
-                  //   }),
-                  // });
                 }}
               >
                 {submitType === 'all' ? (

@@ -1,4 +1,5 @@
-import { productApi } from '@/api/product-api';
+import { useGetCategories } from '@/api/category/queries';
+import { useGetProducts } from '@/api/product/queries';
 import { LoadingEmpty } from '@/components/main/loading-empty';
 import { ProductCard } from '@/components/main/product-card';
 import { ProductFilter } from '@/components/product/product-filter';
@@ -12,15 +13,20 @@ import {
 } from '@/components/ui/select';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { toast } from 'sonner';
+
+interface ProductSearch {
+  searchQuery?: string;
+  categoryId?: string;
+  isA11yGuaranteed?: boolean;
+  sellerGrade?: string;
+}
 
 export const Route = createFileRoute('/products/')({
   component: RouteComponent,
-  validateSearch: (search) => ({
+  validateSearch: (search: Record<string, unknown>): ProductSearch => ({
     searchQuery: typeof search.searchQuery === 'string' ? search.searchQuery : '',
     categoryId: typeof search.categoryId === 'string' ? search.categoryId : '',
-    isA11yGuaranteed: search.isA11yGuaranteed === 'true',
+    isA11yGuaranteed: search.isA11yGuaranteed === 'true' || search.isA11yGuaranteed === true,
     sellerGrade: typeof search.sellerGrade === 'string' ? search.sellerGrade : '',
   }),
 });
@@ -36,20 +42,23 @@ const sortOptions = [
 function RouteComponent() {
   // URL 검색 매개변수
   const { searchQuery, categoryId, isA11yGuaranteed, sellerGrade } = Route.useSearch();
-  const { categories: allCategories } = useSelector((state) => state.category);
 
-  const [products, setProducts] = useState([]);
   const [filters, setFilters] = useState({
     searchQuery: searchQuery || '',
-    categories: categoryId ? [categoryId] : [],
+    categories: categoryId || '',
     isA11yGuaranteed: isA11yGuaranteed || false,
     sellerGrade: sellerGrade || '',
   });
   const [sortBy, setSortBy] = useState('on-development');
-  const [isLoading, setIsLoading] = useState(false);
+
+  const { data: allCategories = [] } = useGetCategories();
+  const { data: products, isLoading } = useGetProducts({
+    keyword: searchQuery,
+    category: categoryId,
+  });
 
   useEffect(() => {
-    let targetCategories = [];
+    let targetCategories: string[] = [];
 
     if (categoryId) {
       const parentCategory = allCategories.find((cat) => cat.categoryId === categoryId);
@@ -69,46 +78,21 @@ function RouteComponent() {
       isA11yGuaranteed: isA11yGuaranteed || false,
       sellerGrade: sellerGrade || '',
     });
-  }, [searchQuery, categoryId, isA11yGuaranteed, sellerGrade]);
+  }, [searchQuery, categoryId, isA11yGuaranteed, sellerGrade, allCategories]);
 
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      try {
-        const resp = await productApi.getProducts({
-          search: filters.searchQuery,
-          categoryId: filters.categories,
-          certified: filters.isA11yGuaranteed,
-          grade: filters.sellerGrade,
-        });
-
-        if (resp.status === 200) {
-          setProducts(resp.data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
-        toast.error('상품을 불러오는 데 실패했습니다.');
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [filters]);
-
-  // 클라이언트 사이드 필터링 제거
-  // 서버 사이드에서 필터링된 데이터를 받아오기 때문에 불필요
-  const filteredProducts = products;
+  const filteredProducts = products?.content || [];
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
       case 'price-asc':
-        return a.price - b.price;
+        return (a.productPrice || 0) - (b.productPrice || 0);
       case 'price-desc':
-        return b.price - a.price;
+        return (b.productPrice || 0) - (a.productPrice || 0);
       case 'newest':
-        return new Date(b.createdAt) - new Date(a.createdAt);
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       case 'popular':
       default:
-        return b.salesCount - a.salesCount;
+        return (b.salesCount || 0) - (a.salesCount || 0);
     }
   });
 
@@ -180,8 +164,8 @@ function RouteComponent() {
                         setFilters({
                           searchQuery: '',
                           categories: [],
-                          priceRange: [0, maxPrice],
-                          minRating: 0,
+                          isA11yGuaranteed: false,
+                          sellerGrade: '',
                         })
                       }
                     >

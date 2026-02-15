@@ -7,6 +7,8 @@ import type {
   ProductRegisterRequest,
   ProductUpdateRequest,
   ReceivedOrdersResponse,
+  SellerApplyRequest,
+  SellerInfo,
 } from './types';
 
 export const sellerApi = {
@@ -16,7 +18,12 @@ export const sellerApi = {
   },
 
   updateSellerInfo: async (data: { sellerName: string; sellerIntro: string }): Promise<void> => {
-    await axiosInstance.patch('/v1/seller/info', data);
+    await axiosInstance.patch('/v1/seller/me', data);
+  },
+
+  getSellerInfo: async (sellerId: string): Promise<SellerInfo> => {
+    const { data } = await axiosInstance.get(`/v1/seller/info/${sellerId}`);
+    return data;
   },
 
   getDailyRevenue: async (year: number, month: number): Promise<DailyRevenue[]> => {
@@ -29,6 +36,10 @@ export const sellerApi = {
   getTopSellingProducts: async (): Promise<Product[]> => {
     const { data } = await axiosInstance.get<Product[]>('/v1/seller/dashboard/products/top');
     return data;
+  },
+
+  applySellerAccount: async (data: SellerApplyRequest): Promise<void> => {
+    await axiosInstance.post('/v1/seller/apply', data);
   },
 
   getRecentOrders: async (): Promise<any[]> => {

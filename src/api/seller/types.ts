@@ -60,13 +60,17 @@ export interface Seller {
   sellerId: string;
   sellerName: string;
   businessNumber: string;
-  storeIntro: string;
-  contactEmail: string;
-  contactPhone: string;
+  sellerIntro: string;
+  sellerEmail: string;
+  sellerPhone: string;
   sellerGrade: 'NEWER' | 'REGULAR' | 'TRUSTED';
   isA11yGuarantee: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SellerInfo extends Seller {
+  products: Product[];
 }
 
 export interface SellerDetail extends Seller {
@@ -101,4 +105,10 @@ export interface ProductUpdateRequest {
     imageMetadataList: ProductImageMetadata[];
   };
   images: File[];
+}
+
+export interface SellerApplyRequest {
+  sellerName: string;
+  businessNumber: string;
+  sellerIntro: string;
 }

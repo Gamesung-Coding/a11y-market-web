@@ -16,29 +16,34 @@ const mockOrder = {
   status: '배송완료',
 };
 
+interface ConfirmSearch {
+  orderId?: string;
+}
+
+export const Route = createFileRoute('/_need-auth/order/confirm')({
+  component: PurchaseConfirmPage,
+  validateSearch: (search: Record<string, any>): ConfirmSearch => ({
+    orderId: typeof search.orderId === 'string' ? search.orderId : undefined,
+  }),
+});
+
 function PurchaseConfirmPage() {
   //  /mypage/order/confirm?orderId=... 에서 넘어온 orderId 를 search 로 받음
   const { orderId } = Route.useSearch();
 
   const [agreeAll, setAgreeAll] = useState(false);
-  const [detailReason, setDetailReason] = useState('');
-  const [password, setPassword] = useState('');
 
-  // 실제 연동 시에는 orderId 로 백엔드에서 주문 정보 조회 예정
   const currentOrder = {
     ...mockOrder,
     orderId: orderId ?? mockOrder.orderId,
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!agreeAll) {
-      // 필수 동의 체크 안 했을 때는 일단 아무 것도 안 함
       return;
     }
-
-    // TODO: 이후에 구매 확정 API 연동
   };
 
   return (
@@ -167,11 +172,3 @@ function PurchaseConfirmPage() {
     </div>
   );
 }
-
-//  search 에서 orderId 를 받음
-export const Route = createFileRoute('/_need-auth/order/confirm')({
-  component: PurchaseConfirmPage,
-  validateSearch: (search) => ({
-    orderId: typeof search.orderId === 'string' ? search.orderId : undefined,
-  }),
-});

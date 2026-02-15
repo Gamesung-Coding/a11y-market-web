@@ -1,6 +1,8 @@
-import { addressApi } from '@/api/address-api';
-import { orderApi } from '@/api/order-api';
-import { userApi } from '@/api/user-api';
+import { useGetAddressList } from '@/api/address/queries';
+import type { Address } from '@/api/address/types';
+import { useCreateOrder, useGetCheckoutInfo } from '@/api/order/mutations';
+import type { CheckoutInfoResponse } from '@/api/order/types';
+import { useGetProfile } from '@/api/user/queries';
 import { AddressSelector } from '@/components/address/address-selector';
 import { ErrorEmpty } from '@/components/main/error-empty';
 import { LoadingEmpty } from '@/components/main/loading-empty';
@@ -22,39 +24,45 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { loadPaymentWidget } from '@tosspayments/payment-widget-sdk';
+import { loadPaymentWidget, type PaymentWidgetInstance } from '@tosspayments/payment-widget-sdk';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+
+// Define search params type
+interface CheckoutSearch {
+  type: 'CART' | 'DIRECT';
+  cartItemIds?: string;
+  productId?: number;
+  quantity?: number;
+}
 
 const CLIENT_KEY = import.meta.env.VITE_TOSS_PAYMENTS_CLIENT_KEY;
 
 export const Route = createFileRoute('/_need-auth/order/checkout')({
-  component: orderCheckoutPage,
-  validateSearch: (search) => ({
+  component: OrderCheckoutPage,
+  validateSearch: (search: Record<string, any>): CheckoutSearch => ({
     type: search.type || 'CART',
     cartItemIds: search.cartItemIds,
-    productId: search.productId || null,
+    productId: search.productId ? Number(search.productId) : undefined,
     quantity: search.quantity ? Number(search.quantity) : 1,
   }),
 });
 
-function orderCheckoutPage() {
+function OrderCheckoutPage() {
   const { type, cartItemIds, productId, quantity } = Route.useSearch();
 
-  const [user, setUser] = useState({
-    userId: '',
-    userEmail: '',
-    userName: '',
-  });
-  const [checkout, setCheckout] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [orderItems, setOrderItems] = useState([]);
+  const [checkout, setCheckout] = useState<CheckoutInfoResponse | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [orderItems, setOrderItems] = useState<any[]>([]);
 
   const navigate = useNavigate();
-  const paymentWidgetRef = useRef(null);
-  const paymentMethodWidgetRef = useRef(null);
+  const { mutateAsync: getCheckoutInfo, isPending: loading, error } = useGetCheckoutInfo();
+  const { mutateAsync: createOrder } = useCreateOrder();
+  const { data: addresses } = useGetAddressList();
+  const { data: user } = useGetProfile();
+
+  const paymentWidgetRef = useRef<PaymentWidgetInstance | null>(null);
+  const paymentMethodWidgetRef = useRef<any>(null);
 
   // 결제 전 정보 조회
   useEffect(() => {
@@ -62,106 +70,91 @@ function orderCheckoutPage() {
 
     let isMounted = true;
     (async () => {
-      try {
-        setLoading(true);
-        const resp = await orderApi.getCheckoutInfoV2(
-          type === 'CART' ? (cartItemIds ? cartItemIds.split(',') : []) : null,
-          type === 'DIRECT'
-            ? {
-                productId: productId,
-                quantity: quantity,
-              }
-            : null,
-        );
+      if (!addresses || !user) return;
 
-        if (!isMounted) return;
+      const cartIds = cartItemIds ? cartItemIds.split(',').map(Number) : [];
 
-        setCheckout(resp.data);
-        setOrderItems(resp.data.items);
+      // Direct order item
+      const directItem =
+        type === 'DIRECT' && productId ? { productId, quantity: quantity || 1 } : undefined;
 
-        const { data, status } = await addressApi.getAddressList();
-        if (status !== 200) {
-          throw new Error('Failed to fetch address list');
-        }
+      const data = await getCheckoutInfo({
+        cartItemIds: type === 'CART' ? cartIds : [],
+        directOrderItem: directItem,
+      });
 
-        const defaultAddress = data.find((addr) => addr.isDefault === true) || data[0] || null;
-        setSelectedAddress(defaultAddress);
+      if (!isMounted) return;
 
-        const { data: user } = await userApi.getProfile();
-        setUser({
-          userId: user?.userId || '',
-          userEmail: user?.userEmail || '',
-          userName: user?.userName || '',
-        });
+      setCheckout(data);
+      setOrderItems((data as any).items || []);
 
-        const userId = user?.userId;
-        if (!userId) throw new Error('사용자 정보가 없습니다.');
+      const defaultAddress =
+        addresses.find((addr) => addr.isDefault === true) || addresses[0] || null;
+      setSelectedAddress(defaultAddress);
 
-        const paymentWidget = await loadPaymentWidget(CLIENT_KEY, userId);
-        paymentWidgetRef.current = paymentWidget;
+      const userId = String(user.userId);
+      if (!userId) throw new Error('사용자 정보가 없습니다.');
 
-        const paymentMethodWidget = paymentWidget.renderPaymentMethods(
-          '#payment-method',
-          { value: resp.data.finalAmount },
-          { variantKey: 'DEFAULT' },
-        );
+      const paymentWidget = await loadPaymentWidget(CLIENT_KEY, userId);
+      paymentWidgetRef.current = paymentWidget;
 
-        paymentWidget.renderAgreement('#agreement', { variantKey: 'DEFAULT' });
-        paymentMethodWidgetRef.current = paymentMethodWidget;
-      } catch (err) {
-        setError(err);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
+      const paymentMethodWidget = paymentWidget.renderPaymentMethods(
+        '#payment-method',
+        { value: data.finalAmount },
+        { variantKey: 'DEFAULT' },
+      );
+
+      paymentWidget.renderAgreement('#agreement', { variantKey: 'DEFAULT' });
+      paymentMethodWidgetRef.current = paymentMethodWidget;
     })();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handlePayment = async () => {
+    if (!user) {
+      toast.error('사용자 정보가 없습니다.');
+      return;
+    }
+
     if (!selectedAddress) {
       toast.error('배송지를 선택해주세요.');
       return;
     }
+    const currentCartItemIds = orderItems.map((item: any) => item.cartItemId);
 
-    try {
-      setLoading(true);
+    const orderData = await createOrder({
+      addressId: selectedAddress.addressId,
+      cartItemIds: type === 'CART' ? currentCartItemIds : null,
+      directOrderItem:
+        type === 'DIRECT' && orderItems.length > 0
+          ? { productId: orderItems[0].productId, quantity: orderItems[0].quantity }
+          : null,
+    });
 
-      const currentCartItemIds = orderItems.map((item) => item.cartItemId);
-
-      const { data: orderData } = await orderApi.createOrder({
-        addressId: selectedAddress.addressId,
-        cartItemIds: type === 'CART' ? currentCartItemIds : null,
-        directOrderItem:
-          type === 'DIRECT'
-            ? { productId: orderItems[0].productId, quantity: orderItems[0].quantity }
-            : null,
-      });
-
-      if (!orderData || !orderData.orderId) {
-        throw new Error('주문 생성에 실패했습니다.');
-      }
-
-      if (type === 'CART') {
-        sessionStorage.setItem('checkout_cart_items', JSON.stringify(currentCartItemIds));
-      }
-
-      const paymentWidget = paymentWidgetRef.current;
-
-      await paymentWidget.requestPayment({
-        orderId: orderData.orderId,
-        orderName:
-          orderItems.length > 1
-            ? `${orderItems[0].productName} 외 ${orderItems.length - 1}건`
-            : orderItems[0].productName,
-        successUrl: `${window.location.origin}/order/process`,
-        failUrl: `${window.location.origin}/order/process`,
-        customerEmail: user.userEmail,
-        customerName: user.userName,
-      });
-    } catch (err) {
-      console.error('결제 요청에 실패하였습니다:', err);
-      toast.error(`결제 요청에 실패하였습니다: ${err.message || err}`);
-      setLoading(false);
+    if (!orderData || !orderData.orderId) {
+      throw new Error('주문 생성에 실패했습니다.');
     }
+
+    if (type === 'CART') {
+      sessionStorage.setItem('checkout_cart_items', JSON.stringify(currentCartItemIds));
+    }
+
+    const paymentWidget = paymentWidgetRef.current;
+    if (!paymentWidget) throw new Error('결제 위젯이 로드되지 않았습니다.');
+
+    await paymentWidget.requestPayment({
+      orderId: orderData.orderId,
+      orderName:
+        orderItems.length > 1
+          ? `${orderItems[0].productName} 외 ${orderItems.length - 1}건`
+          : orderItems[0].productName,
+      successUrl: `${window.location.origin}/order/process`,
+      failUrl: `${window.location.origin}/order/process`,
+      customerEmail: user.userEmail,
+      customerName: user.userName,
+    });
   };
 
   // 로딩 상태
@@ -188,6 +181,9 @@ function orderCheckoutPage() {
       </main>
     );
   } else {
+    // checkout is not null here
+    const checkoutData = checkout!;
+
     return (
       <main className='font-kakao-big mx-auto flex max-w-4xl flex-col justify-center space-y-6 p-6'>
         <header className='flex flex-col justify-center gap-4 py-4'>
@@ -213,7 +209,7 @@ function orderCheckoutPage() {
         {/* 배송지 선택 */}
         <section>
           <AddressSelector
-            defaultAddressId={selectedAddress?.addressId}
+            defaultAddressId={selectedAddress?.addressId ?? ''}
             onSelectAddress={(address) => {
               setSelectedAddress(address);
             }}
@@ -288,10 +284,10 @@ function orderCheckoutPage() {
               <CardDescription>결제하실 금액을 확인해 주세요.</CardDescription>
             </CardHeader>
             <CardContent className='flex flex-col gap-2'>
-              <span>{`총 상품 금액: ${checkout?.totalAmount.toLocaleString('ko-KR')}원`}</span>
-              <span>{`배송비: ${checkout?.shippingFee.toLocaleString('ko-KR')}원`}</span>
+              <span>{`총 상품 금액: ${checkoutData.totalAmount.toLocaleString('ko-KR')}원`}</span>
+              <span>{`배송비: ${checkoutData.shippingFee.toLocaleString('ko-KR')}원`}</span>
               <span className='text-lg font-bold'>
-                {`총 결제 금액: ${checkout?.finalAmount.toLocaleString('ko-KR')}원`}
+                {`총 결제 금액: ${checkoutData.finalAmount.toLocaleString('ko-KR')}원`}
               </span>
             </CardContent>
           </Card>

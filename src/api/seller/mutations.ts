@@ -3,7 +3,7 @@ import { SELLER_KEYS } from '@/api/seller/keys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { productKeys } from '../product/keys';
-import type { ProductRegisterRequest, ProductUpdateRequest } from './types';
+import type { ProductRegisterRequest, ProductUpdateRequest, SellerApplyRequest } from './types';
 
 export const useDeleteMyProduct = () => {
   const queryClient = useQueryClient();
@@ -106,6 +106,22 @@ export const useRegisterProduct = () => {
     onError: (error) => {
       console.error('Register product error:', error);
       toast.error('상품 등록 신청에 실패했습니다.');
+    },
+  });
+};
+
+export const useApplySellerAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: SellerApplyRequest) => sellerApi.applySellerAccount(data),
+    onSuccess: () => {
+      toast.success('판매자 가입 신청이 완료되었습니다. 심사 후 결과를 알려드리겠습니다.');
+      queryClient.invalidateQueries({ queryKey: SELLER_KEYS.all });
+    },
+    onError: (error) => {
+      console.error('Failed to apply for seller account:', error);
+      toast.error('판매자 가입 신청에 실패했습니다.');
     },
   });
 };

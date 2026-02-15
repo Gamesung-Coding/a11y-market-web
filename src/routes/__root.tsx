@@ -4,8 +4,6 @@ import Footer from '@/components/layout/footer';
 import TopBar from '@/components/layout/top-bar';
 import { Toaster } from '@/components/ui/sonner';
 import { useA11yEffect } from '@/hooks/use-a11y-effect';
-import { useAuthInit } from '@/hooks/use-auth-init';
-import { useCategory } from '@/hooks/use-category';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
@@ -14,9 +12,7 @@ export const Route = createRootRoute({
 });
 
 function Root() {
-  useAuthInit();
   useA11yEffect();
-  useCategory();
 
   return (
     <>

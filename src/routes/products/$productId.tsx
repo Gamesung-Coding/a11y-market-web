@@ -1,5 +1,4 @@
-// src/routes/products/$productId.jsx
-import { productApi } from '@/api/product-api';
+import { useGetProductDetails } from '@/api/product/queries';
 import { AddCartButton } from '@/components/cart/add-cart-button';
 import { ImageWithFallback } from '@/components/image-with-fallback';
 import { LoadingEmpty } from '@/components/main/loading-empty';
@@ -12,49 +11,34 @@ import { Spinner } from '@/components/ui/spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { MinusIcon, PlusIcon, RotateCcw, Shield, Store, Truck } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 function ProductDetailPage() {
   const { productId } = Route.useParams();
 
   // 기본 탭은 상세정보로
-  const [productData, setProductData] = useState(null);
-  const [quantity, setQuantity] = useState(1); // 수량 상태
-  const [isLoading, setIsLoading] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchProductDetails = async () => {
-      setIsLoading(true);
-      try {
-        const response = await productApi.getProductDetails(productId);
-        setProductData(response.data);
-      } catch (error) {
-        console.error('Failed to fetch productData details:', error);
-        navigate({
-          to: '/not-found',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProductDetails();
-  }, [productId]);
+  const { data: productData, isLoading } = useGetProductDetails(productId);
 
   const handleBuyNow = async () => {
+    setIsSubmitting(true);
     // 결제 페이지로 이동
-    navigate({
+    await navigate({
       to: '/order/checkout',
-      search: (old) => ({
-        ...old,
+      search: {
         type: 'DIRECT',
-        productId: productId,
-        quantity: quantity.toString(),
-      }),
+        items: JSON.stringify([
+          {
+            productId: productId,
+            quantity: quantity,
+          },
+        ]),
+      },
     });
+    setIsSubmitting(false);
   };
 
   if (isLoading || !productData) {
@@ -92,6 +76,7 @@ function ProductDetailPage() {
                 />
                 <Link
                   to={`/sellers/${productData.sellerId}`}
+                  params={{ sellerId: productData.sellerId }}
                   className='text-neutral-700 transition-colors hover:underline dark:text-neutral-200 dark:hover:text-blue-400'
                 >
                   {productData.sellerName}

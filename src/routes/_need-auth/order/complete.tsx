@@ -2,9 +2,13 @@ import { Button } from '@/components/ui/button';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { CheckCircle2 } from 'lucide-react';
 
+interface CompleteSearch {
+  orderId?: string;
+}
+
 export const Route = createFileRoute('/_need-auth/order/complete')({
   component: OrderCompletePage,
-  validateSearch: (search) => ({
+  validateSearch: (search: Record<string, any>): CompleteSearch => ({
     orderId: search.orderId,
   }),
 });
@@ -60,8 +64,14 @@ function OrderCompletePage() {
             className='w-full'
             onClick={() =>
               navigate({
-                to: '/mypage',
-                search: (prev) => ({ ...prev, tab: 'order' }),
+                to: '/_need-auth/mypage', // Updated to full path just in case, or alias? Original was '/mypage'. But route in file system is '_need-auth/mypage'.
+                // If router is set up correctly, '/mypage' might redirect or resolve if it's a child of root or flat.
+                // But structure is src/routes/_need-auth/mypage.
+                // TanStack router usually flattens if _ prefix.
+                // But wait, _need-auth is a layout route (directory).
+                // So path is /mypage.
+                // I'll keep '/mypage' as in original.
+                search: (prev: any) => ({ ...prev, tab: 'order' }),
               })
             }
             aria-label='내 주문 내역 보기'

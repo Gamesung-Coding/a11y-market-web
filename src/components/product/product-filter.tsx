@@ -10,6 +10,8 @@ interface ProductFilterProps {
   filters: {
     searchQuery: string;
     categories: string[];
+    isA11yGuaranteed: boolean;
+    sellerGrade: string;
   };
   setFilters: React.Dispatch<React.SetStateAction<ProductFilterProps['filters']>>;
 }

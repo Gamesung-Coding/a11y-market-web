@@ -1,8 +1,9 @@
-// src/routes/_needAuth/seller/apply.jsx
+// src/routes/_needAuth/seller/apply.tsx
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
-import { sellerApi } from '@/api/seller-api';
+import { useApplySellerAccount } from '@/api/seller/mutations';
+import { useGetProfile } from '@/api/user/queries';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -17,54 +18,37 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ROLES } from '@/constants/roles';
-import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
 
 function SellerApplyPage() {
-  const { user } = useSelector((state) => state.auth);
+  const { data: user } = useGetProfile();
   const navigate = useNavigate();
+  const { mutateAsync: applySellerAccount, isPending: submitting } = useApplySellerAccount();
 
-  const [submiting, setSubmiting] = useState(false);
   const [shopName, setShopName] = useState('');
   const [businessNo, setBusinessNo] = useState('');
   const [description, setDescription] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
-    setSubmiting(true);
-    try {
-      const resp = await sellerApi.applySellerAccount({
-        sellerName: shopName,
-        businessNumber: businessNo,
-        sellerIntro: description,
-      });
+    await applySellerAccount({
+      sellerName: shopName,
+      businessNumber: businessNo,
+      sellerIntro: description,
+    });
 
-      if (resp.status !== 201) {
-        throw new Error('판매자 가입 신청에 실패했습니다.');
-      }
-
-      toast.success('판매자 가입 신청이 완료되었습니다. 심사 후 결과를 알려드리겠습니다.');
-      navigate({
-        to: '/',
-      });
-    } catch (err) {
-      console.error('Error applying for seller account:', err);
-      if (err.error === 'DUPLICATED_DATA') {
-        toast.error('이미 신청한 판매자 계정이 존재합니다.');
-      } else {
-        toast.error('판매자 가입 신청 중 오류가 발생했습니다. 다시 시도해 주세요.');
-      }
-    } finally {
-      setSubmiting(false);
-    }
+    toast.success('판매자 가입 신청이 완료되었습니다. 심사 후 결과를 알려드리겠습니다.');
+    navigate({
+      to: '/',
+    });
   };
 
   if (!user || user?.userRole !== ROLES.USER) {
-    toast.error('판매자 가입 신청은 일반 회원만 이용할 수 있습니다.');
-    navigate({
-      to: '/unauthorized',
-    });
-    return null;
+    return (
+      <div className='flex items-center justify-center py-20'>
+        <p>판매자 가입 신청은 일반 회원만 이용할 수 있습니다. (또는 이미 판매자입니다)</p>
+      </div>
+    );
   }
 
   return (
@@ -165,7 +149,7 @@ function SellerApplyPage() {
                 variant='outline'
                 className='font-kakao-little h-9 border-slate-300 bg-slate-50 text-xs text-slate-700 hover:bg-slate-100'
                 onClick={() => navigate({ to: '/mypage' })}
-                disabled={submiting}
+                disabled={submitting}
                 aria-label='신청 취소'
               >
                 취소
@@ -173,7 +157,7 @@ function SellerApplyPage() {
               <Button
                 type='submit'
                 className='font-kakao-little h-9 bg-slate-900 text-xs font-medium text-slate-50 hover:bg-slate-800'
-                disabled={submiting}
+                disabled={submitting}
                 aria-label='가입 신청하기'
               >
                 가입 신청하기
