@@ -912,13 +912,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@iconify/json@npm:^2.2.437":
-  version: 2.2.437
-  resolution: "@iconify/json@npm:2.2.437"
+"@iconify-json/fa7-solid@npm:^1.2.4":
+  version: 1.2.4
+  resolution: "@iconify-json/fa7-solid@npm:1.2.4"
   dependencies:
     "@iconify/types": "npm:*"
-    pathe: "npm:^2.0.3"
-  checksum: 10c0/a213ec630a3eff2623ba4920fb22941c59b7ece165f199b2656e5ccab020f89ff5f3f501c95518f44fa006c814a534d129d8e5963eda703ff72505f27ef14f62
+  checksum: 10c0/c5d32a3d9846284aff53ff0f4b10656c5178e35187249e340bc4a1e6f3299cfbd4b910c86f961802f259afa8f991860bf2b7ea5f6ecdcd929e7654c9739569bb
+  languageName: node
+  linkType: hard
+
+"@iconify-json/mdi@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "@iconify-json/mdi@npm:1.2.3"
+  dependencies:
+    "@iconify/types": "npm:*"
+  checksum: 10c0/4d11426abba03464e5ebe4675c87cc39c720e54b7c28265ff9ccd93f229a51f7616bb0a8f1c01412eac3cc9a1ebdc0a122bbaa3395c14d30834d96f8a141e96d
+  languageName: node
+  linkType: hard
+
+"@iconify-json/svg-spinners@npm:^1.2.4":
+  version: 1.2.4
+  resolution: "@iconify-json/svg-spinners@npm:1.2.4"
+  dependencies:
+    "@iconify/types": "npm:*"
+  checksum: 10c0/86d32446a5d2a3f09a534c592d06fc0f33606987e8ebe2e278154a4140855954d709e9732e835a16ef2bad4e0b318943a96348b3f77beb1c4b38a7a8c249cf52
   languageName: node
   linkType: hard
 
@@ -3808,7 +3825,9 @@ __metadata:
     "@eslint/js": "npm:^9"
     "@gscd-dev/a11y-engine": "npm:^1.0.5"
     "@hookform/resolvers": "npm:^5.2.2"
-    "@iconify/json": "npm:^2.2.437"
+    "@iconify-json/fa7-solid": "npm:^1.2.4"
+    "@iconify-json/mdi": "npm:^1.2.3"
+    "@iconify-json/svg-spinners": "npm:^1.2.4"
     "@iconify/react": "npm:^6.0.2"
     "@reduxjs/toolkit": "npm:^2.11.2"
     "@tailwindcss/vite": "npm:^4.1.18"
